@@ -71,17 +71,9 @@ export function ElectricHeaterNode({ data }: NodeProps<ComponentNodeData>) {
         <span style={{ fontSize: 11, fontWeight: 700, color: tempColor }}>{temp.toFixed(1)}°C</span>
       ) : (
         <span style={{ fontSize: 9, color: isRunning ? 'var(--status-healthy)' : 'var(--text-dim)' }}>
-          {isRunning ? 'פועל' : 'כבוי'}
+          {isRunning ? 'Running' : 'Off'}
         </span>
       )}
-
-      <span style={{
-        fontSize:     8,
-        color:        'var(--text-dim)',
-        letterSpacing:'0.02em',
-      }}>
-        rpn
-      </span>
     </div>
   );
 }
