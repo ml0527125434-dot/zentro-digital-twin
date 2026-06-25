@@ -67,7 +67,7 @@ export function projectConnection(
     connectionId: connection.id,
     flow,
     value,
-    unit:        binding.unit,
+    ...(binding.unit !== undefined ? { unit: binding.unit } : {}),
     status:      NodeStatus.Unknown,
     sensorState,
     provenance:  sample?.provenance ?? ValueProvenance.Unknown,

@@ -66,11 +66,13 @@ function makeNodeData(overrides: Partial<ComponentNodeData> = {}): ComponentNode
 
 // Minimal NodeProps shape the components use
 function nodeProps(data: ComponentNodeData) {
-  return { data } as never;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return { data } as any;
 }
 
 // Minimal EdgeProps shape FlowEdge uses
 function edgeProps(data: ConnectionEdgeData) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return {
     id:             'cn_test',
     sourceX:        0,
@@ -80,7 +82,7 @@ function edgeProps(data: ConnectionEdgeData) {
     sourcePosition: 'right',
     targetPosition: 'left',
     data,
-  } as never;
+  } as any;
 }
 
 // ---------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import {
   getBezierPath,
   type EdgeProps,
 } from '@xyflow/react';
-import type { ConnectionEdgeData } from '../../flow-transformers.js';
+import type { ConnectionEdge, ConnectionEdgeData } from '../../flow-transformers.js';
 import { sensorStatePresentation, nodeStatusPresentation } from '../../theme.js';
 import { FlowState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
@@ -39,7 +39,7 @@ export function FlowEdge({
   targetPosition,
   data,
   markerEnd,
-}: EdgeProps<ConnectionEdgeData>) {
+}: EdgeProps<ConnectionEdge>) {
   const { t } = useLocale();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX, sourceY, sourcePosition,

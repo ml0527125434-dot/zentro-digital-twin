@@ -117,7 +117,7 @@ export function projectComponent(
     operationalStatus,
     sensorState:       overallSensorState,
     provenance:        primaryProvenance,
-    confidence:        primaryConfidence,
+    ...(primaryConfidence !== undefined ? { confidence: primaryConfidence } : {}),
     liveValues,
     activeCommands,
     activeAlarms:      activeAlarms.map(a => a.id),

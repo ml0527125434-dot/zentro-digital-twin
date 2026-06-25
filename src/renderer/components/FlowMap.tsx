@@ -120,29 +120,31 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, p
   );
 
   return (
-    <ReactFlow
-      nodes={stableNodes}
-      edges={edges}
-      onNodesChange={handleNodesChange}
-      nodeTypes={NODE_TYPES}
-      edgeTypes={EDGE_TYPES}
-      fitView
-      fitViewOptions={{ padding: 0.25 }}
-      proOptions={{ hideAttribution: true }}
-      minZoom={0.3}
-      maxZoom={2}
-      onNodeClick={onNodeClick ? handleNodeClick : undefined}
-      onEdgeClick={onEdgeClick ? handleEdgeClick : undefined}
-      onPaneClick={onPaneClick}
-      style={placingMode ? { cursor: 'crosshair' } : undefined}
-    >
-      <Background
-        variant={BackgroundVariant.Lines}
-        gap={32}
-        size={0.5}
-        color="var(--border)"
-      />
-      <Controls showInteractive={false} />
-    </ReactFlow>
+    <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
+      {/* @ts-expect-error — @xyflow/react optional props conflict with exactOptionalPropertyTypes */}
+      <ReactFlow
+        nodes={stableNodes}
+        edges={edges}
+        onNodesChange={handleNodesChange}
+        nodeTypes={NODE_TYPES}
+        edgeTypes={EDGE_TYPES}
+        fitView
+        fitViewOptions={{ padding: 0.25 }}
+        proOptions={{ hideAttribution: true }}
+        minZoom={0.3}
+        maxZoom={2}
+        onNodeClick={onNodeClick ? handleNodeClick : undefined}
+        onEdgeClick={onEdgeClick ? handleEdgeClick : undefined}
+        onPaneClick={onPaneClick}
+      >
+        <Background
+          variant={BackgroundVariant.Lines}
+          gap={32}
+          size={0.5}
+          color="var(--border)"
+        />
+        <Controls showInteractive={false} />
+      </ReactFlow>
+    </div>
   );
 }

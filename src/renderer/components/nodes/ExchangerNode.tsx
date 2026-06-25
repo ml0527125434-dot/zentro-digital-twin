@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ComponentNodeData } from '../../flow-transformers.js';
+import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
@@ -10,7 +10,7 @@ const EXCHANGER_ICONS: Record<string, string> = {
   solar_collector:      '☀',
 };
 
-export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
+export function ExchangerNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
   const { name, typeId, viewModel } = data;
   const { health, operationalStatus, liveValues } = viewModel;

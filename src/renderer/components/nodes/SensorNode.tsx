@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ComponentNodeData } from '../../flow-transformers.js';
+import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState, SensorState } from '../../../domain/types.js';
 
@@ -28,7 +28,7 @@ const PRIMARY_SLOT: Record<string, string> = {
   water_meter:        'flow',
 };
 
-export function SensorNode({ data }: NodeProps<ComponentNodeData>) {
+export function SensorNode({ data }: NodeProps<ComponentNode>) {
   const { name, typeId, viewModel } = data;
   const { health, operationalStatus, liveValues, sensorState } = viewModel;
 

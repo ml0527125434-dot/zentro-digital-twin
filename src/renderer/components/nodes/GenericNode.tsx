@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ComponentNodeData } from '../../flow-transformers.js';
+import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
@@ -16,7 +16,7 @@ const TYPE_ICON: Record<string, string> = {
   generic:              '⬡',
 };
 
-export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
+export function GenericNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
   const { name, typeId, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);

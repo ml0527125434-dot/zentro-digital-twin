@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ComponentNodeData } from '../../flow-transformers.js';
+import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
@@ -21,7 +21,7 @@ function tempToFillColor(temp: number): string {
   return 'var(--pipe-scald)';
 }
 
-export function TankNode({ data }: NodeProps<ComponentNodeData>) {
+export function TankNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);

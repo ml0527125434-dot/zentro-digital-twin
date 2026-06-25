@@ -1,12 +1,12 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import type { ComponentNodeData } from '../../flow-transformers.js';
+import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
 
-export function GasBackupNode({ data }: NodeProps<ComponentNodeData>) {
+export function GasBackupNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
