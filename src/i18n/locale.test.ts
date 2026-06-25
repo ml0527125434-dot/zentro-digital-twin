@@ -70,6 +70,7 @@ const ALL_KEYS: TranslationKey[] = [
   'category.sensor', 'category.meter', 'category.consumer', 'category.zone', 'category.air',
   // Inspector / equipment
   'inspector.title', 'equip.filter_placeholder', 'equip.no_match',
+  'builder.deselect_tip',
 ];
 
 describe('Hebrew locale', () => {

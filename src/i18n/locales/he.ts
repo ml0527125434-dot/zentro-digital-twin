@@ -188,4 +188,5 @@ export const HE: Translations = {
   'inspector.title':           'מפקח',
   'equip.filter_placeholder':  'סינון…',
   'equip.no_match':            'אין תוצאות',
+  'builder.deselect_tip':      'טיפ: לחץ Del או Esc לביטול הבחירה',
 };

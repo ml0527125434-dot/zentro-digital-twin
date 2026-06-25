@@ -188,4 +188,5 @@ export const EN: Translations = {
   'inspector.title':           'Inspector',
   'equip.filter_placeholder':  'Filter…',
   'equip.no_match':            'No match',
+  'builder.deselect_tip':      'Tip: press Del or Esc to deselect',
 };

@@ -164,7 +164,8 @@ export type TranslationKey =
   // ── Stage 31: Inspector / equipment ───────────────────────────────────────
   | 'inspector.title'
   | 'equip.filter_placeholder'
-  | 'equip.no_match';
+  | 'equip.no_match'
+  | 'builder.deselect_tip';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);
