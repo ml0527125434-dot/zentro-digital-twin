@@ -9,6 +9,29 @@
 | 5B    | React Builder Integration — BuilderContext + useBuilder | — | (pre-git) |
 | 6     | Minimal Application Integration — ZentroApp + FlowMapView + DashboardPanel | 454 | (pre-git) |
 | 7     | OperationalProfileStore + AlarmStore Foundation | **487** | `f3eebe9` |
+| 8     | AlarmRule Evaluation Engine | **508** | `bb44b96` |
+
+## Stage 8 Notes
+
+**Approved.** Net +21 tests (487 → 508). No skipped tests.
+
+New modules:
+- `src/alarm/alarm-evaluator.ts` — `evaluateAlarms()` (pure, deterministic, side-effect free) +
+  `applyAlarmEvaluation()` (sole write path; must be called outside React)
+- `src/alarm/alarm-evaluator.test.ts` — 18 tests
+
+Modified:
+- `src/alarm/alarm-store.ts` — `getAlarmRulesForComponent()` accessor added to interface + impl
+- `src/alarm/alarm-store.test.ts` — +3 tests for new accessor
+
+Architecture invariants confirmed:
+- `evaluateAlarms()` is pure: no store access, no mutations, no side effects
+- `applyAlarmEvaluation()` is the sole AlarmStore write point for evaluation results
+- `useProjection`, `ZentroApp`, `types.ts` unchanged
+- Digital Twin remains frontend-only; no adapters, scheduler, or backend ingestion added
+
+Alarm transition rules implemented: raise on first trigger, respect debounce before activate,
+dismiss pending if condition clears before debounce, clear active on recovery.
 
 ## Stage 7 Notes
 
@@ -41,4 +64,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 8 — pending proposal and approval.
+Stage 9 — pending proposal and approval.
