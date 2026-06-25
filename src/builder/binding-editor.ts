@@ -101,7 +101,7 @@ export function assignComponentBinding(
   const existing = component.bindings.filter(b => b.metric !== slot.metric);
   const bindings = [...existing, newBinding];
 
-  return updateComponent(projectId, componentId, { bindings } as never, createdBy, stores);
+  return updateComponent(projectId, componentId, { bindings }, createdBy, stores);
 }
 
 /**
@@ -127,7 +127,7 @@ export function removeComponentBinding(
     );
   }
 
-  return updateComponent(projectId, componentId, { bindings } as never, createdBy, stores);
+  return updateComponent(projectId, componentId, { bindings }, createdBy, stores);
 }
 
 // ---------------------------------------------------------------------------

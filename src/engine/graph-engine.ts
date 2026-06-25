@@ -92,6 +92,7 @@ export type ComponentPatch = Partial<Pick<Component,
   | 'position'
   | 'layoutHint'
   | 'mode'
+  | 'bindings'
   | 'operationalProfileId'
   | 'allowedActions'
 >>;
