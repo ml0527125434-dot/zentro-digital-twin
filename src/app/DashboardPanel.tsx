@@ -71,7 +71,7 @@ export function DashboardPanel({
         const healthPres = healthPresentation(vm.health);
         const statusPres = nodeStatusPresentation(vm.operationalStatus);
         const sensorPres = sensorStatePresentation(vm.sensorState);
-        const activeAlarmCount = vm.activeAlarms.filter(a => a.state === 'active').length;
+        const activeAlarmCount = vm.activeAlarms.length;
 
         return (
           <li key={component.id} data-testid={`dashboard-item-${component.id}`}>

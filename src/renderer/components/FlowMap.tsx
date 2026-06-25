@@ -76,10 +76,10 @@ const EDGE_TYPES: EdgeTypes = {
 export interface FlowMapProps {
   nodes: ComponentNode[];
   edges: ConnectionEdge[];
-  onNodeClick?:   (componentId: string) => void;
-  onEdgeClick?:   (connectionId: string) => void;
-  onPaneClick?:   () => void;
-  placingMode?:   boolean;
+  onNodeClick?:   ((componentId: string) => void) | undefined;
+  onEdgeClick?:   ((connectionId: string) => void) | undefined;
+  onPaneClick?:   (() => void) | undefined;
+  placingMode?:   boolean | undefined;
 }
 
 export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, placingMode }: FlowMapProps) {

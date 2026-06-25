@@ -215,7 +215,7 @@ describe('MissionControlView', () => {
     render(wrapMCV(makeMCVProps()));
     expect(screen.getByTestId('inspector-placeholder')).toBeTruthy();
     const items = screen.getAllByTestId(/^dashboard-item-/);
-    act(() => { fireEvent.click(items[0]); });
+    act(() => { fireEvent.click(items[0]!); });
     expect(screen.queryByTestId('inspector-placeholder')).toBeNull();
   });
 
@@ -254,7 +254,7 @@ describe('MissionControlView', () => {
       </LocaleProvider>,
     );
     const items = screen.getAllByTestId(/^dashboard-item-/);
-    act(() => { fireEvent.click(items[0]); });
+    act(() => { fireEvent.click(items[0]!); });
     expect(screen.getByTestId('inspector-panel')).toBeTruthy();
     act(() => { fireEvent.click(screen.getByTestId('inspector-close-btn')); });
     expect(screen.queryByTestId('inspector-panel')).toBeNull();

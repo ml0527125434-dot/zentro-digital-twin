@@ -24,11 +24,11 @@ export interface KpiBarProps {
 interface KpiCardProps {
   label:      string;
   value:      string;
-  unit?:      string;
-  statusVar?: string;
-  secondary?: string;
-  alarm?:     boolean;
-  icon?:      string;
+  unit?:      string | undefined;
+  statusVar?: string | undefined;
+  secondary?: string | undefined;
+  alarm?:     boolean | undefined;
+  icon?:      string | undefined;
 }
 
 function KpiCard({ label, value, unit, statusVar, secondary, alarm, icon }: KpiCardProps) {
