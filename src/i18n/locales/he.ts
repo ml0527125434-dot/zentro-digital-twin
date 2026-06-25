@@ -131,4 +131,9 @@ export const HE: Translations = {
   'demo.info_body':       'ערכי טמפרטורה, זרימה ומצבי ציוד מסומלצים — אין חיבור לציוד אמיתי.',
   'demo.dismiss':         'הסתר',
   'demo.not_available':   'לא זמין בנתוני הדגמה',
+
+  // Stage 26: Presentation Mode
+  'pres.enter': 'הצגה מלאה',
+  'pres.exit':  'יציאה',
+  'pres.badge': 'מצג',
 };

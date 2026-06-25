@@ -9,7 +9,7 @@
  * No TELEMETRY writes. No COMMAND execution. No persistence.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { EngineStores } from '../engine/graph-engine.js';
 import type { ComponentRegistry } from '../lib/component-registry.js';
 import type { LiveStore } from '../telemetry/live-store.js';
@@ -44,6 +44,27 @@ function AppContent({
 }: AppContentProps) {
   const { t, config, setLocale, locale } = useLocale();
   const [showDemoInfo, setShowDemoInfo] = useState(true);
+  const [presentationMode, setPresentationMode] = useState(false);
+  const drawerOpenRef = useRef(false);
+
+  const handleDrawerOpenChange = useCallback((open: boolean) => {
+    drawerOpenRef.current = open;
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (e.key === 'f' || e.key === 'F') {
+        setPresentationMode(m => !m);
+      }
+      if (e.key === 'Escape' && !drawerOpenRef.current) {
+        setPresentationMode(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   const { componentVMs, connectionVMs } = useProjection(
     projectId,
@@ -62,6 +83,8 @@ function AppContent({
 
   const project = stores.graph.getProject(projectId);
 
+  const isRtl = config.dir === 'rtl';
+
   return (
     <div data-testid="zentro-app" dir={config.dir} style={{
       display:       'flex',
@@ -69,70 +92,104 @@ function AppContent({
       height:        '100%',
       overflow:      'hidden',
       background:    'var(--bg-base)',
+      ...(presentationMode ? { position: 'fixed', inset: 0, zIndex: 200 } : {}),
     }}>
-      {/* Header bar */}
-      <header style={{
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'space-between',
-        padding:        '6px 14px',
-        background:     'var(--bg-crust)',
-        borderBottom:   '1px solid var(--border)',
-        flexShrink:     0,
-        gap:            8,
-        minHeight:      36,
-      }}>
-        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-base)', letterSpacing: '0.03em', flexShrink: 0 }}>
-          {t('app.title')}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--text-sub)', flex: 1, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {project?.name ?? projectId}
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {activeAlarmCount > 0 ? (
-            <span style={{
-              background: 'var(--status-critical)', color: '#fff',
-              borderRadius: 10, padding: '2px 8px', fontSize: 11, fontWeight: 700,
-            }}>
-              {t('app.alarms_count', { count: activeAlarmCount })}
-            </span>
-          ) : (
-            <span style={{ fontSize: 11, color: 'var(--status-healthy)' }}>
-              {t('app.all_clear')}
-            </span>
-          )}
-          <button
-            data-testid="lang-switch-btn"
-            onClick={() => setLocale(locale === 'he' ? 'en' : 'he')}
-            style={{
-              background:   'var(--bg-mantle)',
-              border:       '1px solid var(--border)',
-              borderRadius: 4,
-              color:        'var(--text-base)',
-              cursor:       'pointer',
-              fontSize:     11,
-              fontWeight:   600,
-              padding:      '2px 7px',
-              lineHeight:   1.4,
-            }}
-          >
-            {t('app.lang_switch')}
-          </button>
-        </div>
-      </header>
 
-      {/* Demo info strip — dismissable on first view */}
-      {showDemoInfo && (
-        <div data-testid="demo-info-strip" style={{
+      {/* Header bar — collapses in presentation mode */}
+      <div style={{
+        maxHeight:  presentationMode ? 0 : 64,
+        overflow:   'hidden',
+        flexShrink: 0,
+        transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+      }}>
+        <header style={{
           display:        'flex',
           alignItems:     'center',
-          gap:            10,
+          justifyContent: 'space-between',
           padding:        '6px 14px',
-          background:     'color-mix(in srgb, var(--accent) 8%, var(--bg-crust))',
-          borderBottom:   '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
+          background:     'var(--bg-crust)',
+          borderBottom:   '1px solid var(--border)',
           flexShrink:     0,
-          fontSize:       11,
+          gap:            8,
+          minHeight:      36,
         }}>
+          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-base)', letterSpacing: '0.03em', flexShrink: 0 }}>
+            {t('app.title')}
+          </span>
+          <span style={{ fontSize: 11, color: 'var(--text-sub)', flex: 1, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {project?.name ?? projectId}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {activeAlarmCount > 0 ? (
+              <span style={{
+                background: 'var(--status-critical)', color: '#fff',
+                borderRadius: 10, padding: '2px 8px', fontSize: 11, fontWeight: 700,
+              }}>
+                {t('app.alarms_count', { count: activeAlarmCount })}
+              </span>
+            ) : (
+              <span style={{ fontSize: 11, color: 'var(--status-healthy)' }}>
+                {t('app.all_clear')}
+              </span>
+            )}
+            <button
+              data-testid="pres-enter-btn"
+              onClick={() => setPresentationMode(true)}
+              aria-label={t('pres.enter')}
+              style={{
+                background:   'color-mix(in srgb, var(--accent) 10%, var(--bg-mantle))',
+                border:       '1px solid color-mix(in srgb, var(--accent) 35%, var(--border))',
+                borderRadius: 4,
+                color:        'var(--accent)',
+                cursor:       'pointer',
+                fontSize:     11,
+                fontWeight:   700,
+                padding:      '2px 8px',
+                lineHeight:   1.4,
+                letterSpacing: '0.04em',
+              }}
+            >
+              ▶ {t('pres.enter')}
+            </button>
+            <button
+              data-testid="lang-switch-btn"
+              onClick={() => setLocale(locale === 'he' ? 'en' : 'he')}
+              style={{
+                background:   'var(--bg-mantle)',
+                border:       '1px solid var(--border)',
+                borderRadius: 4,
+                color:        'var(--text-base)',
+                cursor:       'pointer',
+                fontSize:     11,
+                fontWeight:   600,
+                padding:      '2px 7px',
+                lineHeight:   1.4,
+              }}
+            >
+              {t('app.lang_switch')}
+            </button>
+          </div>
+        </header>
+      </div>
+
+      {/* Demo info strip — dismissable; hidden in presentation mode */}
+      {showDemoInfo && (
+        <div
+          data-testid="demo-info-strip"
+          style={{
+            display:        'flex',
+            alignItems:     'center',
+            gap:            10,
+            padding:        presentationMode ? '0 14px' : '6px 14px',
+            maxHeight:      presentationMode ? 0 : 40,
+            overflow:       'hidden',
+            background:     'color-mix(in srgb, var(--accent) 8%, var(--bg-crust))',
+            borderBottom:   '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
+            flexShrink:     0,
+            fontSize:       11,
+            transition:     'max-height 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s ease',
+          }}
+        >
           <span style={{
             fontSize:      9,
             fontWeight:    800,
@@ -179,7 +236,56 @@ function AppContent({
         connectionVMs={connectionVMs}
         alarmStore={alarmStore}
         nowMs={nowMs}
+        presentationMode={presentationMode}
+        onDrawerOpenChange={handleDrawerOpenChange}
       />
+
+      {/* Floating presentation mode overlay — exit button + badge */}
+      {presentationMode && (
+        <div style={{
+          position:    'fixed',
+          top:         12,
+          [isRtl ? 'left' : 'right']: 12,
+          zIndex:      300,
+          display:     'flex',
+          alignItems:  'center',
+          gap:         8,
+          pointerEvents: 'auto',
+        }}>
+          <span style={{
+            fontSize:      9,
+            fontWeight:    800,
+            color:         'var(--accent)',
+            background:    'color-mix(in srgb, var(--accent) 12%, var(--bg-crust))',
+            border:        '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
+            borderRadius:  10,
+            padding:       '2px 9px',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          }}>
+            {t('pres.badge')}
+          </span>
+          <button
+            data-testid="pres-exit-btn"
+            onClick={() => setPresentationMode(false)}
+            aria-label={t('pres.exit')}
+            style={{
+              background:   'color-mix(in srgb, var(--bg-mantle) 90%, transparent)',
+              border:       '1px solid var(--border)',
+              borderRadius: 4,
+              color:        'var(--text-sub)',
+              cursor:       'pointer',
+              fontSize:     11,
+              fontWeight:   600,
+              padding:      '3px 10px',
+              lineHeight:   1.4,
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            ✕ {t('pres.exit')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

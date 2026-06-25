@@ -44,6 +44,50 @@ function makeFullRegistry() {
 }
 
 // ---------------------------------------------------------------------------
+// Presentation Mode (Stage 26)
+// ---------------------------------------------------------------------------
+
+function makeZentroApp() {
+  const stores       = makeStores();
+  const registry     = makeFullRegistry();
+  const liveStore    = createInMemoryLiveStore();
+  const profileStore = createInMemoryOperationalProfileStore();
+  const alarmStore   = createInMemoryAlarmStore();
+  buildHotWaterSeed(stores, registry);
+  return (
+    <ZentroApp
+      projectId={HOT_WATER_PROJECT_ID}
+      stores={stores}
+      registry={registry}
+      liveStore={liveStore}
+      profileStore={profileStore}
+      alarmStore={alarmStore}
+    />
+  );
+}
+
+describe('Presentation Mode', () => {
+  it('renders the presentation mode enter button', () => {
+    render(makeZentroApp());
+    expect(screen.getByTestId('pres-enter-btn')).toBeTruthy();
+  });
+
+  it('shows exit button and hides enter button when enter is clicked', () => {
+    render(makeZentroApp());
+    act(() => { screen.getByTestId('pres-enter-btn').click(); });
+    expect(screen.getByTestId('pres-exit-btn')).toBeTruthy();
+  });
+
+  it('returns to normal when exit is clicked', () => {
+    render(makeZentroApp());
+    act(() => { screen.getByTestId('pres-enter-btn').click(); });
+    act(() => { screen.getByTestId('pres-exit-btn').click(); });
+    expect(screen.getByTestId('pres-enter-btn')).toBeTruthy();
+    expect(screen.queryByTestId('pres-exit-btn')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Demo Info Strip (Stage 25)
 // ---------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@
  * All data received as props — no store access inside this component.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { ComponentViewModel, ConnectionViewModel } from '../../domain/types.js';
 import type { EngineStores } from '../../engine/graph-engine.js';
 import type { ComponentRegistry } from '../../lib/component-registry.js';
@@ -36,6 +36,8 @@ export interface MissionControlViewProps {
   connectionVMs: Record<string, ConnectionViewModel>;
   alarmStore:    AlarmStore;
   nowMs:         number;
+  presentationMode?:    boolean;
+  onDrawerOpenChange?:  (open: boolean) => void;
 }
 
 export function MissionControlView({
@@ -46,6 +48,8 @@ export function MissionControlView({
   connectionVMs,
   alarmStore,
   nowMs,
+  presentationMode = false,
+  onDrawerOpenChange,
 }: MissionControlViewProps) {
   const { t } = useLocale();
 
@@ -58,6 +62,10 @@ export function MissionControlView({
   const handleCloseDrawer = useCallback(() => {
     setSelectedComponentId(null);
   }, []);
+
+  useEffect(() => {
+    onDrawerOpenChange?.(selectedComponentId !== null);
+  }, [selectedComponentId, onDrawerOpenChange]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -75,8 +83,15 @@ export function MissionControlView({
       position:       'relative',
     }} data-testid="mission-control">
 
-      {/* System status strip */}
-      <SystemStatusBar componentVMs={componentVMs} nowMs={nowMs} />
+      {/* System status strip — hidden in presentation mode */}
+      <div style={{
+        maxHeight:  presentationMode ? 0 : 64,
+        overflow:   'hidden',
+        transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+        flexShrink: 0,
+      }}>
+        <SystemStatusBar componentVMs={componentVMs} nowMs={nowMs} />
+      </div>
 
       {/* Alarm banner — rendered only when alarms are active */}
       <AlarmBanner alarmStore={alarmStore} components={components} />
@@ -126,15 +141,16 @@ export function MissionControlView({
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar — collapses to 0 in presentation mode */}
         <div style={{
-          width:        320,
+          width:        presentationMode ? 0 : 320,
           flexShrink:   0,
           borderInlineStart: '1px solid var(--border)',
           display:      'flex',
           flexDirection: 'column',
           background:   'var(--bg-crust)',
           overflow:     'hidden',
+          transition:   'width 0.3s cubic-bezier(0.4,0,0.2,1)',
         }}>
           {/* Equipment grid — top half */}
           <div style={{ flex: '0 0 auto', maxHeight: '55%', display: 'flex', flexDirection: 'column', borderBottom: '1px solid var(--border)' }}>

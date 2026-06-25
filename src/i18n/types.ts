@@ -113,7 +113,11 @@ export type TranslationKey =
   | 'demo.info_title'
   | 'demo.info_body'
   | 'demo.dismiss'
-  | 'demo.not_available';
+  | 'demo.not_available'
+  // ── Stage 26: Presentation Mode ──────────────────────────────────────────
+  | 'pres.enter'
+  | 'pres.exit'
+  | 'pres.badge';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

@@ -131,4 +131,9 @@ export const EN: Translations = {
   'demo.info_body':       'Temperature, flow, and equipment states are simulated — no real equipment is connected.',
   'demo.dismiss':         'Dismiss',
   'demo.not_available':   'Not available in demo data',
+
+  // Stage 26: Presentation Mode
+  'pres.enter': 'Present',
+  'pres.exit':  'Exit',
+  'pres.badge': 'PRESENT',
 };
