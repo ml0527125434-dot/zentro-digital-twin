@@ -58,4 +58,48 @@ export const EN: Translations = {
   'flowmap.loading': 'Computing layout…',
   'flowmap.empty':   'No components to display',
   'dashboard.empty': 'No components',
+
+  // ── Stage 22: Mission Control ─────────────────────────────────────────────
+
+  // System status bar
+  'sys.health':             'System Health',
+  'sys.last_update':        'Last update',
+  'sys.demo_mode':          'Demo mode',
+  'sys.all_sensors_live':   'All sensors live',
+  'sys.some_sensors_stale': 'Some sensors stale',
+  'sys.sensors_offline':    'Sensors offline',
+  'sys.just_now':           'Just now',
+  'sys.seconds_ago':        ({ count }) => `${count}s ago`,
+
+  // KPI bar
+  'kpi.tank_temp':      'Tank Temp',
+  'kpi.supply_temp':    'Supply Temp',
+  'kpi.return_temp':    'Return Temp',
+  'kpi.flow_rate':      'Flow Rate',
+  'kpi.heat_pump':      'Heat Pump',
+  'kpi.gas_backup':     'Gas Backup',
+  'kpi.recirc_pump':    'Recirc Pump',
+  'kpi.active_alarms':  'Active Alarms',
+  'kpi.no_value':       '—',
+  'kpi.running':        'Running',
+  'kpi.standby':        'Standby',
+
+  // Alarm banner
+  'alarm.critical_title': '⚠ Critical Alert',
+  'alarm.warning_title':  '⚠ System Warning',
+  'alarm.count_active':   ({ count }) =>
+    count === 1 ? '1 active alarm' : `${count} active alarms`,
+  'alarm.component_label': 'Component',
+
+  // Equipment grid
+  'equip.title':          'Equipment',
+  'equip.no_sensor_data': 'No sensor data',
+
+  // Event timeline
+  'timeline.title':         'Recent Events',
+  'timeline.alarm_raised':  'Alarm raised',
+  'timeline.alarm_pending': 'Alarm pending',
+  'timeline.alarm_cleared': 'Alarm cleared',
+  'timeline.session_start': 'Demo session started',
+  'timeline.no_events':     'No recent events',
 };

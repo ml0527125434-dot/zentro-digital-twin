@@ -16,6 +16,7 @@ import type { TranslationKey } from './types.js';
 
 // All keys that must exist in every locale
 const ALL_KEYS: TranslationKey[] = [
+  // Stage 21 keys
   'app.title', 'app.all_clear', 'app.alarms_count', 'app.lang_switch',
   'health.healthy', 'health.warning', 'health.critical', 'health.offline',
   'health.maintenance', 'health.commissioning',
@@ -26,6 +27,17 @@ const ALL_KEYS: TranslationKey[] = [
   'pump.running', 'pump.standby', 'pump.no_data', 'pump.flow_unit',
   'unit.temperature',
   'flowmap.loading', 'flowmap.empty', 'dashboard.empty',
+  // Stage 22 keys
+  'sys.health', 'sys.last_update', 'sys.demo_mode',
+  'sys.all_sensors_live', 'sys.some_sensors_stale', 'sys.sensors_offline',
+  'sys.just_now', 'sys.seconds_ago',
+  'kpi.tank_temp', 'kpi.supply_temp', 'kpi.return_temp', 'kpi.flow_rate',
+  'kpi.heat_pump', 'kpi.gas_backup', 'kpi.recirc_pump', 'kpi.active_alarms',
+  'kpi.no_value', 'kpi.running', 'kpi.standby',
+  'alarm.critical_title', 'alarm.warning_title', 'alarm.count_active', 'alarm.component_label',
+  'equip.title', 'equip.no_sensor_data',
+  'timeline.title', 'timeline.alarm_raised', 'timeline.alarm_pending',
+  'timeline.alarm_cleared', 'timeline.session_start', 'timeline.no_events',
 ];
 
 describe('Hebrew locale', () => {

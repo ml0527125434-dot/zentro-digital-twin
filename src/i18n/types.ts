@@ -49,7 +49,44 @@ export type TranslationKey =
   // Loading / empty states
   | 'flowmap.loading'
   | 'flowmap.empty'
-  | 'dashboard.empty';
+  | 'dashboard.empty'
+  // ── Stage 22: Mission Control ────────────────────────────────────────────
+  // System status bar
+  | 'sys.health'
+  | 'sys.last_update'
+  | 'sys.demo_mode'
+  | 'sys.all_sensors_live'
+  | 'sys.some_sensors_stale'
+  | 'sys.sensors_offline'
+  | 'sys.just_now'
+  | 'sys.seconds_ago'
+  // KPI bar (8 cards)
+  | 'kpi.tank_temp'
+  | 'kpi.supply_temp'
+  | 'kpi.return_temp'
+  | 'kpi.flow_rate'
+  | 'kpi.heat_pump'
+  | 'kpi.gas_backup'
+  | 'kpi.recirc_pump'
+  | 'kpi.active_alarms'
+  | 'kpi.no_value'
+  | 'kpi.running'
+  | 'kpi.standby'
+  // Alarm banner
+  | 'alarm.critical_title'
+  | 'alarm.warning_title'
+  | 'alarm.count_active'
+  | 'alarm.component_label'
+  // Equipment grid
+  | 'equip.title'
+  | 'equip.no_sensor_data'
+  // Event timeline
+  | 'timeline.title'
+  | 'timeline.alarm_raised'
+  | 'timeline.alarm_pending'
+  | 'timeline.alarm_cleared'
+  | 'timeline.session_start'
+  | 'timeline.no_events';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

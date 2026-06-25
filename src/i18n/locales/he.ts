@@ -58,4 +58,48 @@ export const HE: Translations = {
   'flowmap.loading': 'מחשב פריסה…',
   'flowmap.empty':   'אין רכיבים להצגה',
   'dashboard.empty': 'אין רכיבים',
+
+  // ── Stage 22: Mission Control ─────────────────────────────────────────────
+
+  // System status bar
+  'sys.health':             'בריאות המערכת',
+  'sys.last_update':        'עדכון אחרון',
+  'sys.demo_mode':          'מצב הדגמה',
+  'sys.all_sensors_live':   'כל החיישנים פעילים',
+  'sys.some_sensors_stale': 'חיישנים מיושנים',
+  'sys.sensors_offline':    'חיישנים לא מחוברים',
+  'sys.just_now':           'ממש עכשיו',
+  'sys.seconds_ago':        ({ count }) => `לפני ${count} שניות`,
+
+  // KPI bar
+  'kpi.tank_temp':      'טמפ׳ מיכל',
+  'kpi.supply_temp':    'טמפ׳ אספקה',
+  'kpi.return_temp':    'טמפ׳ חזרה',
+  'kpi.flow_rate':      'קצב זרימה',
+  'kpi.heat_pump':      'משאבת חום',
+  'kpi.gas_backup':     'גיבוי גז',
+  'kpi.recirc_pump':    'משאבת סירקולציה',
+  'kpi.active_alarms':  'התראות פעילות',
+  'kpi.no_value':       '—',
+  'kpi.running':        'פועל',
+  'kpi.standby':        'המתנה',
+
+  // Alarm banner
+  'alarm.critical_title': '⚠ מצב קריטי',
+  'alarm.warning_title':  '⚠ אזהרת מערכת',
+  'alarm.count_active':   ({ count }) =>
+    count === 1 ? 'התראה קריטית אחת פעילה' : `${count} התראות פעילות`,
+  'alarm.component_label': 'רכיב',
+
+  // Equipment grid
+  'equip.title':          'ציוד',
+  'equip.no_sensor_data': 'אין נתוני חיישן',
+
+  // Event timeline
+  'timeline.title':         'אירועים אחרונים',
+  'timeline.alarm_raised':  'התראה הופעלה',
+  'timeline.alarm_pending': 'התראה בהמתנה',
+  'timeline.alarm_cleared': 'התראה נסגרה',
+  'timeline.session_start': 'סשן הדגמה החל',
+  'timeline.no_events':     'אין אירועים אחרונים',
 };

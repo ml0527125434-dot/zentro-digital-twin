@@ -191,7 +191,44 @@ html, body {
 }
 
 /* ---------------------------------------------------------------------------
-   DashboardPanel
+   Mission Control layout (Stage 22)
+--------------------------------------------------------------------------- */
+
+/* Full-height flex column so MissionControlView fills remaining viewport */
+[data-testid="mission-control"] {
+  display:        flex;
+  flex-direction: column;
+  flex:           1;
+  min-height:     0;
+  overflow:       hidden;
+}
+
+/* FlowMap must fill available height in Mission Control */
+[data-testid="mission-control"] .zentro-flow-container {
+  height:     100%;
+  min-height: 0;
+  border:     none;
+}
+
+/* KPI bar: horizontal scroll on small viewports */
+[data-testid="kpi-bar"] {
+  scrollbar-width: none;
+}
+[data-testid="kpi-bar"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Equipment grid sidebar: override panel max-height from legacy layout */
+[data-testid="mission-control"] [data-testid="dashboard-panel"] {
+  max-height: none;
+  border-top:  none;
+  background:  transparent;
+  flex-direction: column;
+  flex-wrap:   nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   DashboardPanel (legacy / direct-import path kept for test compatibility)
 --------------------------------------------------------------------------- */
 [data-testid="dashboard-panel"] {
   list-style: none;

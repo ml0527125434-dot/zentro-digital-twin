@@ -1,9 +1,9 @@
 /**
- * Zentro Digital Twin — ZentroApp (Stage 7, updated Stage 21)
+ * Zentro Digital Twin — ZentroApp (Stage 7, updated Stage 21, Stage 22)
  *
  * Root composer: LocaleProvider + BuilderProvider + shared ViewModels →
- * FlowMapView + DashboardPanel.
- * ViewModels are computed once via useProjection and passed to both child views.
+ * MissionControlView.
+ * ViewModels are computed once via useProjection and passed to all child views.
  * LiveStore, OperationalProfileStore, and AlarmStore are received as props — React
  * never writes to any of them.
  * No TELEMETRY writes. No COMMAND execution. No persistence.
@@ -18,8 +18,7 @@ import type { AlarmStore } from '../alarm/alarm-store.js';
 import { BuilderProvider } from '../builder/BuilderContext.js';
 import { LocaleProvider, useLocale } from '../i18n/index.js';
 import { useProjection } from './useProjection.js';
-import { FlowMapView } from './FlowMapView.js';
-import { DashboardPanel } from './DashboardPanel.js';
+import { MissionControlView } from './mission-control/MissionControlView.js';
 
 export interface ZentroAppProps {
   projectId:    string;
@@ -55,31 +54,40 @@ function AppContent({
     nowMs,
   );
 
-  const activeAlarmCount = Object.values(componentVMs)
-    .flatMap(vm => vm.activeAlarms)
-    .filter(a => a.state === 'active').length;
+  // Accurate alarm count using alarmStore directly
+  const components = stores.graph.getComponents(projectId);
+  const activeAlarmCount = components.reduce((n, c) =>
+    n + alarmStore.getAlarmsForComponent(c.id).filter(a => a.state === 'active').length, 0);
 
   const project = stores.graph.getProject(projectId);
 
   return (
-    <div data-testid="zentro-app" dir={config.dir}>
+    <div data-testid="zentro-app" dir={config.dir} style={{
+      display:       'flex',
+      flexDirection: 'column',
+      height:        '100%',
+      overflow:      'hidden',
+      background:    'var(--bg-base)',
+    }}>
+      {/* Header bar */}
       <header style={{
-        display:         'flex',
-        alignItems:      'center',
-        justifyContent:  'space-between',
-        padding:         '6px 14px',
-        background:      'var(--bg-crust)',
-        borderBottom:    '1px solid var(--border)',
-        flexShrink:      0,
-        gap:             8,
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'space-between',
+        padding:        '6px 14px',
+        background:     'var(--bg-crust)',
+        borderBottom:   '1px solid var(--border)',
+        flexShrink:     0,
+        gap:            8,
+        minHeight:      36,
       }}>
-        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-base)', letterSpacing: '0.03em' }}>
+        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-base)', letterSpacing: '0.03em', flexShrink: 0 }}>
           {t('app.title')}
         </span>
-        <span style={{ fontSize: 11, color: 'var(--text-sub)', flex: 1, textAlign: 'center' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-sub)', flex: 1, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {project?.name ?? projectId}
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {activeAlarmCount > 0 ? (
             <span style={{
               background: 'var(--status-critical)', color: '#fff',
@@ -111,16 +119,15 @@ function AppContent({
           </button>
         </div>
       </header>
-      <FlowMapView
+
+      {/* Mission Control — fills the rest */}
+      <MissionControlView
         projectId={projectId}
         stores={stores}
         componentVMs={componentVMs}
         connectionVMs={connectionVMs}
-      />
-      <DashboardPanel
-        projectId={projectId}
-        stores={stores}
-        componentVMs={componentVMs}
+        alarmStore={alarmStore}
+        nowMs={nowMs}
       />
     </div>
   );
