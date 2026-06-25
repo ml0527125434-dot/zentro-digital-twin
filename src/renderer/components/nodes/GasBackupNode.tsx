@@ -18,9 +18,11 @@ export function GasBackupNode({ data }: NodeProps<ComponentNodeData>) {
   const isRunning  = hasRuntime && (typeof runtime === 'number' ? runtime > 0.5 : runtime === true);
 
   const healthClass =
-    viewModel.health === HealthState.Critical ? 'zentro-node--critical' :
-    viewModel.health === HealthState.Warning   ? 'zentro-node--warning'  :
-    viewModel.health === HealthState.Healthy   ? 'zentro-node--healthy'  :
+    viewModel.health === HealthState.Critical      ? 'zentro-node--critical'     :
+    viewModel.health === HealthState.Warning       ? 'zentro-node--warning'      :
+    viewModel.health === HealthState.Healthy       ? 'zentro-node--healthy'      :
+    viewModel.health === HealthState.Maintenance   ? 'zentro-node--maintenance'  :
+    viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
   const runColor = isRunning ? 'var(--pipe-hot)' : 'var(--text-sub)';

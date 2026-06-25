@@ -35,9 +35,11 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
   const fillColor = tempNum !== null ? tempToFillColor(tempNum) : 'var(--border)';
 
   const healthClass =
-    viewModel.health === HealthState.Critical     ? 'zentro-node--critical' :
-    viewModel.health === HealthState.Warning       ? 'zentro-node--warning'  :
-    viewModel.health === HealthState.Healthy       ? 'zentro-node--healthy'  :
+    viewModel.health === HealthState.Critical      ? 'zentro-node--critical'     :
+    viewModel.health === HealthState.Warning       ? 'zentro-node--warning'      :
+    viewModel.health === HealthState.Healthy       ? 'zentro-node--healthy'      :
+    viewModel.health === HealthState.Maintenance   ? 'zentro-node--maintenance'  :
+    viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
   const isLive = sensorPres.cssVar === '--sensor-live';

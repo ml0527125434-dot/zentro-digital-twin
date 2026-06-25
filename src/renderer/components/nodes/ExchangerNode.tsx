@@ -1,7 +1,8 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
-import { nodeStatusPresentation } from '../../theme.js';
+import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
+import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 
 const EXCHANGER_ICONS: Record<string, string> = {
@@ -23,26 +24,27 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
   const value     = typeof rawValue === 'number' ? rawValue : null;
 
   const statusPres = operationalStatus ? nodeStatusPresentation(operationalStatus) : null;
+  const sensorPres = sensorStatePresentation(viewModel.sensorState);
   const valueColor = statusPres ? `var(${statusPres.cssVar})` : 'var(--text-base)';
-
-  const healthBorder =
-    health === 'critical'     ? 'var(--status-critical)'   :
-    health === 'warning'      ? 'var(--status-warning)'    :
-    health === 'offline'      ? 'var(--status-offline)'    :
-    health === 'maintenance'  ? 'var(--status-maintenance)':
-    health === 'commissioning'? 'var(--status-commissioning)': 'var(--border-bright)';
+  const isLive     = sensorPres.cssVar === '--sensor-live';
 
   const isActive = typeof liveValues?.['runtime'] === 'boolean'
     ? liveValues.runtime
     : value !== null && value > 30;
 
+  const healthClass =
+    health === HealthState.Critical     ? 'zentro-node--critical'     :
+    health === HealthState.Warning      ? 'zentro-node--warning'      :
+    health === HealthState.Healthy      ? 'zentro-node--healthy'      :
+    health === HealthState.Maintenance  ? 'zentro-node--maintenance'  :
+    health === HealthState.Commissioning? 'zentro-node--commissioning':
+    'zentro-node--offline';
+
   return (
     <div
-      className="zentro-node"
+      className={`zentro-node ${healthClass}`}
       style={{
         background:   'var(--bg-mantle)',
-        border:       `1px solid ${healthBorder}`,
-        borderRadius: 'var(--card-radius)',
         padding:      '8px 12px',
         minWidth:     120,
         display:      'flex',
@@ -97,6 +99,11 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
           {isActive ? t('kpi.running') : t('kpi.standby')}
         </span>
       )}
+
+      <span
+        className={`zentro-node__dot${isLive ? ' zentro-node__dot--blink' : ''}`}
+        style={{ background: `var(${sensorPres.cssVar})` }}
+      />
     </div>
   );
 }

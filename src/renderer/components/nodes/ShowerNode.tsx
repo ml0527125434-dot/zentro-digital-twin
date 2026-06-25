@@ -18,9 +18,11 @@ export function ShowerNode({ data }: NodeProps<ComponentNodeData>) {
   const tempNum = typeof temp === 'number' ? temp : null;
 
   const healthClass =
-    viewModel.health === HealthState.Critical ? 'zentro-node--critical' :
-    viewModel.health === HealthState.Warning   ? 'zentro-node--warning'  :
-    viewModel.health === HealthState.Healthy   ? 'zentro-node--healthy'  :
+    viewModel.health === HealthState.Critical      ? 'zentro-node--critical'     :
+    viewModel.health === HealthState.Warning       ? 'zentro-node--warning'      :
+    viewModel.health === HealthState.Healthy       ? 'zentro-node--healthy'      :
+    viewModel.health === HealthState.Maintenance   ? 'zentro-node--maintenance'  :
+    viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
   const dropColor = tempNum !== null

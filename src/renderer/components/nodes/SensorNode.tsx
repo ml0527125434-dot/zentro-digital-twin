@@ -2,7 +2,7 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
-import { SensorState } from '../../../domain/types.js';
+import { HealthState, SensorState } from '../../../domain/types.js';
 
 const SENSOR_ICONS: Record<string, string> = {
   temperature_sensor: '🌡',
@@ -43,23 +43,22 @@ export function SensorNode({ data }: NodeProps<ComponentNodeData>) {
   const valueColor = statusPres ? `var(${statusPres.cssVar})` : 'var(--text-base)';
   const isLive = sensorState === SensorState.Live;
 
-  const healthBorder =
-    health === 'critical'     ? 'var(--status-critical)'   :
-    health === 'warning'      ? 'var(--status-warning)'    :
-    health === 'offline'      ? 'var(--status-offline)'    :
-    health === 'maintenance'  ? 'var(--status-maintenance)':
-    health === 'commissioning'? 'var(--status-commissioning)': 'var(--border)';
+  const healthClass =
+    health === HealthState.Critical     ? 'zentro-node--critical'     :
+    health === HealthState.Warning      ? 'zentro-node--warning'      :
+    health === HealthState.Healthy      ? 'zentro-node--healthy'      :
+    health === HealthState.Maintenance  ? 'zentro-node--maintenance'  :
+    health === HealthState.Commissioning? 'zentro-node--commissioning':
+    'zentro-node--offline';
 
   const hasLeftPort  = ['flow_sensor', 'energy_meter', 'water_meter'].includes(typeId);
   const hasRightPort = ['flow_sensor', 'energy_meter', 'water_meter'].includes(typeId);
 
   return (
     <div
-      className="zentro-node"
+      className={`zentro-node ${healthClass}`}
       style={{
         background:   'var(--bg-mantle)',
-        border:       `1px solid ${healthBorder}`,
-        borderRadius: 'var(--card-radius)',
         padding:      '6px 10px',
         minWidth:     90,
         maxWidth:     110,
