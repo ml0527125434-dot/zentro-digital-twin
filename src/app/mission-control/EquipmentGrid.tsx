@@ -84,9 +84,17 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
 
   const components = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return allComponents;
-    return allComponents.filter(c => c.name.toLowerCase().includes(q));
-  }, [allComponents, search]);
+    const filtered = q
+      ? allComponents.filter(c => c.name.toLowerCase().includes(q))
+      : allComponents;
+    // Sort: alarmed components first, then by name
+    return [...filtered].sort((a, b) => {
+      const aAlarms = alarmStore.getAlarmsForComponent(a.id).filter(x => x.state === 'active').length;
+      const bAlarms = alarmStore.getAlarmsForComponent(b.id).filter(x => x.state === 'active').length;
+      if (bAlarms !== aAlarms) return bAlarms - aAlarms;
+      return a.name.localeCompare(b.name);
+    });
+  }, [allComponents, search, alarmStore]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

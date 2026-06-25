@@ -109,6 +109,11 @@ export function BuilderPropertyPanel({
       setRenameError(null);
       setDeleteError(null);
       setConnErrors([]);
+      // Auto-populate the "from" side of the connection form with the selected component
+      setConnFromId(selectedId);
+      setConnFromPort('');
+      setConnToId('');
+      setConnToPort('');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);

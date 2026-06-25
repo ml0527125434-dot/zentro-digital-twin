@@ -101,8 +101,11 @@ export function EventTimeline({ alarmStore, components, nowMs }: EventTimelinePr
 
   const relativeTime = (ts: number): string => {
     const diffSec = Math.max(0, Math.floor((nowMs - ts) / 1000));
-    if (diffSec < 5) return t('sys.just_now');
-    return t('sys.seconds_ago', { count: diffSec });
+    if (diffSec < 5)  return t('sys.just_now');
+    if (diffSec < 60) return t('sys.seconds_ago', { count: diffSec });
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return t('sys.minutes_ago', { count: diffMin });
+    return t('sys.hours_ago', { count: Math.floor(diffMin / 60) });
   };
 
   const kindLabel = (kind: EventKind): string => {

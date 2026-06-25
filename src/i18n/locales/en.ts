@@ -70,6 +70,8 @@ export const EN: Translations = {
   'sys.sensors_offline':    'Sensors offline',
   'sys.just_now':           'Just now',
   'sys.seconds_ago':        ({ count }) => `${count}s ago`,
+  'sys.minutes_ago':        ({ count }) => `${count}m ago`,
+  'sys.hours_ago':          ({ count }) => `${count}h ago`,
 
   // KPI bar
   'kpi.tank_temp':      'Tank Temp',

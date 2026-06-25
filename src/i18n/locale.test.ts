@@ -30,7 +30,7 @@ const ALL_KEYS: TranslationKey[] = [
   // Stage 22 keys
   'sys.health', 'sys.last_update', 'sys.demo_mode',
   'sys.all_sensors_live', 'sys.some_sensors_stale', 'sys.sensors_offline',
-  'sys.just_now', 'sys.seconds_ago',
+  'sys.just_now', 'sys.seconds_ago', 'sys.minutes_ago', 'sys.hours_ago',
   'kpi.tank_temp', 'kpi.supply_temp', 'kpi.return_temp', 'kpi.flow_rate',
   'kpi.heat_pump', 'kpi.gas_backup', 'kpi.recirc_pump', 'kpi.active_alarms',
   'kpi.no_value', 'kpi.running', 'kpi.standby',

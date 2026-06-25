@@ -60,6 +60,8 @@ export type TranslationKey =
   | 'sys.sensors_offline'
   | 'sys.just_now'
   | 'sys.seconds_ago'
+  | 'sys.minutes_ago'
+  | 'sys.hours_ago'
   // KPI bar (8 cards)
   | 'kpi.tank_temp'
   | 'kpi.supply_temp'

@@ -70,6 +70,8 @@ export const HE: Translations = {
   'sys.sensors_offline':    'חיישנים לא מחוברים',
   'sys.just_now':           'ממש עכשיו',
   'sys.seconds_ago':        ({ count }) => `לפני ${count} שניות`,
+  'sys.minutes_ago':        ({ count }) => `לפני ${count} דקות`,
+  'sys.hours_ago':          ({ count }) => `לפני ${count} שעות`,
 
   // KPI bar
   'kpi.tank_temp':      'טמפ׳ מיכל',
