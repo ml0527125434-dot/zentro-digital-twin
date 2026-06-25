@@ -18,7 +18,7 @@
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
 | 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
-| 17    | Edge Visuals + App Header Bar | **564** | `` |
+| 17    | Edge Visuals + App Header Bar | **564** | `c75807c` |
 
 ## Stage 17 Notes
 
