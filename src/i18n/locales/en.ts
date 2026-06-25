@@ -124,4 +124,11 @@ export const EN: Translations = {
   'drawer.demo_source':        'Demo mode',
   'drawer.conn_in':            'From',
   'drawer.conn_out':           'To',
+
+  // Stage 25: Demo Readiness
+  'drawer.section_info':  'System Information',
+  'demo.info_title':      'Demo Mode',
+  'demo.info_body':       'Temperature, flow, and equipment states are simulated — no real equipment is connected.',
+  'demo.dismiss':         'Dismiss',
+  'demo.not_available':   'Not available in demo data',
 };

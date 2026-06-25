@@ -46,6 +46,9 @@ const ALL_KEYS: TranslationKey[] = [
   'drawer.no_live_data', 'drawer.no_alarms', 'drawer.no_connections',
   'drawer.provenance_measured', 'drawer.provenance_inferred', 'drawer.provenance_unknown',
   'drawer.demo_source', 'drawer.conn_in', 'drawer.conn_out',
+  // Stage 25 keys
+  'drawer.section_info',
+  'demo.info_title', 'demo.info_body', 'demo.dismiss', 'demo.not_available',
 ];
 
 describe('Hebrew locale', () => {

@@ -277,7 +277,20 @@ export function EquipmentDrawer({
                   </Row>
                   <Row label={t('drawer.mode')}>{mode}</Row>
                   <Row label={t('drawer.demo_source')}>
-                    <span style={{ color: 'var(--text-sub)' }}>{provenanceLabel}</span>
+                    <span style={{
+                      display:      'inline-flex',
+                      alignItems:   'center',
+                      gap:          4,
+                      fontSize:     10,
+                      color:        'var(--accent)',
+                      background:   'color-mix(in srgb, var(--accent) 10%, transparent)',
+                      border:       '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
+                      borderRadius: 10,
+                      padding:      '1px 7px',
+                      fontWeight:   600,
+                    }}>
+                      ⚡ {provenanceLabel}
+                    </span>
                   </Row>
                 </>
               );
@@ -309,7 +322,15 @@ export function EquipmentDrawer({
             {/* ── Alarms ─────────────────────────────────────────────── */}
             <SectionHeader label={t('drawer.section_alarms')} />
             {activeAlarms.length === 0 ? (
-              <div style={{ padding: '8px 16px', fontSize: 11, color: 'var(--status-healthy)' }}>
+              <div style={{
+                padding:    '8px 16px',
+                fontSize:   11,
+                display:    'flex',
+                alignItems: 'center',
+                gap:        6,
+                color:      'var(--status-healthy)',
+              }}>
+                <span style={{ fontSize: 10 }}>✓</span>
                 {t('drawer.no_alarms')}
               </div>
             ) : (
@@ -321,15 +342,36 @@ export function EquipmentDrawer({
                   'var(--text-sub)';
                 return (
                   <div key={alarm.id} style={{
-                    padding:      '7px 16px',
+                    padding:      '8px 16px',
                     fontSize:     11,
                     borderBottom: '1px solid var(--border)',
+                    background:   `color-mix(in srgb, ${severityColor} 5%, transparent)`,
                     display:      'flex',
-                    gap:          8,
-                    alignItems:   'flex-start',
+                    flexDirection: 'column',
+                    gap:          4,
                   }}>
-                    <span style={{ color: severityColor, flexShrink: 0, marginTop: 1 }}>⚠</span>
-                    <span style={{ color: 'var(--text-base)' }}>{rule?.message ?? alarm.id}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{
+                        fontSize:     9,
+                        fontWeight:   800,
+                        color:        severityColor,
+                        background:   `color-mix(in srgb, ${severityColor} 15%, transparent)`,
+                        border:       `1px solid color-mix(in srgb, ${severityColor} 30%, transparent)`,
+                        borderRadius: 4,
+                        padding:      '1px 6px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        flexShrink:   0,
+                      }}>
+                        {rule?.severity ?? 'alarm'}
+                      </span>
+                      <span style={{ color: 'var(--text-base)', fontWeight: 600 }}>
+                        {rule?.message ?? alarm.id}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--text-dim)', paddingInlineStart: 2 }}>
+                      ID: {alarm.id}
+                    </div>
                   </div>
                 );
               })
@@ -369,6 +411,22 @@ export function EquipmentDrawer({
                 );
               })
             )}
+
+            {/* ── System Information ─────────────────────────────────── */}
+            <SectionHeader label={t('drawer.section_info')} />
+            <div style={{
+              padding:      '10px 16px',
+              fontSize:     11,
+              color:        'var(--text-dim)',
+              fontStyle:    'italic',
+              display:      'flex',
+              alignItems:   'center',
+              gap:          6,
+              borderBottom: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+            }}>
+              <span style={{ fontSize: 10, flexShrink: 0 }}>ℹ</span>
+              {t('demo.not_available')}
+            </div>
 
             {/* Bottom breathing room */}
             <div style={{ height: 20 }} />

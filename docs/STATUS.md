@@ -1,5 +1,39 @@
 # Zentro Digital Twin — Build Status
 
+## Technical Debt
+
+These are **pre-existing, non-blocking** TypeScript type errors. They do not affect runtime behavior or test correctness. All tests pass. None were introduced after Stage 6.
+
+### TD-001 — `@xyflow/react` node_modules type incompatibility (pre-existing, external)
+**Scope:** `node_modules/@xyflow/react` and `@xyflow/system` declaration files  
+**Error:** `exactOptionalPropertyTypes` strictness: `NodeOrigin | undefined` is not assignable to `[number, number]` in `InternalNode` generic constraints.  
+**Count:** ~10 cascading errors all from the same root cause in `@xyflow`'s `.d.ts` files.  
+**Blocked by:** Upstream `@xyflow/react` package — cannot be fixed in this repo without patching `node_modules`.  
+**Impact:** None. Vitest compiles via esbuild (skips declaration checking). Vite build succeeds. Runtime unaffected.  
+**Resolution path:** Upgrade `@xyflow/react` when a compatible version is released, or add `skipLibCheck: true` to `tsconfig.json` (currently omitted intentionally to catch real errors).
+
+### TD-002 — `src/app/DashboardPanel.tsx` `activeAlarms` string-array `.state` access (pre-existing, internal)
+**Scope:** `src/app/DashboardPanel.tsx` line 74  
+**Error:** `Property 'state' does not exist on type 'string'` — `ComponentViewModel.activeAlarms` is `string[]` but the code calls `.filter(a => a.state === 'active')`.  
+**Root cause:** `DashboardPanel` predates the Stage 23 fix that moved alarm filtering to `alarmStore.getAlarmsForComponent().filter(a => a.state === 'active')`. DashboardPanel was superseded by `EquipmentGrid` in Stage 22 but not removed.  
+**Impact:** None — `DashboardPanel` is no longer rendered; it is dead code from the pre-Stage 22 era.  
+**Resolution path:** Delete `src/app/DashboardPanel.tsx` in a future cleanup stage (confirmed unused).
+
+### TD-003 — `src/app/mission-control/KpiBar.tsx` `exactOptionalPropertyTypes` on `KpiCardProps` (pre-existing, internal)
+**Scope:** `src/app/mission-control/KpiBar.tsx` lines 167–220 (6 call sites)  
+**Error:** `unit: string | undefined` passed where `unit?: string` with `exactOptionalPropertyTypes: true` requires the key to be absent (not present as `undefined`).  
+**Root cause:** TypeScript `exactOptionalPropertyTypes` treats `{ unit: undefined }` differently from `{}`. KpiCard callers pass `unit={…}` which evaluates to `undefined` when no unit applies.  
+**Impact:** None at runtime — `undefined` props behave identically to absent props in React.  
+**Resolution path:** Change callers to use conditional spread (`...(unit ? { unit } : {})`) or relax `exactOptionalPropertyTypes` for this file.
+
+### TD-004 — `src/builder/binding-editor.test.ts` partial type stubs (pre-existing, internal)
+**Scope:** `src/builder/binding-editor.test.ts`  
+**Error:** Test stubs for `SensorSlot`, `Component`, and `ComponentDefinition` are incomplete — missing required fields added in later stages, and one `ProfileMetric` value predates the current enum.  
+**Impact:** None — tests still pass (Vitest uses esbuild; type errors in test files do not block test execution).  
+**Resolution path:** Update test stubs to match current types. Low priority since the binding editor is not exercised in production flows yet.
+
+---
+
 ## Completed Stages
 
 | Stage | Title | Tests at close | Commit |

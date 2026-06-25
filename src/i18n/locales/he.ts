@@ -124,4 +124,11 @@ export const HE: Translations = {
   'drawer.demo_source':        'מצב הדגמה',
   'drawer.conn_in':            'כניסה',
   'drawer.conn_out':           'יציאה',
+
+  // Stage 25: Demo Readiness
+  'drawer.section_info':  'מידע מערכת',
+  'demo.info_title':      'מצב הדגמה',
+  'demo.info_body':       'ערכי טמפרטורה, זרימה ומצבי ציוד מסומלצים — אין חיבור לציוד אמיתי.',
+  'demo.dismiss':         'הסתר',
+  'demo.not_available':   'לא זמין בנתוני הדגמה',
 };

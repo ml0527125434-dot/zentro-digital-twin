@@ -107,7 +107,13 @@ export type TranslationKey =
   | 'drawer.provenance_unknown'
   | 'drawer.demo_source'
   | 'drawer.conn_in'
-  | 'drawer.conn_out';
+  | 'drawer.conn_out'
+  // ── Stage 25: Demo Readiness ─────────────────────────────────────────────
+  | 'drawer.section_info'
+  | 'demo.info_title'
+  | 'demo.info_body'
+  | 'demo.dismiss'
+  | 'demo.not_available';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

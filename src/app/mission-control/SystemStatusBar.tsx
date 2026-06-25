@@ -113,18 +113,29 @@ export function SystemStatusBar({ componentVMs, nowMs }: SystemStatusBarProps) {
 
       <span style={{ flex: 1 }} />
 
-      {/* Demo badge */}
+      {/* Demo badge — live pulse dot to make demo state unmistakable */}
       <span style={{
+        display:       'inline-flex',
+        alignItems:    'center',
+        gap:           5,
         background:    'color-mix(in srgb, var(--accent) 10%, transparent)',
-        border:        '1px solid var(--accent-dim)',
+        border:        '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
         borderRadius:  10,
-        padding:       '1px 9px',
+        padding:       '2px 10px 2px 7px',
         color:         'var(--accent)',
         fontWeight:    700,
         fontSize:      9,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
       }}>
+        <span style={{
+          width:        6,
+          height:       6,
+          borderRadius: '50%',
+          background:   'var(--accent)',
+          flexShrink:   0,
+          animation:    'demo-live-pulse 2s ease-in-out infinite',
+        }} />
         {t('sys.demo_mode')}
       </span>
     </div>

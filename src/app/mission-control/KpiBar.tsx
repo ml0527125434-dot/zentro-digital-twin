@@ -49,8 +49,8 @@ function KpiCard({ label, value, unit, statusVar, secondary, alarm, icon }: KpiC
       background:      'linear-gradient(160deg, var(--bg-mantle) 0%, var(--bg-crust) 100%)',
       border:          `1px solid ${borderColor}`,
       borderRadius:    'var(--card-radius)',
-      padding:         '10px 14px 10px',
-      minWidth:        108,
+      padding:         '8px 10px',
+      minWidth:        88,
       flex:            '1 1 0',
       display:         'flex',
       flexDirection:   'column',
@@ -88,7 +88,7 @@ function KpiCard({ label, value, unit, statusVar, secondary, alarm, icon }: KpiC
       </span>
 
       <span style={{
-        fontSize:           alarm ? 22 : 24,
+        fontSize:           alarm ? 20 : 22,
         fontWeight:         700,
         color:              valueColor,
         fontVariantNumeric: 'tabular-nums',
@@ -157,12 +157,13 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
   return (
     <div style={{
       display:       'flex',
-      gap:           6,
-      padding:       '8px 12px',
+      gap:           5,
+      padding:       '6px 10px',
       background:    'var(--bg-crust)',
       borderBottom:  '1px solid var(--border)',
       overflowX:     'auto',
       flexShrink:    0,
+      scrollbarWidth: 'none',
     }} data-testid="kpi-bar">
       <KpiCard
         icon="🛢"

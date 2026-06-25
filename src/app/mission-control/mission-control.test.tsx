@@ -1,7 +1,7 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect } from 'vitest';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 
 import { createInMemoryGraphStore, type EngineStores } from '../../engine/graph-engine.js';
 import { createInMemoryVersionStore } from '../../domain/project-version.js';
@@ -15,6 +15,7 @@ import { GAS_BACKUP   } from '../../lib/definitions/gas-backup.def.js';
 import { POINT_OF_USE } from '../../lib/definitions/point-of-use.def.js';
 import { buildHotWaterSeed, HOT_WATER_PROJECT_ID } from '../../seed/hot-water.seed.js';
 import { LocaleProvider } from '../../i18n/index.js';
+import { ZentroApp } from '../ZentroApp.js';
 import { KpiBar } from './KpiBar.js';
 import { SystemStatusBar } from './SystemStatusBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
@@ -41,6 +42,57 @@ function makeFullRegistry() {
   r.register(POINT_OF_USE);
   return r;
 }
+
+// ---------------------------------------------------------------------------
+// Demo Info Strip (Stage 25)
+// ---------------------------------------------------------------------------
+
+describe('Demo Info Strip', () => {
+  it('renders the demo info strip by default', () => {
+    const stores       = makeStores();
+    const registry     = makeFullRegistry();
+    const liveStore    = createInMemoryLiveStore();
+    const profileStore = createInMemoryOperationalProfileStore();
+    const alarmStore   = createInMemoryAlarmStore();
+    buildHotWaterSeed(stores, registry);
+
+    render(
+      <ZentroApp
+        projectId={HOT_WATER_PROJECT_ID}
+        stores={stores}
+        registry={registry}
+        liveStore={liveStore}
+        profileStore={profileStore}
+        alarmStore={alarmStore}
+      />,
+    );
+
+    expect(screen.getByTestId('demo-info-strip')).toBeTruthy();
+  });
+
+  it('dismisses the demo info strip when × is clicked', () => {
+    const stores       = makeStores();
+    const registry     = makeFullRegistry();
+    const liveStore    = createInMemoryLiveStore();
+    const profileStore = createInMemoryOperationalProfileStore();
+    const alarmStore   = createInMemoryAlarmStore();
+    buildHotWaterSeed(stores, registry);
+
+    render(
+      <ZentroApp
+        projectId={HOT_WATER_PROJECT_ID}
+        stores={stores}
+        registry={registry}
+        liveStore={liveStore}
+        profileStore={profileStore}
+        alarmStore={alarmStore}
+      />,
+    );
+
+    act(() => { screen.getByTestId('demo-info-dismiss').click(); });
+    expect(screen.queryByTestId('demo-info-strip')).toBeNull();
+  });
+});
 
 // ---------------------------------------------------------------------------
 // KpiBar

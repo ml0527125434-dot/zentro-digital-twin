@@ -43,6 +43,7 @@ function AppContent({
   nowMs,
 }: AppContentProps) {
   const { t, config, setLocale, locale } = useLocale();
+  const [showDemoInfo, setShowDemoInfo] = useState(true);
 
   const { componentVMs, connectionVMs } = useProjection(
     projectId,
@@ -119,6 +120,55 @@ function AppContent({
           </button>
         </div>
       </header>
+
+      {/* Demo info strip — dismissable on first view */}
+      {showDemoInfo && (
+        <div data-testid="demo-info-strip" style={{
+          display:        'flex',
+          alignItems:     'center',
+          gap:            10,
+          padding:        '6px 14px',
+          background:     'color-mix(in srgb, var(--accent) 8%, var(--bg-crust))',
+          borderBottom:   '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
+          flexShrink:     0,
+          fontSize:       11,
+        }}>
+          <span style={{
+            fontSize:      9,
+            fontWeight:    800,
+            color:         'var(--accent)',
+            background:    'color-mix(in srgb, var(--accent) 15%, transparent)',
+            border:        '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
+            borderRadius:  10,
+            padding:       '1px 8px',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            flexShrink:    0,
+          }}>
+            ⚡ {t('demo.info_title')}
+          </span>
+          <span style={{ color: 'var(--text-sub)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {t('demo.info_body')}
+          </span>
+          <button
+            data-testid="demo-info-dismiss"
+            onClick={() => setShowDemoInfo(false)}
+            aria-label={t('demo.dismiss')}
+            style={{
+              background:   'transparent',
+              border:       'none',
+              color:        'var(--text-dim)',
+              cursor:       'pointer',
+              fontSize:     14,
+              lineHeight:   1,
+              padding:      '2px 4px',
+              flexShrink:   0,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Mission Control — fills the rest */}
       <MissionControlView

@@ -115,6 +115,16 @@
   50%       { opacity: 0.3; }
 }
 
+@keyframes demo-live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+/* KPI bar — hide scrollbar track while keeping scroll functional */
+[data-testid="kpi-bar"]::-webkit-scrollbar {
+  display: none;
+}
+
 /* Pipe classes */
 .zentro-edge-flowing {
   stroke-dasharray:  10 5;
