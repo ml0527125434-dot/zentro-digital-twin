@@ -12,6 +12,22 @@
 | 8     | AlarmRule Evaluation Engine | **508** | `bb44b96` |
 | 9     | Zentro Data Ingestion Contract | **522** | `1cdc6d8` |
 | 10    | Fixture / Payload Loader | **532** | `517ce11` |
+| 11    | Application Bootstrap Wiring | **540** | `edced14` |
+
+## Stage 11 Notes
+
+**Approved.** Net +8 tests (532 → 540). No skipped tests.
+
+New modules:
+- `src/app/bootstrap.ts` — `AppContext` interface + `bootstrapApp(payload, registry)`
+- `src/app/bootstrap.test.ts` — 8 tests
+
+Architecture invariants confirmed:
+- Bootstrap is synchronous and frontend-only; no async, network, scheduler, or config reading
+- `ComponentRegistry` remains caller-provided; registry composition is deployment configuration
+- `bootstrapApp` composes store creation + `loadFixture` + context assembly — no new logic
+- `ZentroApp`, `useProjection`, all existing stores unchanged
+- No `main.tsx`/`index.tsx` wiring; no `types.ts` changes
 
 ## Stage 10 Notes
 
@@ -101,4 +117,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 11 — pending proposal and approval.
+Stage 12 — pending proposal and approval.
