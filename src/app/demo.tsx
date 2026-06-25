@@ -16,8 +16,7 @@
 import React, { useEffect } from 'react';
 import { createComponentRegistry } from '../lib/component-registry.js';
 import { registerBaseLibrary } from '../lib/component-library.js';
-import { GAS_BACKUP }   from '../lib/definitions/gas-backup.def.js';
-import { POINT_OF_USE } from '../lib/definitions/point-of-use.def.js';
+import { registerHotWaterLibrary } from '../lib/hot-water-library.js';
 import { bootstrapApp } from './bootstrap.js';
 import { DemoRuntimeSource } from '../runtime/demo-runtime-source.js';
 import { ZentroApp } from './ZentroApp.js';
@@ -27,8 +26,7 @@ import { createEvaluationRunner } from '../simulation/evaluation-runner.js';
 function buildDemoRegistry() {
   const registry = createComponentRegistry();
   registerBaseLibrary(registry);
-  registry.register(GAS_BACKUP);
-  registry.register(POINT_OF_USE);
+  registerHotWaterLibrary(registry);
   return registry;
 }
 

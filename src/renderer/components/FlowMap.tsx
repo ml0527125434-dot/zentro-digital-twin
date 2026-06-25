@@ -18,23 +18,55 @@ import {
   type NodeChange,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
-import { TankNode }      from './nodes/TankNode.js';
-import { PumpNode }      from './nodes/PumpNode.js';
-import { ValveNode }     from './nodes/ValveNode.js';
-import { HeatPumpNode }  from './nodes/HeatPumpNode.js';
-import { GasBackupNode } from './nodes/GasBackupNode.js';
-import { ShowerNode }    from './nodes/ShowerNode.js';
-import { GenericNode }   from './nodes/GenericNode.js';
-import { FlowEdge }      from './edges/FlowEdge.js';
+import { TankNode }           from './nodes/TankNode.js';
+import { PumpNode }           from './nodes/PumpNode.js';
+import { ValveNode }          from './nodes/ValveNode.js';
+import { HeatPumpNode }       from './nodes/HeatPumpNode.js';
+import { GasBackupNode }      from './nodes/GasBackupNode.js';
+import { ShowerNode }         from './nodes/ShowerNode.js';
+import { GenericNode }        from './nodes/GenericNode.js';
+import { SensorNode }         from './nodes/SensorNode.js';
+import { ExchangerNode }      from './nodes/ExchangerNode.js';
+import { ElectricHeaterNode } from './nodes/ElectricHeaterNode.js';
+import { FlowEdge }           from './edges/FlowEdge.js';
 
 const NODE_TYPES: NodeTypes = {
-  storage_tank:  TankNode      as never,
-  heat_pump:     HeatPumpNode  as never,
-  recirc_pump:   PumpNode      as never,
-  mixing_valve:  ValveNode     as never,
-  gas_backup:    GasBackupNode as never,
-  point_of_use:  ShowerNode    as never,
-  generic:       GenericNode   as never,
+  // Base library
+  storage_tank:          TankNode           as never,
+  heat_pump:             HeatPumpNode       as never,
+  recirc_pump:           PumpNode           as never,
+  mixing_valve:          ValveNode          as never,
+  // Hot-water library — sources
+  gas_backup:            GasBackupNode      as never,
+  electric_heater:       ElectricHeaterNode as never,
+  solar_collector:       ExchangerNode      as never,
+  plate_heat_exchanger:  ExchangerNode      as never,
+  // Storage
+  buffer_tank:           TankNode           as never,
+  expansion_vessel:      GenericNode        as never,
+  // Pumps
+  variable_speed_pump:   PumpNode           as never,
+  // Consumers
+  point_of_use:          ShowerNode         as never,
+  tap:                   ShowerNode         as never,
+  // Valves
+  control_valve:         ValveNode          as never,
+  isolation_valve:       ValveNode          as never,
+  safety_valve:          ValveNode          as never,
+  // Sensors
+  temperature_sensor:    SensorNode         as never,
+  pressure_sensor:       SensorNode         as never,
+  flow_sensor:           SensorNode         as never,
+  // Meters
+  energy_meter:          SensorNode         as never,
+  water_meter:           SensorNode         as never,
+  // Auxiliary
+  filter:                GenericNode        as never,
+  air_separator:         GenericNode        as never,
+  // Distribution
+  distribution_manifold: GenericNode        as never,
+  // Fallback
+  generic:               GenericNode        as never,
 };
 
 const EDGE_TYPES: EdgeTypes = {
