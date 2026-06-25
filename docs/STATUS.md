@@ -10,6 +10,24 @@
 | 6     | Minimal Application Integration — ZentroApp + FlowMapView + DashboardPanel | 454 | (pre-git) |
 | 7     | OperationalProfileStore + AlarmStore Foundation | **487** | `f3eebe9` |
 | 8     | AlarmRule Evaluation Engine | **508** | `bb44b96` |
+| 9     | Zentro Data Ingestion Contract | **522** | `1cdc6d8` |
+
+## Stage 9 Notes
+
+**Approved.** Net +14 tests (508 → 522). No skipped tests.
+
+New modules:
+- `src/ingestion/ingestion-contract.ts` — `GraphSnapshot`, `ProfileSnapshot`, `AlarmRuleSnapshot`,
+  `Ingestor` interface, `createIngestor()`
+- `src/ingestion/ingestion-contract.test.ts` — 14 tests
+
+Architecture invariants confirmed:
+- Frontend-only boundary: no transport, scheduler, or backend logic
+- Graph snapshots are authoritative direct `GraphStore` replacements — snapshot is the
+  complete source of truth; absent entities are deleted (connections before components)
+- No EventStore or VersionStore writes during ingestion
+- No React/projection changes; no `types.ts` changes; no existing stores modified
+- Validation: projectId mismatch and dangling connection references throw at ingest time
 
 ## Stage 8 Notes
 
@@ -64,4 +82,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 9 — pending proposal and approval.
+Stage 10 — pending proposal and approval.
