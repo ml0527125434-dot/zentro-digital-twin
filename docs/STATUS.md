@@ -60,6 +60,44 @@ These are **pre-existing, non-blocking** TypeScript type errors. They do not aff
 | 22    | Mission Control UI | **600** | `d70de0b` |
 | 23    | Zentro Visual Identity Alignment | **607** | `d00389f` |
 | 24    | Equipment Detail Drawer          | **612** | `cab20d4` |
+| 25    | Operational Polish & Demo Readiness | **614** | `d7b4a29` |
+
+## Stage 25 Notes
+
+Net +2 tests (612 → 614). 5 new i18n keys (91 total). Zero pre-existing TypeScript errors added.
+
+Modified:
+- `src/app/ZentroApp.tsx` — dismissable demo info strip (accent-tinted, `data-testid="demo-info-strip"`);
+  dismiss button `data-testid="demo-info-dismiss"` removes strip without page reload
+- `src/app/mission-control/SystemStatusBar.tsx` — demo badge gains live pulse dot
+  (`animation: demo-live-pulse 2s ease-in-out infinite`); unmistakable demo-mode indicator
+- `src/app/mission-control/KpiBar.tsx` — responsive fix: `minWidth 108→88`, reduced padding/font-size;
+  all 8 cards fit at 800px viewport (759px total minimum)
+- `src/app/mission-control/EquipmentDrawer.tsx` — alarm display upgraded (severity chip + message + ID
+  sub-row, severity-tinted row background); provenance row shows `⚡` badge with accent styling;
+  System Info section added with `demo.not_available` note
+- `src/i18n/types.ts` — +5 keys: `drawer.section_info`, `demo.info_title`, `demo.info_body`,
+  `demo.dismiss`, `demo.not_available` (91 total)
+- `src/i18n/locales/he.ts` — Hebrew translations for all 5 new keys
+- `src/i18n/locales/en.ts` — English translations for all 5 new keys
+- `src/i18n/locale.test.ts` — ALL_KEYS updated to 91 entries
+- `src/styles.css` — `@keyframes demo-live-pulse`; KPI scrollbar hide rule
+- `src/app/mission-control/mission-control.test.tsx` — +2 demo strip tests (renders, dismisses)
+- `docs/STATUS.md` — Technical Debt section TD-001 through TD-004
+
+Architecture invariants confirmed:
+- No Component Graph, Projection, Runtime Stores, LiveStore, or telemetry ingestion changes
+- No COMMAND plane behavior introduced
+- No Builder work
+
+Visual QA summary (2026-06-25):
+- Hebrew RTL: demo info strip visible + dismissable ✓; demo badge with pulse dot ✓;
+  KPI 8 cards no clipping ✓; Storage Tank drawer opens from right (RTL physical edge) ✓;
+  all drawer sections render correctly (status badges, live values, alarms, connections,
+  system info, ⚡ provenance badge) ✓
+- English LTR: layout mirrored (equipment panel right, title left) ✓; drawer opens from right
+  (LTR `insetInlineEnd`) ✓; English strings correct ("Normal", "Inferred") ✓
+- Console: zero errors on page load ✓
 
 ## Stage 24 Notes
 
