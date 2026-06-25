@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist',
-    sourcemap: true,
+    outDir:                'dist',
+    sourcemap:             true,
+    chunkSizeWarningLimit: 1600,  // ELK bundled JS is ~1.4 MB; warning is expected
   },
 });

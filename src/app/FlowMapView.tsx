@@ -10,6 +10,7 @@ import React from 'react';
 import type { ComponentViewModel, ConnectionViewModel } from '../domain/types.js';
 import type { EngineStores } from '../engine/graph-engine.js';
 import { buildFlowGraph } from '../renderer/flow-transformers.js';
+import { useElkLayout } from '../renderer/useElkLayout.js';
 import { FlowMap } from '../renderer/components/FlowMap.js';
 
 export interface FlowMapViewProps {
@@ -35,9 +36,11 @@ export function FlowMapView({
     connectionVMs,
   );
 
+  const { layoutNodes } = useElkLayout(nodes, edges);
+
   return (
     <div className="zentro-flow-container">
-      <FlowMap nodes={nodes} edges={edges} />
+      <FlowMap nodes={layoutNodes} edges={edges} />
     </div>
   );
 }

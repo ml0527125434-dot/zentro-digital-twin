@@ -20,6 +20,34 @@
 | 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
 | 17    | Edge Visuals + App Header Bar | **564** | `c75807c` |
 | 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `fb47d65` |
+| 19    | ELK.js Auto Layout | **572** | `` |
+
+## Stage 19 Notes
+
+**Approved.** Net +8 tests (564 → 572). No skipped tests.
+
+Pre-implementation audit confirmed:
+- `src/renderer/elk-layout.ts` + `elk-layout.test.ts` (7 tests) already existed and were production-ready
+- Missing: async orchestration hook, topology-change detection, integration point
+
+New modules:
+- `src/renderer/useElkLayout.ts` — `useElkLayout(nodes, edges)` hook; topology key derived from node/edge IDs only; ELK imported dynamically (lazy chunk); falls back to seed positions while layout is pending
+- `src/renderer/useElkLayout.test.ts` — 8 tests covering: isReady lifecycle, seed fallback, position application, no mutation, topology change triggers recompute, ViewModel-only change does NOT trigger recompute
+
+Modified:
+- `src/app/FlowMapView.tsx` — one-line addition: `const { layoutNodes } = useElkLayout(nodes, edges); <FlowMap nodes={layoutNodes} />`
+- `vite.config.ts` — `chunkSizeWarningLimit: 1600` (ELK bundled JS is ~1.4 MB, expected)
+
+Build output:
+- Main chunk: 405 kB / 127 kB gzip (unchanged from pre-ELK)
+- ELK lazy chunk: 1,432 kB / 442 kB gzip (loaded on first layout run only)
+
+Architecture invariants confirmed:
+- Graph topology is never mutated by the layout engine
+- Telemetry, alarm, and ViewModel updates never trigger layout recomputation
+- Seed positions remain fallback until first ELK result arrives
+- Layout is deterministic for identical graphs (ELK layered algorithm)
+- Projection, LiveStore, AlarmStore, simulation engine — all unchanged
 
 ## Stage 18 Notes
 
@@ -238,4 +266,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 19 — pending.
+Stage 20 — pending.
