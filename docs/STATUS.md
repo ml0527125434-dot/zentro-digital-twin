@@ -18,6 +18,21 @@
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
 | 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
+| 17    | Edge Visuals + App Header Bar | **564** | `` |
+
+## Stage 17 Notes
+
+**Approved.** 564 tests unchanged (pure rendering). Build: 17.4 kB CSS, 401 kB JS.
+
+Modified:
+- `src/styles.css` — added `--edge-flowing`, `--edge-reverse`, `--edge-default` CSS variables
+- `src/renderer/components/edges/FlowEdge.tsx` — edge path now 2px stroke; edge label shows temperature (colour-coded by NodeStatus) + sensor state icon in a pill badge; stroke colour driven by flow state
+- `src/app/ZentroApp.tsx` — added `<header>` bar showing app title, project name, and live active alarm count (red badge when >0, green "All clear" when none); alarm count derived from `componentVMs` already in scope
+
+Architecture invariants confirmed:
+- Header reads `componentVMs` (already computed by useProjection in scope) — no new store reads
+- Edge label reads `viewModel` props — no projection calls in renderer
+- No new stores, hooks, or data planes added
 
 ## Stage 16 Notes
 
@@ -208,4 +223,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 17 — pending.
+Stage 18 — pending.

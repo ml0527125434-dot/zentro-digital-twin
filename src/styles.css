@@ -36,6 +36,11 @@
   --sensor-lost:    #f38ba8;
   --sensor-unknown: #6c7086;
 
+  /* Edge / connection flow states */
+  --edge-flowing: #a6e3a1;
+  --edge-reverse: #fab387;
+  --edge-default: #45475a;
+
   /* App chrome */
   --bg-base:   #1e1e2e;
   --bg-mantle: #181825;
@@ -88,6 +93,11 @@ html, body {
   flex:   1 1 auto;
   min-height: 300px;
   border-bottom: 1px solid var(--border);
+}
+
+/* App header */
+.zentro-app-header {
+  flex-shrink: 0;
 }
 
 /* React Flow overrides */

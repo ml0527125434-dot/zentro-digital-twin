@@ -51,8 +51,42 @@ function AppContent({
     nowMs,
   );
 
+  const activeAlarmCount = Object.values(componentVMs)
+    .flatMap(vm => vm.activeAlarms)
+    .filter(a => a.state === 'active').length;
+
+  const project = stores.graph.getProject(projectId);
+
   return (
     <div data-testid="zentro-app">
+      <header style={{
+        display:         'flex',
+        alignItems:      'center',
+        justifyContent:  'space-between',
+        padding:         '6px 14px',
+        background:      'var(--bg-crust)',
+        borderBottom:    '1px solid var(--border)',
+        flexShrink:      0,
+      }}>
+        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-base)', letterSpacing: '0.03em' }}>
+          Zentro Digital Twin
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--text-sub)' }}>
+          {project?.name ?? projectId}
+        </span>
+        {activeAlarmCount > 0 ? (
+          <span style={{
+            background: 'var(--status-critical)', color: '#fff',
+            borderRadius: 10, padding: '2px 8px', fontSize: 11, fontWeight: 700,
+          }}>
+            {activeAlarmCount} alarm{activeAlarmCount !== 1 ? 's' : ''}
+          </span>
+        ) : (
+          <span style={{ fontSize: 11, color: 'var(--status-healthy)' }}>
+            ✓ All clear
+          </span>
+        )}
+      </header>
       <FlowMapView
         projectId={projectId}
         stores={stores}
