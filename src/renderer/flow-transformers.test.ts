@@ -184,4 +184,26 @@ describe('buildFlowGraph', () => {
     const { edges } = buildFlowGraph(components, connections, cVMs, {});
     expect(edges).toHaveLength(0);
   });
+
+  it('hasActiveAlarm is false when both endpoints have no alarms', () => {
+    const { edges } = buildFlowGraph(components, connections, cVMs, cnVMs);
+    expect(edges[0]!.data?.hasActiveAlarm).toBe(false);
+  });
+
+  it('hasActiveAlarm is true when source component has active alarms', () => {
+    const vmWithAlarm = makeVM({ componentId: 'cmp_1', activeAlarms: [{ id: 'a1', ruleId: 'r1', componentId: 'cmp_1', state: 'active' as any, raisedAt: '2024-01-01T00:00:00Z' }] });
+    const { edges } = buildFlowGraph(components, connections, { cmp_1: vmWithAlarm, cmp_2: vm2 }, cnVMs);
+    expect(edges[0]!.data?.hasActiveAlarm).toBe(true);
+  });
+
+  it('hasActiveAlarm is true when target component has active alarms', () => {
+    const vmWithAlarm = makeVM({ componentId: 'cmp_2', activeAlarms: [{ id: 'a2', ruleId: 'r1', componentId: 'cmp_2', state: 'active' as any, raisedAt: '2024-01-01T00:00:00Z' }] });
+    const { edges } = buildFlowGraph(components, connections, { cmp_1: vm1, cmp_2: vmWithAlarm }, cnVMs);
+    expect(edges[0]!.data?.hasActiveAlarm).toBe(true);
+  });
+
+  it('hasActiveAlarm is false when endpoint components are missing from componentVMs', () => {
+    const { edges } = buildFlowGraph([], connections, {}, cnVMs);
+    expect(edges[0]!.data?.hasActiveAlarm).toBe(false);
+  });
 });

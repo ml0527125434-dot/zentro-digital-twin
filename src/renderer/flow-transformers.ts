@@ -29,10 +29,12 @@ export type ComponentNode = Node<ComponentNodeData>;
 // ---------------------------------------------------------------------------
 
 export interface ConnectionEdgeData extends Record<string, unknown> {
-  connectionId: string;
-  viewModel:    ConnectionViewModel;
+  connectionId:  string;
+  viewModel:     ConnectionViewModel;
   /** Animated when flow === Flowing */
-  animated:     boolean;
+  animated:      boolean;
+  /** True when either endpoint component has at least one active alarm */
+  hasActiveAlarm: boolean;
 }
 
 export type ConnectionEdge = Edge<ConnectionEdgeData>;
@@ -67,8 +69,9 @@ export function componentToNode(
  * The edge is animated only when flow === FlowState.Flowing.
  */
 export function connectionToEdge(
-  connection: Connection,
-  viewModel:  ConnectionViewModel,
+  connection:    Connection,
+  viewModel:     ConnectionViewModel,
+  hasActiveAlarm = false,
 ): ConnectionEdge {
   return {
     id:            connection.id,
@@ -79,9 +82,10 @@ export function connectionToEdge(
     type:          'flowEdge',
     animated:      viewModel.flow === FlowState.Flowing,
     data: {
-      connectionId: connection.id,
+      connectionId:  connection.id,
       viewModel,
-      animated:     viewModel.flow === FlowState.Flowing,
+      animated:      viewModel.flow === FlowState.Flowing,
+      hasActiveAlarm,
     },
   };
 }
@@ -102,7 +106,12 @@ export function buildFlowGraph(
 
   const edges = connections
     .filter(cn => cn.id in connectionVMs)
-    .map(cn => connectionToEdge(cn, connectionVMs[cn.id]!));
+    .map(cn => {
+      const fromAlarms = componentVMs[cn.fromComponentId]?.activeAlarms ?? [];
+      const toAlarms   = componentVMs[cn.toComponentId]?.activeAlarms   ?? [];
+      const hasActiveAlarm = fromAlarms.length > 0 || toAlarms.length > 0;
+      return connectionToEdge(cn, connectionVMs[cn.id]!, hasActiveAlarm);
+    });
 
   return { nodes, edges };
 }

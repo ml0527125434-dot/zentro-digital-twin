@@ -40,6 +40,7 @@
   --edge-flowing: #a6e3a1;
   --edge-reverse: #fab387;
   --edge-default: #45475a;
+  --edge-alarm:   #f38ba8;
 
   /* App chrome */
   --bg-base:   #1e1e2e;
@@ -48,6 +49,50 @@
   --text-base: #cdd6f4;
   --text-sub:  #a6adc8;
   --border:    #313244;
+}
+
+/* ---------------------------------------------------------------------------
+   Edge flow animations (Stage 20)
+--------------------------------------------------------------------------- */
+
+@keyframes flowDash {
+  to { stroke-dashoffset: -24; }
+}
+
+@keyframes flowDashReverse {
+  to { stroke-dashoffset: 24; }
+}
+
+@keyframes alarmPulse {
+  0%   { opacity: 1;   }
+  50%  { opacity: 0.3; }
+  100% { opacity: 1;   }
+}
+
+/* Flowing: animated dashes moving forward along the edge */
+.zentro-edge-flowing {
+  stroke-dasharray:  8 4;
+  stroke-dashoffset: 0;
+  animation: flowDash 0.9s linear infinite;
+}
+
+/* Reverse: same dashes moving backward */
+.zentro-edge-reverse {
+  stroke-dasharray:  8 4;
+  stroke-dashoffset: 0;
+  animation: flowDashReverse 0.9s linear infinite;
+}
+
+/* No flow / unknown: static dim dashes */
+.zentro-edge-noflow {
+  stroke-dasharray: 4 6;
+  opacity: 0.35;
+}
+
+/* Alarm override: fast critical-red pulse, overrides flow class */
+.zentro-edge-alarm {
+  stroke-dasharray: 6 3;
+  animation: alarmPulse 0.55s ease-in-out infinite;
 }
 
 /* ---------------------------------------------------------------------------
