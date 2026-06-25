@@ -22,6 +22,44 @@
 | 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `fb47d65` |
 | 19    | ELK.js Auto Layout | **572** | `1deca65` |
 | 20    | Animated FlowMap   | **576** | `c974ba2` |
+| 21    | Localization (i18n) — Hebrew RTL + English LTR | **593** | `a5d4d96` |
+
+## Stage 21 Notes
+
+**Approved.** Net +17 tests (576 → 593). No skipped tests.
+
+New modules (`src/i18n/`):
+- `types.ts` — `Locale`, `TranslationKey` (35 keys), `Translations`, `LocaleConfig`
+- `locales/he.ts` — Hebrew translations (RTL, default locale)
+- `locales/en.ts` — English translations (LTR)
+- `LocaleContext.tsx` — `LocaleProvider`, `useLocale()` hook; safe default context (Hebrew) so components render without a provider
+- `index.ts` — barrel export
+- `locale.test.ts` — 17 tests: key completeness, no empty values, RTL/LTR config, plural forms, key parity between locales
+
+Modified:
+- `src/renderer/theme.ts` — `StatusPresentation.label` changed from English string to `TranslationKey`; all maps updated
+- `src/app/ZentroApp.tsx` — wrapped with `LocaleProvider`; header uses `t()`; language switcher button (`[data-testid="lang-switch-btn"]`) toggles between he/en without reload; root div gets `dir={config.dir}`
+- `src/app/DashboardPanel.tsx` — Chip labels use `t(pres.label)`, alarm count uses `t('app.alarms_count', { count })`
+- `src/app/FlowMapView.tsx` — loading indicator and empty state via `t()`
+- `src/renderer/components/nodes/TankNode.tsx` — sensor label, temperature unit via `t()`
+- `src/renderer/components/nodes/GenericNode.tsx` — health label, temperature unit via `t()`
+- `src/renderer/components/nodes/PumpNode.tsx` — running/standby/no_data, flow unit via `t()`
+- `src/renderer/components/edges/FlowEdge.tsx` — temperature unit via `t()`
+- `src/renderer/flow-transformers.ts` — `hasActiveAlarm` made optional (backward compat with smoke tests)
+- `src/styles.css` — `[dir="rtl"]` overrides; `.zentro-flow-empty` utility class
+
+Architecture invariants confirmed:
+- Component Graph, Projection, Runtime Stores, LiveStore, telemetry ingestion unchanged
+- Type Contract v3 unchanged
+- No hard-coded user-facing strings remain in any component
+- Adding a third locale requires only: a new `locales/xx.ts` file + one entry in `LOCALE_CONFIGS` in `LocaleContext.tsx`
+- `document.documentElement.lang` and `dir` synced on locale switch
+
+Localization summary:
+- **35 translation keys** across Hebrew and English
+- **Hebrew (RTL, default):** right-to-left layout, Hebrew typography, dashboard chips right-aligned
+- **English (LTR):** left-to-right layout, English strings
+- Language switch is immediate — no page reload required
 
 ## Stage 20 Notes
 
