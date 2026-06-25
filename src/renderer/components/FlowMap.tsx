@@ -5,7 +5,7 @@
  * Grid background for plant-room schematic feel.
  */
 
-import React from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -15,6 +15,7 @@ import {
   type EdgeTypes,
   type Node,
   type Edge,
+  type NodeChange,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { TankNode }      from './nodes/TankNode.js';
@@ -50,14 +51,36 @@ export interface FlowMapProps {
 }
 
 export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, placingMode }: FlowMapProps) {
-  const handleNodeClick = React.useCallback(
+  // Track measured dimensions per node ID so RF preserves handleBounds across
+  // re-renders where buildFlowGraph creates new node object references every tick.
+  // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
+  // keeping nodes permanently visibility:hidden and edges unrendered.
+  const measuredRef = useRef<Map<string, { width: number; height: number }>>(new Map());
+
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    for (const change of changes) {
+      if (change.type === 'dimensions' && change.dimensions) {
+        measuredRef.current.set(change.id, change.dimensions);
+      }
+    }
+  }, []);
+
+  const stableNodes = useMemo(() =>
+    nodes.map(node => {
+      const measured = measuredRef.current.get(node.id);
+      return measured ? { ...node, measured } : node;
+    }),
+    [nodes],
+  );
+
+  const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       onNodeClick?.(node.id);
     },
     [onNodeClick],
   );
 
-  const handleEdgeClick = React.useCallback(
+  const handleEdgeClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
       onEdgeClick?.(edge.id);
     },
@@ -66,8 +89,9 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, p
 
   return (
     <ReactFlow
-      nodes={nodes}
+      nodes={stableNodes}
       edges={edges}
+      onNodesChange={handleNodesChange}
       nodeTypes={NODE_TYPES}
       edgeTypes={EDGE_TYPES}
       fitView
