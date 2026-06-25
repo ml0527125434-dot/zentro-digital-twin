@@ -18,8 +18,8 @@ import { createComponentRegistry } from '../lib/component-registry.js';
 import { registerBaseLibrary } from '../lib/component-library.js';
 import { GAS_BACKUP }   from '../lib/definitions/gas-backup.def.js';
 import { POINT_OF_USE } from '../lib/definitions/point-of-use.def.js';
-import { buildHotWaterPayload } from '../ingestion/fixture-adapter.js';
 import { bootstrapApp } from './bootstrap.js';
+import { DemoRuntimeSource } from '../runtime/demo-runtime-source.js';
 import { ZentroApp } from './ZentroApp.js';
 import { createHotWaterSimulation } from '../simulation/hot-water-simulation.js';
 import { createEvaluationRunner } from '../simulation/evaluation-runner.js';
@@ -34,7 +34,7 @@ function buildDemoRegistry() {
 
 // Module-level bootstrap — runs once per import, stores are stable references.
 const registry = buildDemoRegistry();
-const payload  = buildHotWaterPayload(registry);
+const payload  = new DemoRuntimeSource().getInitialPayload(registry);
 const ctx      = bootstrapApp(payload, registry);
 
 export function DemoApp() {

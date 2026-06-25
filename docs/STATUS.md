@@ -62,6 +62,48 @@ These are **pre-existing, non-blocking** TypeScript type errors. They do not aff
 | 24    | Equipment Detail Drawer          | **612** | `cab20d4` |
 | 25    | Operational Polish & Demo Readiness | **614** | `d7b4a29` |
 | 26    | Presentation Mode                   | **617** | `833a317` |
+| 27    | Real Runtime Integration Readiness  | **638** | TBD |
+
+## Stage 27 Notes
+
+Net +21 tests (617 → 638). No i18n changes. Zero pre-existing TypeScript errors added.
+
+**Pre-implementation audit findings:**
+
+Production-ready (no changes needed):
+- `src/ingestion/ingestion-contract.ts` — `Ingestor` interface, 4 methods, validates projectId/referential integrity
+- `src/ingestion/fixture-adapter.ts` — `loadFixture()` designed for backend use from Stage 10 (comment: "zero changes inside the app")
+- `src/app/bootstrap.ts` — `bootstrapApp(payload, registry)` accepts any `ZentroPayload`, no demo assumptions
+- `src/telemetry/live-store.ts` — clean key-value Map, `set(bindingId, sample)` is the telemetry write path
+- `src/alarm/` — pure alarm evaluator + store, no demo assumptions
+- `src/app/useProjection.ts` — derives all ViewModels synchronously, no demo assumptions
+
+Demo-only (must be replaced for production):
+- `src/app/demo.tsx` — entire file; replaced by a real entry point using `BackendRuntimeSource`
+- `buildHotWaterPayload()` + `HOT_WATER_ALARM_RULES` in `fixture-adapter.ts` — backend provides `ZentroPayload`
+- `src/simulation/hot-water-simulation.ts` — waveform generator; replaced by backend WebSocket telemetry
+- `src/simulation/evaluation-runner.ts` — the pattern is correct; driven by real samples in production
+
+New files:
+- `src/runtime/runtime-source.ts` — `RuntimeSource` interface (`getInitialPayload(registry): ZentroPayload`)
+- `src/runtime/demo-runtime-source.ts` — `DemoRuntimeSource` wraps `buildHotWaterPayload`; demo-only marker
+- `src/runtime/backend-runtime-source.ts` — `BackendRuntimeSource(payload)` integration seam with full JSDoc; documents the WebSocket live-telemetry pattern and the architecture constraint against direct field-device connections
+- `src/ingestion/payload-validator.ts` — `validatePayload(unknown): ValidationError[]` + `assertValidPayload(unknown): asserts ... is ZentroPayload`; validates graph/project/components/connections/profiles/alarmRules/samples; used at backend adapter boundary before any ingestion
+- `src/ingestion/payload-validator.test.ts` — 17 tests
+- `src/runtime/runtime-source.test.ts` — 4 tests
+- `docs/BACKEND_INTEGRATION.md` — full integration contract: what is production-ready, what is demo-only, HTTP payload shape, WebSocket live-telemetry shape, integration entry point example, payload validation, topology update pattern, production readiness checklist
+
+Modified:
+- `src/app/demo.tsx` — replaced `buildHotWaterPayload(registry)` call with `new DemoRuntimeSource().getInitialPayload(registry)`; import changed accordingly
+- `docs/STATUS.md` — Stage 27 entry
+
+Architecture invariants confirmed:
+- No Component Graph, Projection, Runtime Stores, LiveStore, or telemetry changes
+- No COMMAND plane behavior introduced
+- No Builder work
+- No direct MQTT/Modbus/KNX/PLC connections added or implied
+- Type Contract v3 unchanged
+- `DemoApp` behavior identical to pre-Stage 27 (same payload, same simulation, same evaluation runner)
 
 ## Stage 26 Notes
 
