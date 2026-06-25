@@ -144,9 +144,9 @@ export function MissionControlView({
     onDrawerOpenChange?.(selectedComponentId !== null);
   }, [selectedComponentId, onDrawerOpenChange]);
 
-  // ESC clears selection
+  // ESC clears selection (monitor mode)
   useEffect(() => {
-    if (buildMode) return; // builder mode has its own ESC in BuilderContext
+    if (buildMode) return;
     if (!selectedComponentId) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedComponentId(null);
@@ -154,6 +154,39 @@ export function MissionControlView({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [selectedComponentId, buildMode]);
+
+  // Build mode keyboard shortcuts: Delete → delete selected; Escape → cancel placing
+  useEffect(() => {
+    if (!buildMode) return;
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      if (e.key === 'Escape') {
+        if (builder.state.mode === 'placing') {
+          builder.dispatchFsm({ type: 'CANCEL_PLACING' });
+        } else {
+          builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+        }
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (builder.state.mode === 'selected-component' && builder.state.selectedComponentId) {
+          try {
+            builder.deleteComponent(builder.state.selectedComponentId);
+            builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+            onMutation?.();
+          } catch { /* blocked — has connections */ }
+        } else if (builder.state.mode === 'selected-connection' && builder.state.selectedConnectionId) {
+          builder.disconnectPorts(builder.state.selectedConnectionId);
+          builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+          onMutation?.();
+        }
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [buildMode, builder, onMutation]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);

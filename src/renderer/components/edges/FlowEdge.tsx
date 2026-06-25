@@ -18,6 +18,19 @@ import { sensorStatePresentation, nodeStatusPresentation } from '../../theme.js'
 import { FlowState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 
+// Medium → static pipe color for inactive/unknown flow state
+function mediumColor(medium?: string): string {
+  switch (medium) {
+    case 'cold_water': return 'var(--pipe-cold)';
+    case 'recirc':     return 'var(--pipe-recirc)';
+    case 'gas':        return 'var(--pipe-gas)';
+    case 'electric':   return 'var(--pipe-electric)';
+    case 'air':        return 'var(--pipe-air)';
+    case 'hot_water':  return 'var(--pipe-hot)';
+    default:           return 'var(--edge-default)';
+  }
+}
+
 export function FlowEdge({
   id,
   sourceX, sourceY,
@@ -38,11 +51,12 @@ export function FlowEdge({
   const value          = data?.viewModel.value       ?? null;
   const status         = data?.viewModel.status;
   const hasActiveAlarm = data?.hasActiveAlarm        ?? false;
+  const medium         = data?.medium;
 
   const sensorPres = sensorState ? sensorStatePresentation(sensorState) : null;
   const statusPres = status      ? nodeStatusPresentation(status)        : null;
 
-  // Stroke color: alarm > temperature status > flow state
+  // Stroke color: alarm > temperature status > flow state > medium identity
   let strokeColor: string;
   if (hasActiveAlarm) {
     strokeColor = 'var(--edge-alarm)';
@@ -53,7 +67,7 @@ export function FlowEdge({
   } else if (flow === FlowState.Reverse) {
     strokeColor = 'var(--edge-reverse)';
   } else {
-    strokeColor = 'var(--edge-default)';
+    strokeColor = mediumColor(medium);
   }
 
   // Animation class

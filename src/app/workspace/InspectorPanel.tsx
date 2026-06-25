@@ -325,31 +325,42 @@ export function InspectorPanel({
       ) : (
         connections.map(conn => {
           const isOutgoing = conn.fromComponentId === componentId;
-          const peerId = isOutgoing ? conn.toComponentId : conn.fromComponentId;
-          const peer = allComponents.find(c => c.id === peerId);
+          const peerId     = isOutgoing ? conn.toComponentId   : conn.fromComponentId;
+          const portId     = isOutgoing ? conn.fromPortId      : conn.toPortId;
+          const peer       = allComponents.find(c => c.id === peerId);
+          const portDef    = definition?.ports.find(p => p.id === portId);
+          const mediumVar  =
+            conn.medium === 'cold_water' ? '--pipe-cold'    :
+            conn.medium === 'recirc'     ? '--pipe-recirc'  :
+            conn.medium === 'gas'        ? '--pipe-gas'     :
+            conn.medium === 'electric'   ? '--pipe-electric':
+            conn.medium === 'air'        ? '--pipe-air'     :
+            '--pipe-warm';
           return (
             <div key={conn.id} style={{
-              padding:      '6px 16px',
-              fontSize:     11,
-              display:      'flex',
-              gap:          6,
-              alignItems:   'center',
-              borderBottom: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
-              color:        'var(--text-sub)',
+              padding:       '7px 16px',
+              fontSize:      11,
+              display:       'flex',
+              gap:           8,
+              alignItems:    'center',
+              borderBottom:  '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
             }}>
               <span style={{
-                color:     isOutgoing ? 'var(--pipe-warm)' : 'var(--pipe-cold)',
+                color:      `var(${mediumVar})`,
                 flexShrink: 0,
-                fontSize:  12,
+                fontSize:   13,
+                fontWeight: 700,
               }}>
                 {isOutgoing ? '→' : '←'}
               </span>
-              <span style={{ color: 'var(--text-dim)', flexShrink: 0 }}>
-                {isOutgoing ? t('drawer.conn_out') : t('drawer.conn_in')}
-              </span>
-              <span style={{ color: 'var(--text-base)', fontWeight: 600 }}>
-                {peer?.name ?? peerId}
-              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
+                <span style={{ color: 'var(--text-base)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {peer?.name ?? peerId}
+                </span>
+                <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>
+                  {portDef?.label ?? portId} · {conn.medium.replace('_', ' ')}
+                </span>
+              </div>
             </div>
           );
         })

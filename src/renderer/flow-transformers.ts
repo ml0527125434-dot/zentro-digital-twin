@@ -35,6 +35,8 @@ export interface ConnectionEdgeData extends Record<string, unknown> {
   animated:      boolean;
   /** True when either endpoint component has at least one active alarm */
   hasActiveAlarm?: boolean;
+  /** Pipe medium — drives static color when flow state is unknown */
+  medium?: string;
 }
 
 export type ConnectionEdge = Edge<ConnectionEdgeData>;
@@ -86,6 +88,7 @@ export function connectionToEdge(
       viewModel,
       animated:      viewModel.flow === FlowState.Flowing,
       hasActiveAlarm,
+      medium:        connection.medium,
     },
   };
 }

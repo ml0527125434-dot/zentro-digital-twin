@@ -379,6 +379,9 @@ export function BuilderPropertyPanel({
               {deleteError}
             </span>
           )}
+          <div style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: 2 }}>
+            Tip: Press <kbd style={{ background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius:2, padding:'0 3px', fontSize:9 }}>Del</kbd> or <kbd style={{ background:'var(--bg-base)', border:'1px solid var(--border)', borderRadius:2, padding:'0 3px', fontSize:9 }}>Esc</kbd> to deselect
+          </div>
         </div>
 
         {/* ── Add Connection form ─────────────────────────────────────── */}

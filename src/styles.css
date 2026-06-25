@@ -63,6 +63,10 @@
   --pipe-warm:    #fb923c;   /* warm domestic                            */
   --pipe-hot:     #f97316;   /* hot supply                               */
   --pipe-scald:   #ef4444;   /* overtemp / scald risk                    */
+  --pipe-recirc:  #2dd4bf;   /* recirculation loop — teal                */
+  --pipe-gas:     #fbbf24;   /* gas supply — amber                       */
+  --pipe-electric:#a78bfa;   /* electrical — violet                      */
+  --pipe-air:     #94a3b8;   /* air/vent — slate                         */
 
   /* ── Node canvas ─────────────────────────────────────────────────────── */
   --node-bg:     #131825;    /* node card fill                           */
