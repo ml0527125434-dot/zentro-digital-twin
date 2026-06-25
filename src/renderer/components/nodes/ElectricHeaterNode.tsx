@@ -72,7 +72,7 @@ export function ElectricHeaterNode({ data }: NodeProps<ComponentNodeData>) {
       </span>
 
       {temp !== null ? (
-        <span style={{ fontSize: 11, fontWeight: 700, color: tempColor }}>{temp.toFixed(1)}°C</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: tempColor }}>{temp.toFixed(1)}{t('unit.temperature')}</span>
       ) : (
         <span style={{ fontSize: 9, color: isRunning ? 'var(--status-healthy)' : 'var(--text-dim)' }}>
           {isRunning ? t('kpi.running') : t('kpi.standby')}

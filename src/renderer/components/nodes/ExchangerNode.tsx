@@ -91,7 +91,7 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
 
       {value !== null ? (
         <span style={{ fontSize: 11, fontWeight: 700, color: valueColor }}>
-          {value.toFixed(1)}°C
+          {value.toFixed(1)}{t('unit.temperature')}
         </span>
       ) : (
         <span style={{ fontSize: 9, color: isActive ? 'var(--status-healthy)' : 'var(--text-dim)' }}>
