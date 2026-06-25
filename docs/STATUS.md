@@ -13,6 +13,22 @@
 | 9     | Zentro Data Ingestion Contract | **522** | `1cdc6d8` |
 | 10    | Fixture / Payload Loader | **532** | `517ce11` |
 | 11    | Application Bootstrap Wiring | **540** | `edced14` |
+| 12    | Demo App Entry Point | **542** | `8c8eb4b` |
+
+## Stage 12 Notes
+
+**Approved.** Net +2 tests (540 → 542). No skipped tests.
+
+New modules:
+- `src/app/demo.tsx` — `DemoApp` zero-argument component (composition root for hot-water demo)
+- `src/app/demo.test.tsx` — 2 tests (mount smoke test + DashboardPanel node-count assertion)
+
+Architecture invariants confirmed:
+- `DemoApp` is a composition root only — no new logic, no state, no async
+- Bootstrap is module-level (runs once at import time); `DemoApp` itself is stateless
+- Node-count assertion targets synchronous DashboardPanel DOM (`[data-testid^="dashboard-item-"]`)
+- `main.tsx`/`index.tsx`, `ZentroApp`, `useProjection`, all stores unchanged
+- This is demo/dev code only — not wired into any production entry point
 
 ## Stage 11 Notes
 
@@ -117,4 +133,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 12 — pending proposal and approval.
+Stage 13 — pending proposal and approval.
