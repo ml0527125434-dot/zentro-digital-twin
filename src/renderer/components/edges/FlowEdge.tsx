@@ -90,12 +90,23 @@ export function FlowEdge({
         />
       )}
 
+      {/* Invisible wide hit area — keeps visual unchanged, makes click reliable */}
+      <path
+        d={edgePath}
+        style={{
+          stroke:        'transparent',
+          strokeWidth:   20,
+          fill:          'none',
+          pointerEvents: 'stroke',
+        }}
+      />
+
       {/* Main pipe */}
       <path
         id={id}
         d={edgePath}
         className={`react-flow__edge-path ${animClass}`}
-        style={{ stroke: strokeColor, strokeWidth, fill: 'none' }}
+        style={{ stroke: strokeColor, strokeWidth, fill: 'none', pointerEvents: 'none' }}
         markerEnd={markerEnd}
       />
 
