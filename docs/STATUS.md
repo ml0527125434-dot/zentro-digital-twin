@@ -17,7 +17,7 @@
 | 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
-| 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `` |
+| 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
 
 ## Stage 16 Notes
 
