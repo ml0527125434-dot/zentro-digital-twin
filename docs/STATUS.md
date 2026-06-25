@@ -15,7 +15,7 @@
 | 11    | Application Bootstrap Wiring | **540** | `edced14` |
 | 12    | Demo App Entry Point | **542** | `8c8eb4b` |
 | 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
-| 14    | Demo Telemetry Simulation Layer | **556** | `` |
+| 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
 
 ## Stage 14 Notes
 
