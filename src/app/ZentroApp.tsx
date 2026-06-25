@@ -8,7 +8,7 @@
  * No TELEMETRY writes. No COMMAND execution. No persistence.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { EngineStores } from '../engine/graph-engine.js';
 import type { ComponentRegistry } from '../lib/component-registry.js';
 import type { LiveStore } from '../telemetry/live-store.js';
@@ -23,10 +23,11 @@ export interface ZentroAppProps {
   projectId:    string;
   stores:       EngineStores;
   registry:     ComponentRegistry;
-  liveStore:    LiveStore;
-  profileStore: OperationalProfileStore;
-  alarmStore:   AlarmStore;
-  createdBy?:   string;
+  liveStore:       LiveStore;
+  profileStore:    OperationalProfileStore;
+  alarmStore:      AlarmStore;
+  createdBy?:      string;
+  autoRefreshMs?:  number;
 }
 
 type AppContentProps = Omit<ZentroAppProps, 'createdBy'> & { nowMs: number };
@@ -75,10 +76,17 @@ export function ZentroApp({
   profileStore,
   alarmStore,
   createdBy = 'app',
+  autoRefreshMs,
 }: ZentroAppProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const refresh = useCallback(() => setNowMs(Date.now()), []);
+
+  useEffect(() => {
+    if (!autoRefreshMs) return;
+    const id = setInterval(() => setNowMs(Date.now()), autoRefreshMs);
+    return () => clearInterval(id);
+  }, [autoRefreshMs]);
 
   return (
     <BuilderProvider

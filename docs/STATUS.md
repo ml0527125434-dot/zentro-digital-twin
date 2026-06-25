@@ -14,6 +14,41 @@
 | 10    | Fixture / Payload Loader | **532** | `517ce11` |
 | 11    | Application Bootstrap Wiring | **540** | `edced14` |
 | 12    | Demo App Entry Point | **542** | `8c8eb4b` |
+| 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
+| 14    | Demo Telemetry Simulation Layer | **556** | `` |
+
+## Stage 14 Notes
+
+**Approved.** Net +14 tests (542 → 556). No skipped tests.
+
+New modules:
+- `src/simulation/simulation-engine.ts` — `SimulationBinding`, `generateSampleValue()` (pure), `SimulationEngine` interface, `createSimulationEngine()` factory
+- `src/simulation/hot-water-simulation.ts` — `HOT_WATER_SIMULATION_BINDINGS`, `createHotWaterSimulation()`
+- `src/simulation/simulation-engine.test.ts` — 14 tests
+
+Modified:
+- `src/app/ZentroApp.tsx` — added optional `autoRefreshMs?: number` prop; `useEffect` clock tick (advances `nowMs` state only — no TELEMETRY write)
+- `src/app/demo.tsx` — `useEffect` starts/stops simulation engine on mount/unmount; passes `autoRefreshMs={1000}` to ZentroApp
+
+Architecture invariants confirmed:
+- Simulation engine is an external service (plain JS setInterval), not a React construct
+- `liveStore.set()` is called only by the engine, never by React/hooks
+- `useEffect` in DemoApp manages engine lifecycle only — zero TELEMETRY writes in React
+- `autoRefreshMs` advances the clock (`setNowMs`) — not a TELEMETRY write
+- All four temperature bindings simulated: `b_t1`, `b_t2_supply`, `b_t3`, `b_t4_return`
+- `ValueProvenance.Inferred` used (no `Simulated` value in Type Contract)
+- Waveform ranges cycle visibly through NodeStatus bands (Risk/Warn/Ok/Scald/Cold)
+
+## Stage 13 Notes
+
+**Build pipeline only.** Same 542 tests. No logic changes.
+
+New files:
+- `vite.config.ts` — Vite + @vitejs/plugin-react
+- `index.html` — HTML shell
+- `src/main.tsx` — mounts DemoApp via createRoot
+
+Added scripts: `dev`, `build`, `preview` to package.json.
 
 ## Stage 12 Notes
 
@@ -133,4 +168,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 13 — pending proposal and approval.
+Stage 15 — pending.
