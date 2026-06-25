@@ -22,6 +22,7 @@ import { buildHotWaterPayload } from '../ingestion/fixture-adapter.js';
 import { bootstrapApp } from './bootstrap.js';
 import { ZentroApp } from './ZentroApp.js';
 import { createHotWaterSimulation } from '../simulation/hot-water-simulation.js';
+import { createEvaluationRunner } from '../simulation/evaluation-runner.js';
 
 function buildDemoRegistry() {
   const registry = createComponentRegistry();
@@ -41,6 +42,15 @@ export function DemoApp() {
     const engine = createHotWaterSimulation(ctx.liveStore);
     engine.start();
     return () => engine.stop();
+  }, []);
+
+  useEffect(() => {
+    const runner = createEvaluationRunner(
+      ctx.projectId, ctx.stores, ctx.liveStore,
+      ctx.registry, ctx.profileStore, ctx.alarmStore, 1_000,
+    );
+    runner.start();
+    return () => runner.stop();
   }, []);
 
   return (

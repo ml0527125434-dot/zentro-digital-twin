@@ -9,7 +9,8 @@
  * and call loadFixture() with the same signature — zero changes inside the app.
  */
 
-import type { LiveSample } from '../domain/types.js';
+import type { LiveSample, AlarmRule } from '../domain/types.js';
+import { NodeStatus } from '../domain/types.js';
 import type { EngineStores } from '../engine/graph-engine.js';
 import {
   createInMemoryGraphStore,
@@ -29,6 +30,48 @@ import {
   HOT_WATER_PROJECT_ID,
   HOT_WATER_PROFILES,
 } from '../seed/hot-water.seed.js';
+
+// ---------------------------------------------------------------------------
+// HOT_WATER_ALARM_RULES — alarm rules for the hot-water demo
+//
+// Rules cover the two components that have OperationalProfiles with
+// meaningful threshold bands. Debounce values are short for demo visibility.
+// ---------------------------------------------------------------------------
+
+export const HOT_WATER_ALARM_RULES: readonly AlarmRule[] = [
+  {
+    id:              'rule_tank_risk',
+    componentId:     'cmp_tank',
+    triggerStatus:   [NodeStatus.Risk],
+    debounceSeconds: 5,
+    severity:        'critical',
+    message:         'Tank temperature below safe threshold — Legionella risk',
+  },
+  {
+    id:              'rule_tank_warn',
+    componentId:     'cmp_tank',
+    triggerStatus:   [NodeStatus.Warn],
+    debounceSeconds: 10,
+    severity:        'warning',
+    message:         'Tank temperature in warning zone',
+  },
+  {
+    id:              'rule_shower_scald',
+    componentId:     'cmp_shower',
+    triggerStatus:   [NodeStatus.Scald],
+    debounceSeconds: 0,
+    severity:        'critical',
+    message:         'Shower temperature above safe limit — scald risk',
+  },
+  {
+    id:              'rule_shower_cold',
+    componentId:     'cmp_shower',
+    triggerStatus:   [NodeStatus.Cold],
+    debounceSeconds: 10,
+    severity:        'warning',
+    message:         'Shower temperature below comfort threshold',
+  },
+];
 
 // ---------------------------------------------------------------------------
 // ZentroPayload — the single composite type for a full frontend load
@@ -91,7 +134,7 @@ export function buildHotWaterPayload(registry: ComponentRegistry): ZentroPayload
       connections: tempStores.graph.getConnections(pid),
     },
     profiles:   { profiles: HOT_WATER_PROFILES },
-    alarmRules: { rules: [] },
+    alarmRules: { rules: [...HOT_WATER_ALARM_RULES] },
     samples:    [],
   };
 }

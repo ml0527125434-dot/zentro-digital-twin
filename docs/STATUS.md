@@ -16,6 +16,27 @@
 | 12    | Demo App Entry Point | **542** | `8c8eb4b` |
 | 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
+| 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `` |
+
+## Stage 15 Notes
+
+**Approved.** Net +8 tests (556 → 564). No skipped tests.
+
+New modules:
+- `src/simulation/evaluation-runner.ts` — `EvaluationRunner` interface + `createEvaluationRunner()` factory; projects each component's NodeStatus and calls `applyAlarmEvaluation()` outside React
+- `src/simulation/evaluation-runner.test.ts` — 8 tests (3 lifecycle, 5 integration)
+
+Modified:
+- `src/ingestion/fixture-adapter.ts` — added `HOT_WATER_ALARM_RULES` (4 rules for `cmp_tank` and `cmp_shower`); `buildHotWaterPayload` now populates `alarmRules` with real rules
+- `src/app/demo.tsx` — second `useEffect` starts/stops `EvaluationRunner` on mount/unmount
+
+Architecture invariants confirmed:
+- `applyAlarmEvaluation` is called only by the EvaluationRunner — outside React
+- `useEffect` in DemoApp manages runner lifecycle only — no telemetry or alarm writes in React
+- Runner skips components with no alarm rules (early exit)
+- All existing tests pass; no store or projection APIs changed
+- Alarm rules: `rule_tank_risk` (critical, 5s debounce), `rule_tank_warn` (warning, 10s),
+  `rule_shower_scald` (critical, 0s debounce), `rule_shower_cold` (warning, 10s)
 
 ## Stage 14 Notes
 
@@ -168,4 +189,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 15 — pending.
+Stage 16 — pending.
