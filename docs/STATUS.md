@@ -24,6 +24,7 @@
 | 20    | Animated FlowMap   | **576** | `c974ba2` |
 | 21    | Localization (i18n) — Hebrew RTL + English LTR | **593** | `a5d4d96` |
 | 22    | Mission Control UI | **600** | `d70de0b` |
+| 23    | Zentro Visual Identity Alignment | **607** | `d00389f` |
 
 ## Stage 22 Notes
 
