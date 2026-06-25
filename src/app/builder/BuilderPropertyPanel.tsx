@@ -384,6 +384,56 @@ export function BuilderPropertyPanel({
           </div>
         </div>
 
+        {/* ── Port definitions ───────────────────────────────────────── */}
+        {def && def.ports.length > 0 && (
+          <>
+            <SectionHeader label="Ports" />
+            <div style={{ padding: '6px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {def.ports.map(port => {
+                const mediumVar =
+                  port.medium === 'cold_water' ? '--pipe-cold'    :
+                  port.medium === 'recirc'     ? '--pipe-recirc'  :
+                  port.medium === 'gas'        ? '--pipe-gas'     :
+                  port.medium === 'electric'   ? '--pipe-electric':
+                  port.medium === 'air'        ? '--pipe-air'     :
+                  '--pipe-warm';
+                const roleIcon = port.role === 'outlet' ? '→' : port.role === 'inlet' ? '←' : '↔';
+                return (
+                  <div key={port.id} style={{
+                    display:      'flex',
+                    alignItems:   'center',
+                    gap:          7,
+                    fontSize:     10,
+                    padding:      '3px 0',
+                    borderBottom: '1px solid color-mix(in srgb, var(--border) 40%, transparent)',
+                  }}>
+                    <span style={{ color: `var(${mediumVar})`, fontWeight: 700, flexShrink: 0, fontSize: 11 }}>
+                      {roleIcon}
+                    </span>
+                    <span style={{ color: 'var(--text-base)', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {port.label}
+                    </span>
+                    <span style={{
+                      fontSize:     8,
+                      fontWeight:   700,
+                      color:        `var(${mediumVar})`,
+                      background:   `color-mix(in srgb, var(${mediumVar}) 12%, transparent)`,
+                      border:       `1px solid color-mix(in srgb, var(${mediumVar}) 25%, transparent)`,
+                      borderRadius: 3,
+                      padding:      '1px 5px',
+                      textTransform:'uppercase',
+                      letterSpacing:'0.06em',
+                      flexShrink:   0,
+                    }}>
+                      {port.medium.replace('_', ' ')}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
         {/* ── Add Connection form ─────────────────────────────────────── */}
         <SectionHeader label={t('builder.conn_title')} />
         <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>

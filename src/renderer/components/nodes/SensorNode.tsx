@@ -1,7 +1,8 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
-import { nodeStatusPresentation } from '../../theme.js';
+import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
+import { SensorState } from '../../../domain/types.js';
 
 const SENSOR_ICONS: Record<string, string> = {
   temperature_sensor: '🌡',
@@ -29,7 +30,7 @@ const PRIMARY_SLOT: Record<string, string> = {
 
 export function SensorNode({ data }: NodeProps<ComponentNodeData>) {
   const { name, typeId, viewModel } = data;
-  const { health, operationalStatus, liveValues } = viewModel;
+  const { health, operationalStatus, liveValues, sensorState } = viewModel;
 
   const slotId = PRIMARY_SLOT[typeId] ?? 'temp';
   const rawValue = liveValues?.[slotId] ?? null;
@@ -38,7 +39,9 @@ export function SensorNode({ data }: NodeProps<ComponentNodeData>) {
   const icon  = SENSOR_ICONS[typeId] ?? '◯';
 
   const statusPres = operationalStatus ? nodeStatusPresentation(operationalStatus) : null;
+  const sensorPres = sensorStatePresentation(sensorState);
   const valueColor = statusPres ? `var(${statusPres.cssVar})` : 'var(--text-base)';
+  const isLive = sensorState === SensorState.Live;
 
   const healthBorder =
     health === 'critical'     ? 'var(--status-critical)'   :
@@ -99,6 +102,14 @@ export function SensorNode({ data }: NodeProps<ComponentNodeData>) {
       ) : (
         <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>—</span>
       )}
+
+      {/* Sensor live state indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2, gap: 3 }}>
+        <span
+          className={`zentro-node__dot${isLive ? ' zentro-node__dot--blink' : ''}`}
+          style={{ background: `var(${sensorPres.cssVar})`, width: 5, height: 5 }}
+        />
+      </div>
     </div>
   );
 }

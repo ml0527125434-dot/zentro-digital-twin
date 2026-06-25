@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation } from '../../theme.js';
+import { useLocale } from '../../../i18n/index.js';
 
 const EXCHANGER_ICONS: Record<string, string> = {
   plate_heat_exchanger: '⇄',
@@ -9,6 +10,7 @@ const EXCHANGER_ICONS: Record<string, string> = {
 };
 
 export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
+  const { t } = useLocale();
   const { name, typeId, viewModel } = data;
   const { health, operationalStatus, liveValues } = viewModel;
 
@@ -91,8 +93,8 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
           {value.toFixed(1)}°C
         </span>
       ) : (
-        <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>
-          {isActive ? 'Running' : 'Standby'}
+        <span style={{ fontSize: 9, color: isActive ? 'var(--status-healthy)' : 'var(--text-dim)' }}>
+          {isActive ? t('kpi.running') : t('kpi.standby')}
         </span>
       )}
     </div>

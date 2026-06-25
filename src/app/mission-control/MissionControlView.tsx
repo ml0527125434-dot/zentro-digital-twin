@@ -30,6 +30,7 @@ import { useElkLayout } from '../../renderer/useElkLayout.js';
 import { FlowMap } from '../../renderer/components/FlowMap.js';
 import { useLocale } from '../../i18n/index.js';
 import { SystemStatusBar } from './SystemStatusBar.js';
+import { KpiBar } from './KpiBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
 import { EquipmentGrid } from './EquipmentGrid.js';
 import { EventTimeline } from './EventTimeline.js';
@@ -220,6 +221,24 @@ export function MissionControlView({
       }}>
         <SystemStatusBar componentVMs={componentVMs} nowMs={nowMs} />
       </div>
+
+      {/* ── KPI Bar — monitor mode only, collapses in presentation mode ─────── */}
+      {!buildMode && (
+        <div style={{
+          maxHeight:  presentationMode ? 0 : 68,
+          overflow:   'hidden',
+          flexShrink: 0,
+          transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+        }}>
+          <KpiBar
+            componentVMs={componentVMs}
+            connectionVMs={connectionVMs}
+            alarmStore={alarmStore}
+            projectId={projectId}
+            components={components}
+          />
+        </div>
+      )}
 
       {/* ── Three-column workspace ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>

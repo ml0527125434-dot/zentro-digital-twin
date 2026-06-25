@@ -2,8 +2,10 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation } from '../../theme.js';
+import { useLocale } from '../../../i18n/index.js';
 
 export function ElectricHeaterNode({ data }: NodeProps<ComponentNodeData>) {
+  const { t } = useLocale();
   const { name, viewModel } = data;
   const { health, operationalStatus, liveValues } = viewModel;
 
@@ -71,7 +73,7 @@ export function ElectricHeaterNode({ data }: NodeProps<ComponentNodeData>) {
         <span style={{ fontSize: 11, fontWeight: 700, color: tempColor }}>{temp.toFixed(1)}°C</span>
       ) : (
         <span style={{ fontSize: 9, color: isRunning ? 'var(--status-healthy)' : 'var(--text-dim)' }}>
-          {isRunning ? 'Running' : 'Off'}
+          {isRunning ? t('kpi.running') : t('kpi.standby')}
         </span>
       )}
     </div>

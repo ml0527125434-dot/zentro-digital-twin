@@ -30,17 +30,28 @@ function buildDemoRegistry() {
   return registry;
 }
 
-// Module-level bootstrap — runs once per import, stores are stable references.
-const registry = buildDemoRegistry();
-const payload  = new DemoRuntimeSource().getInitialPayload(registry);
-const ctx      = bootstrapApp(payload, registry);
+function buildCtx() {
+  const registry = buildDemoRegistry();
+  const payload  = new DemoRuntimeSource().getInitialPayload(registry);
+  return bootstrapApp(payload, registry);
+}
+
+// Lazy singleton — safe for Vite HMR: initialization defers until first render,
+// so all imports are guaranteed to be resolved by the time we run.
+let _ctx: ReturnType<typeof buildCtx> | null = null;
+function getCtx() {
+  if (!_ctx) _ctx = buildCtx();
+  return _ctx;
+}
 
 export function DemoApp() {
+  const ctx = getCtx();
+
   useEffect(() => {
     const engine = createHotWaterSimulation(ctx.liveStore);
     engine.start();
     return () => engine.stop();
-  }, []);
+  }, [ctx.liveStore]);
 
   useEffect(() => {
     const runner = createEvaluationRunner(
@@ -49,7 +60,7 @@ export function DemoApp() {
     );
     runner.start();
     return () => runner.stop();
-  }, []);
+  }, [ctx.projectId, ctx.stores, ctx.liveStore, ctx.registry, ctx.profileStore, ctx.alarmStore]);
 
   return (
     <ZentroApp
