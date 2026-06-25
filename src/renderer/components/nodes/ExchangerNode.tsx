@@ -55,16 +55,15 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
         position:     'relative',
       }}
     >
-      {/* Ports */}
-      <Handle type="target" position={Position.Left}   id={isSolar ? 'cold_in'  : 'primary_in'}    style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />
-      <Handle type="source" position={Position.Right}  id={isSolar ? 'hot_out'  : 'primary_out'}   style={{ background: 'var(--pipe-hot)', width: 7, height: 7 }} />
-      {!isSolar && <>
+      {/* Ports — solar_collector: cold_in=bottom, hot_out=top per definition */}
+      {isSolar ? <>
+        <Handle type="target" position={Position.Bottom} id="cold_in" style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />
+        <Handle type="source" position={Position.Top}    id="hot_out" style={{ background: 'var(--pipe-hot)', width: 7, height: 7 }} />
+      </> : <>
+        <Handle type="target" position={Position.Left}   id="primary_in"    style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />
+        <Handle type="source" position={Position.Right}  id="primary_out"   style={{ background: 'var(--pipe-hot)', width: 7, height: 7 }} />
         <Handle type="target" position={Position.Bottom} id="secondary_in"  style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />
         <Handle type="source" position={Position.Top}    id="secondary_out" style={{ background: 'var(--pipe-hot)', width: 7, height: 7 }} />
-      </>}
-      {isSolar && <>
-        <Handle type="target" position={Position.Bottom} id="cold_in_b" style={{ background: 'var(--pipe-cold)', width: 7, height: 7, display: 'none' }} />
-        <Handle type="source" position={Position.Top}    id="hot_out_t" style={{ background: 'var(--pipe-hot)', width: 7, height: 7, display: 'none' }} />
       </>}
 
       {/* Icon with active glow */}

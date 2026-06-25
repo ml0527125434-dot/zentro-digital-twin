@@ -1,14 +1,16 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
-import { healthPresentation } from '../../theme.js';
+import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 
 export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
   const { t } = useLocale();
   const { name, viewModel } = data;
-  const healthPres = healthPresentation(viewModel.health);
+  const healthPres  = healthPresentation(viewModel.health);
+  const sensorPres  = sensorStatePresentation(viewModel.sensorState);
+  const isLive      = sensorPres.cssVar === '--sensor-live';
 
   const runtime  = viewModel.liveValues['runtime'];
   const flowRate = viewModel.liveValues['flow'];
@@ -53,6 +55,11 @@ export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
           {typeof flowRate === 'number' ? flowRate.toFixed(1) : String(flowRate)} {t('pump.flow_unit')}
         </span>
       )}
+
+      <span
+        className={`zentro-node__dot${isLive ? ' zentro-node__dot--blink' : ''}`}
+        style={{ background: `var(${sensorPres.cssVar})`, marginTop: 2 }}
+      />
     </div>
   );
 }
