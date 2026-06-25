@@ -116,3 +116,33 @@ describe('getAlarmsWithSeverity', () => {
     expect(result.map(a => a.severity).sort()).toEqual(['critical', 'warning']);
   });
 });
+
+describe('getAlarmRulesForComponent', () => {
+  it('returns empty array when no rules are registered', () => {
+    const store = createInMemoryAlarmStore();
+    expect(store.getAlarmRulesForComponent('cmp_tank')).toHaveLength(0);
+  });
+
+  it('returns only rules matching the requested componentId', () => {
+    const store = createInMemoryAlarmStore();
+    const otherRule: AlarmRule = { ...RULE, id: 'rule_pump', componentId: 'cmp_pump' };
+    store.setAlarmRule(RULE);
+    store.setAlarmRule(CRITICAL_RULE);
+    store.setAlarmRule(otherRule);
+
+    const result = store.getAlarmRulesForComponent('cmp_tank');
+    expect(result).toHaveLength(2);
+    expect(result.map(r => r.id).sort()).toEqual(['rule_temp_critical', 'rule_temp_low']);
+    expect(store.getAlarmRulesForComponent('cmp_pump')).toHaveLength(1);
+  });
+
+  it('returned array is a copy — mutating it does not affect the store', () => {
+    const store = createInMemoryAlarmStore();
+    store.setAlarmRule(RULE);
+
+    const first  = store.getAlarmRulesForComponent('cmp_tank');
+    first.splice(0, 1);
+    const second = store.getAlarmRulesForComponent('cmp_tank');
+    expect(second).toHaveLength(1);
+  });
+});

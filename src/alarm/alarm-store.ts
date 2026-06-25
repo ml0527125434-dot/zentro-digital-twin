@@ -19,6 +19,8 @@ export interface AlarmStore {
   setAlarmRule(rule: AlarmRule): void;
   /** Returns the rule or undefined. */
   getAlarmRule(ruleId: string): AlarmRule | undefined;
+  /** Returns all rules registered for the given componentId. */
+  getAlarmRulesForComponent(componentId: string): AlarmRule[];
 }
 
 export function createInMemoryAlarmStore(): AlarmStore {
@@ -37,6 +39,9 @@ export function createInMemoryAlarmStore(): AlarmStore {
     },
     getAlarmRule(ruleId) {
       return rules.get(ruleId);
+    },
+    getAlarmRulesForComponent(componentId) {
+      return [...rules.values()].filter(r => r.componentId === componentId);
     },
   };
 }
