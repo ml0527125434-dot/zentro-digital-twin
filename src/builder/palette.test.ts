@@ -32,8 +32,8 @@ describe('getPaletteItems', () => {
   it('results are sorted by category then label', () => {
     const items = getPaletteItems(makeRegistry());
     for (let i = 1; i < items.length; i++) {
-      const prev = items[i - 1];
-      const curr = items[i];
+      const prev = items[i - 1]!;
+      const curr = items[i]!;
       const catCmp = prev.category.localeCompare(curr.category);
       if (catCmp === 0) {
         expect(prev.label.localeCompare(curr.label)).toBeLessThanOrEqual(0);

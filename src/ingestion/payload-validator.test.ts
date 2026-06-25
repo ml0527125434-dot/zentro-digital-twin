@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validatePayload, assertValidPayload } from './payload-validator.js';
 
-const VALID: unknown = {
+const VALID: Record<string, unknown> = {
   graph: {
     project:     { id: 'proj_1', name: 'Test Project', siteType: 'test' },
     components:  [{ id: 'cmp_1', type: 'tank', name: 'Tank', projectId: 'proj_1', bindings: [] }],
@@ -55,7 +55,7 @@ describe('validatePayload', () => {
   it('errors when a component is missing type', () => {
     const bad = structuredClone(VALID) as Record<string, unknown>;
     const comps = (bad['graph'] as Record<string, unknown>)['components'] as Record<string, unknown>[];
-    delete comps[0]['type'];
+    delete comps[0]!['type'];
     expect(validatePayload(bad).some(e => e.path === 'graph.components[0].type')).toBe(true);
   });
 

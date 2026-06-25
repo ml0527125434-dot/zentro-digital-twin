@@ -77,7 +77,7 @@ describe('EventStore', () => {
     const event = projectCreatedEvent(project);
     store.append(event);
     expect(() => {
-      (event as Record<string, unknown>)['id'] = 'tampered';
+      (event as unknown as Record<string, unknown>)['id'] = 'tampered';
     }).toThrow();
   });
 

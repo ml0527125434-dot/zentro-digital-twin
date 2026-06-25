@@ -18,15 +18,19 @@ const PID  = 'proj_1';
 const USER = 'test_user';
 
 const TEMP_SLOT: SensorSlot = {
-  id:       'temp_slot',
-  metric:   'temperature',
-  required: true,
+  id:               'temp_slot',
+  label:            'Temperature',
+  metric:           'temperature',
+  required:         true,
+  defaultTtlSeconds: 60,
 };
 
 const FLOW_SLOT: SensorSlot = {
-  id:       'flow_slot',
-  metric:   'flow_rate',
-  required: false,
+  id:               'flow_slot',
+  label:            'Flow Rate',
+  metric:           'flow',
+  required:         false,
+  defaultTtlSeconds: 60,
 };
 
 function makeStores(): EngineStores {
@@ -112,8 +116,8 @@ describe('assignComponentBinding', () => {
     const comp = {
       id: 'cmp_tank', projectId: PID, type: 'storage_tank', name: 'Tank',
       position: { x: 0, y: 0 }, mode: 'normal' as const,
-      bindings: [], operationalProfileId: undefined, layoutHint: undefined,
-      allowedActions: def.defaultAllowedActions ?? [],
+      bindings: [],
+      
     };
     stores.graph.setComponent(comp);
     componentId = 'cmp_tank';
@@ -122,14 +126,14 @@ describe('assignComponentBinding', () => {
   it('adds a binding with metric derived from the slot', () => {
     const { data } = assignComponentBinding(PID, componentId, makeDraft(), TEMP_SLOT, stores, USER);
     expect(data.bindings).toHaveLength(1);
-    expect(data.bindings[0].metric).toBe(TEMP_SLOT.metric);
+    expect(data.bindings[0]!.metric).toBe(TEMP_SLOT.metric);
   });
 
   it('binding address is trimmed', () => {
     const { data } = assignComponentBinding(
       PID, componentId, makeDraft({ address: '  sensors/tank/temp  ' }), TEMP_SLOT, stores, USER,
     );
-    expect(data.bindings[0].address).toBe('sensors/tank/temp');
+    expect(data.bindings[0]!.address).toBe('sensors/tank/temp');
   });
 
   it('replaces an existing binding for the same metric', () => {
@@ -137,7 +141,7 @@ describe('assignComponentBinding', () => {
     const { data } = assignComponentBinding(PID, componentId, makeDraft({ address: 'new/topic' }), TEMP_SLOT, stores, USER);
     const tempBindings = data.bindings.filter(b => b.metric === 'temperature');
     expect(tempBindings).toHaveLength(1);
-    expect(tempBindings[0].address).toBe('new/topic');
+    expect(tempBindings[0]!.address).toBe('new/topic');
   });
 
   it('different metrics co-exist', () => {
@@ -175,13 +179,13 @@ describe('removeComponentBinding', () => {
     const comp = {
       id: 'cmp_tank', projectId: PID, type: 'storage_tank', name: 'Tank',
       position: { x: 0, y: 0 }, mode: 'normal' as const,
-      bindings: [], operationalProfileId: undefined, layoutHint: undefined,
-      allowedActions: def.defaultAllowedActions ?? [],
+      bindings: [],
+      
     };
     stores.graph.setComponent(comp);
     componentId = 'cmp_tank';
     const { data } = assignComponentBinding(PID, componentId, makeDraft(), TEMP_SLOT, stores, USER);
-    bindingId = data.bindings[0].id;
+    bindingId = data.bindings[0]!.id;
   });
 
   it('removes the binding', () => {
@@ -212,14 +216,14 @@ describe('assignConnectionBinding + removeConnectionBinding', () => {
     const tank = {
       id: 'cmp_tank', projectId: PID, type: 'storage_tank', name: 'Tank',
       position: { x: 0, y: 0 }, mode: 'normal' as const,
-      bindings: [], operationalProfileId: undefined, layoutHint: undefined,
-      allowedActions: registry.getOrThrow('storage_tank').defaultAllowedActions ?? [],
+      bindings: [],
+      
     };
     const valve = {
       id: 'cmp_valve', projectId: PID, type: 'mixing_valve', name: 'Valve',
       position: { x: 200, y: 0 }, mode: 'normal' as const,
-      bindings: [], operationalProfileId: undefined, layoutHint: undefined,
-      allowedActions: registry.getOrThrow('mixing_valve').defaultAllowedActions ?? [],
+      bindings: [],
+      
     };
     stores.graph.setComponent(tank);
     stores.graph.setComponent(valve);
@@ -240,7 +244,7 @@ describe('assignConnectionBinding + removeConnectionBinding', () => {
     const draft = { slotId: FLOW_SLOT.id, source: 'mqtt' as const, address: 'pipe/flow', ttlSeconds: 30 };
     const { data } = assignConnectionBinding(PID, connectionId, draft, FLOW_SLOT, stores, USER);
     expect(data.bindings).toHaveLength(1);
-    expect(data.bindings![0].metric).toBe(FLOW_SLOT.metric);
+    expect(data.bindings![0]!.metric).toBe(FLOW_SLOT.metric);
   });
 
   it('writes a connection_updated event', () => {
@@ -252,7 +256,7 @@ describe('assignConnectionBinding + removeConnectionBinding', () => {
   it('removeConnectionBinding removes the binding', () => {
     const draft = { slotId: FLOW_SLOT.id, source: 'mqtt' as const, address: 'pipe/flow', ttlSeconds: 30 };
     const { data: after } = assignConnectionBinding(PID, connectionId, draft, FLOW_SLOT, stores, USER);
-    const bId = after.bindings![0].id;
+    const bId = after.bindings![0]!.id;
     const { data: final } = removeConnectionBinding(PID, connectionId, bId, stores, USER);
     expect(final.bindings).toHaveLength(0);
   });
@@ -260,7 +264,7 @@ describe('assignConnectionBinding + removeConnectionBinding', () => {
   it('removeConnectionBinding clears valueBindingId when it matched', () => {
     const draft = { slotId: FLOW_SLOT.id, source: 'mqtt' as const, address: 'pipe/flow', ttlSeconds: 30 };
     const { data: after } = assignConnectionBinding(PID, connectionId, draft, FLOW_SLOT, stores, USER);
-    const bId = after.bindings![0].id;
+    const bId = after.bindings![0]!.id;
     // Manually set valueBindingId
     const cn = stores.graph.getConnection(PID, connectionId)!;
     stores.graph.setConnection({ ...cn, valueBindingId: bId });

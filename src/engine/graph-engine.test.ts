@@ -464,13 +464,13 @@ describe('updateConnection', () => {
 
   it('returns updated connection with the patch applied', () => {
     const stores = setup();
-    const { data } = updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'reverse' }, USER, stores);
-    expect(data.topologicalDirection).toBe('reverse');
+    const { data } = updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'bidirectional' }, USER, stores);
+    expect(data.topologicalDirection).toBe('bidirectional');
   });
 
   it('preserves fields not in the patch', () => {
     const stores = setup();
-    const { data } = updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'reverse' }, USER, stores);
+    const { data } = updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'bidirectional' }, USER, stores);
     expect(data.medium).toBe('hot_water');
     expect(data.fromPortId).toBe('hot_out');
   });
@@ -489,14 +489,14 @@ describe('updateConnection', () => {
 
   it('persists the updated connection in the GraphStore', () => {
     const stores = setup();
-    updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'reverse' }, USER, stores);
+    updateConnection(PROJECT_ID, 'cn_supply', { topologicalDirection: 'bidirectional' }, USER, stores);
     const stored = stores.graph.getConnection(PROJECT_ID, 'cn_supply');
-    expect(stored?.topologicalDirection).toBe('reverse');
+    expect(stored?.topologicalDirection).toBe('bidirectional');
   });
 
   it('patch payload is recorded in the event', () => {
     const stores = setup();
-    const patch = { topologicalDirection: 'reverse' as const };
+    const patch = { topologicalDirection: 'bidirectional' as const };
     const { event } = updateConnection(PROJECT_ID, 'cn_supply', patch, USER, stores);
     expect((event.data as { patch: unknown }).patch).toMatchObject(patch);
   });

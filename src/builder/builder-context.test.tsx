@@ -47,7 +47,7 @@ function makeWrapper(opts: TestHarnessOptions = {}) {
   const registry = opts.registry ?? makeRegistry();
   createProject({ id: PID, name: 'Builder Test', siteType: 'test' }, USER, stores);
 
-  const props: BuilderProviderProps = { projectId: PID, stores, registry, createdBy: USER };
+  const props: Omit<BuilderProviderProps, 'children'> = { projectId: PID, stores, registry, createdBy: USER };
 
   function Wrapper({ children }: { children: React.ReactNode }) {
     return <BuilderProvider {...props}>{children}</BuilderProvider>;
@@ -296,7 +296,7 @@ describe('Architecture invariants', () => {
     const registry = makeRegistry();
     createProject({ id: PID, name: 'T', siteType: 'test' }, USER, stores);
 
-    const props: BuilderProviderProps = { projectId: PID, stores, registry, createdBy: USER };
+    const props: Omit<BuilderProviderProps, 'children'> = { projectId: PID, stores, registry, createdBy: USER };
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <BuilderProvider {...props}>{children}</BuilderProvider>
     );

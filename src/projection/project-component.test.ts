@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { projectComponent } from './project-component.js';
 import { createInMemoryLiveStore } from '../telemetry/live-store.js';
 import {
-  HealthState, NodeStatus, SensorState, ValueProvenance,
+  CommandState, HealthState, NodeStatus, SensorState, ValueProvenance,
 } from '../domain/types.js';
 import type { Component, LiveSample, OperationalProfile } from '../domain/types.js';
 import type { ComponentDefinition } from '../lib/component-registry.js';
@@ -30,8 +30,8 @@ const TANK_DEF: ComponentDefinition = {
   label:    'Storage Tank',
   category: 'storage',
   ports: [
-    { id: 'hot_out', medium: 'hot_water', role: 'outlet', anchor: 'top' },
-    { id: 'heat_in_1', medium: 'hot_water', role: 'inlet', anchor: 'left' },
+    { id: 'hot_out', label: 'Hot Out', medium: 'hot_water', role: 'outlet', anchor: 'top' },
+    { id: 'heat_in_1', label: 'Heat In', medium: 'hot_water', role: 'inlet', anchor: 'left' },
   ],
   sensorSlots: [
     { id: 'temp', label: 'Temp', metric: 'temperature', required: true, defaultTtlSeconds: 120 },
@@ -84,7 +84,7 @@ describe('projectComponent — shape', () => {
 
   it('activeCommands passes through unchanged', () => {
     const store = createInMemoryLiveStore();
-    const cmds = [{ actionId: 'enable', state: 'executing' as const, requestId: 'req_1' }];
+    const cmds = [{ actionId: 'enable', state: CommandState.Executing, requestId: 'req_1' }];
     const vm = projectComponent(TANK, TANK_DEF, store, [], cmds, undefined, NOW_MS);
     expect(vm.activeCommands).toBe(cmds);
   });

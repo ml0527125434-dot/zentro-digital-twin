@@ -89,7 +89,7 @@ describe('Domain Event constructors', () => {
   it('event is frozen — id cannot be mutated after creation', () => {
     const e = projectCreatedEvent(project);
     expect(() => {
-      (e as Record<string, unknown>)['id'] = 'tampered';
+      (e as unknown as Record<string, unknown>)['id'] = 'tampered';
     }).toThrow();
   });
 

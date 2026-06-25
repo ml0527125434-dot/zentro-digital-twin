@@ -39,7 +39,8 @@ const BASE_CONNECTION: Connection = {
 
 describe('projectConnection — no valueBinding', () => {
   it('returns Unknown flow when no valueBindingId', () => {
-    const cn = { ...BASE_CONNECTION, valueBindingId: undefined };
+    const { valueBindingId: _v, ...rest } = BASE_CONNECTION;
+    const cn: Connection = rest;
     const store = createInMemoryLiveStore();
     const vm = projectConnection(cn, store, NOW_MS);
     expect(vm.flow).toBe(FlowState.Unknown);
