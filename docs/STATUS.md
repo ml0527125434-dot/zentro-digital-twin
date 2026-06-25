@@ -11,6 +11,25 @@
 | 7     | OperationalProfileStore + AlarmStore Foundation | **487** | `f3eebe9` |
 | 8     | AlarmRule Evaluation Engine | **508** | `bb44b96` |
 | 9     | Zentro Data Ingestion Contract | **522** | `1cdc6d8` |
+| 10    | Fixture / Payload Loader | **532** | `517ce11` |
+
+## Stage 10 Notes
+
+**Approved.** Net +10 tests (522 → 532). No skipped tests.
+
+New modules:
+- `src/ingestion/fixture-adapter.ts` — `ZentroPayload`, `loadFixture()`, `buildHotWaterPayload()`
+- `src/ingestion/fixture-adapter.test.ts` — 10 tests
+
+Architecture invariants confirmed:
+- Synchronous fixture/payload loader only — no async, network, scheduler, or retry logic
+- Frontend-only ingestion boundary remains intact
+- `loadFixture()` drives all four Ingestor methods in dependency order:
+  graph → profiles → alarm rules → samples
+- `buildHotWaterPayload()` uses a throwaway `EngineStores` to materialise seed output;
+  `hot-water.seed.ts` is unchanged
+- No EventStore/VersionStore writes from `loadFixture()`
+- No existing files modified; no `types.ts` changes; no React/projection changes
 
 ## Stage 9 Notes
 
@@ -82,4 +101,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 10 — pending proposal and approval.
+Stage 11 — pending proposal and approval.
