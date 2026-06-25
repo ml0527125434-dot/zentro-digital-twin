@@ -16,7 +16,7 @@
 | 12    | Demo App Entry Point | **542** | `8c8eb4b` |
 | 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
-| 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `` |
+| 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
 
 ## Stage 15 Notes
 
