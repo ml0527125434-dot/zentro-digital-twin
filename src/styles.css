@@ -587,3 +587,30 @@ html, body {
   color:     var(--text-sub);
   display:   block;
 }
+
+/* ── Interactive hover polish ────────────────────────────────────────────── */
+
+/* Equipment list cards */
+[data-testid^="dashboard-item-"]:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background:   color-mix(in srgb, var(--accent) 4%, var(--bg-mantle));
+  transition:   border-color 0.15s, background 0.15s;
+}
+
+/* Palette component buttons */
+[data-testid^="palette-item-"]:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border)) !important;
+  background:   color-mix(in srgb, var(--accent) 8%, var(--bg-mantle)) !important;
+}
+
+/* Selected node hover — slightly brighter ring */
+.react-flow__node.selected .zentro-node:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow-card);
+}
+
+/* Canvas node hover in build mode — subtle lift */
+.react-flow__node:hover .zentro-node,
+.react-flow__node:hover .zentro-pump-wrapper,
+.react-flow__node:hover .zentro-valve-diamond {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}

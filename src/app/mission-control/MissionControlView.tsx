@@ -315,6 +315,7 @@ export function MissionControlView({
               data-testid="sidebar-left-expand"
               onClick={() => setLeftCollapsed(false)}
               aria-label="Expand equipment panel"
+              title="Expand sidebar"
               style={{
                 ...TOGGLE_BTN,
                 position: 'absolute',
@@ -333,6 +334,7 @@ export function MissionControlView({
               data-testid="inspector-right-expand"
               onClick={() => setRightCollapsed(false)}
               aria-label="Expand inspector panel"
+              title="Expand inspector"
               style={{
                 ...TOGGLE_BTN,
                 position: 'absolute',
