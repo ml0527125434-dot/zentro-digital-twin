@@ -417,8 +417,10 @@ html, body {
   transition:     border-color 0.25s, box-shadow 0.25s;
 }
 
-.zentro-pump-wrapper--healthy   { border-color: rgba(34, 197, 94, 0.55); }
-.zentro-pump-wrapper--warning   { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-pump-wrapper--healthy       { border-color: rgba(34, 197, 94, 0.55); }
+.zentro-pump-wrapper--warning       { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-pump-wrapper--maintenance   { border-color: var(--status-maintenance); }
+.zentro-pump-wrapper--commissioning { border-color: var(--status-commissioning); }
 .zentro-pump-wrapper--critical  {
   border-color: var(--status-critical);
   animation: nodeAlarmPulse 1.8s ease-in-out infinite;
@@ -469,9 +471,11 @@ html, body {
   transition:   border-color 0.25s;
 }
 
-.zentro-valve-diamond--healthy  { border-color: rgba(34, 197, 94, 0.55); }
-.zentro-valve-diamond--warning  { border-color: rgba(245, 158, 11, 0.7); }
-.zentro-valve-diamond--critical { border-color: var(--status-critical); }
+.zentro-valve-diamond--healthy       { border-color: rgba(34, 197, 94, 0.55); }
+.zentro-valve-diamond--warning       { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-valve-diamond--critical      { border-color: var(--status-critical); }
+.zentro-valve-diamond--maintenance   { border-color: var(--status-maintenance); }
+.zentro-valve-diamond--commissioning { border-color: var(--status-commissioning); }
 
 .zentro-valve-inner {
   position:       absolute;

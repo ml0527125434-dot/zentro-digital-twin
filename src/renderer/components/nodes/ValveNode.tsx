@@ -37,9 +37,11 @@ export function ValveNode({ data }: NodeProps<ComponentNodeData>) {
       : null;
 
   const diamondClass =
-    viewModel.health === HealthState.Critical ? 'zentro-valve-diamond--critical' :
-    viewModel.health === HealthState.Warning   ? 'zentro-valve-diamond--warning'  :
-    viewModel.health === HealthState.Healthy   ? 'zentro-valve-diamond--healthy'  :
+    viewModel.health === HealthState.Critical      ? 'zentro-valve-diamond--critical'     :
+    viewModel.health === HealthState.Warning       ? 'zentro-valve-diamond--warning'      :
+    viewModel.health === HealthState.Healthy       ? 'zentro-valve-diamond--healthy'      :
+    viewModel.health === HealthState.Maintenance   ? 'zentro-valve-diamond--maintenance'  :
+    viewModel.health === HealthState.Commissioning ? 'zentro-valve-diamond--commissioning':
     '';
 
   return (

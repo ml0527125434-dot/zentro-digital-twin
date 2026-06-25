@@ -22,9 +22,11 @@ export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
     : isRunning ? t('pump.running') : t('pump.standby');
 
   const healthClass =
-    viewModel.health === HealthState.Critical ? 'zentro-pump-wrapper--critical' :
-    viewModel.health === HealthState.Warning   ? 'zentro-pump-wrapper--warning'  :
-    viewModel.health === HealthState.Healthy   ? 'zentro-pump-wrapper--healthy'  :
+    viewModel.health === HealthState.Critical      ? 'zentro-pump-wrapper--critical'     :
+    viewModel.health === HealthState.Warning       ? 'zentro-pump-wrapper--warning'      :
+    viewModel.health === HealthState.Healthy       ? 'zentro-pump-wrapper--healthy'      :
+    viewModel.health === HealthState.Maintenance   ? 'zentro-pump-wrapper--maintenance'  :
+    viewModel.health === HealthState.Commissioning ? 'zentro-pump-wrapper--commissioning':
     '';
 
   return (
