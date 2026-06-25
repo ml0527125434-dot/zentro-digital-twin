@@ -14,6 +14,7 @@ import {
   type NodeTypes,
   type EdgeTypes,
   type Node,
+  type Edge,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { TankNode }      from './nodes/TankNode.js';
@@ -42,15 +43,25 @@ const EDGE_TYPES: EdgeTypes = {
 export interface FlowMapProps {
   nodes: ComponentNode[];
   edges: ConnectionEdge[];
-  onNodeClick?: (componentId: string) => void;
+  onNodeClick?:   (componentId: string) => void;
+  onEdgeClick?:   (connectionId: string) => void;
+  onPaneClick?:   () => void;
+  placingMode?:   boolean;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, placingMode }: FlowMapProps) {
   const handleNodeClick = React.useCallback(
     (_event: React.MouseEvent, node: Node) => {
       onNodeClick?.(node.id);
     },
     [onNodeClick],
+  );
+
+  const handleEdgeClick = React.useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      onEdgeClick?.(edge.id);
+    },
+    [onEdgeClick],
   );
 
   return (
@@ -65,6 +76,9 @@ export function FlowMap({ nodes, edges, onNodeClick }: FlowMapProps) {
       minZoom={0.3}
       maxZoom={2}
       onNodeClick={onNodeClick ? handleNodeClick : undefined}
+      onEdgeClick={onEdgeClick ? handleEdgeClick : undefined}
+      onPaneClick={onPaneClick}
+      style={placingMode ? { cursor: 'crosshair' } : undefined}
     >
       <Background
         variant={BackgroundVariant.Lines}

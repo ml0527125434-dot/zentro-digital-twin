@@ -119,7 +119,28 @@ export type TranslationKey =
   | 'pres.exit'
   | 'pres.badge'
   // ── Stage 29: Workspace Redesign ─────────────────────────────────────────
-  | 'inspector.empty';
+  | 'inspector.empty'
+  // ── Stage 30: Builder LEGO UI ─────────────────────────────────────────────
+  | 'builder.mode_build'
+  | 'builder.mode_monitor'
+  | 'builder.palette_title'
+  | 'builder.placing_hint'
+  | 'builder.cancel'
+  | 'builder.props_title'
+  | 'builder.name_label'
+  | 'builder.rename_btn'
+  | 'builder.delete_btn'
+  | 'builder.delete_blocked'
+  | 'builder.conn_title'
+  | 'builder.conn_from'
+  | 'builder.conn_from_port'
+  | 'builder.conn_to'
+  | 'builder.conn_to_port'
+  | 'builder.conn_medium'
+  | 'builder.conn_submit'
+  | 'builder.conn_errors'
+  | 'builder.conn_delete'
+  | 'builder.idle_hint';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

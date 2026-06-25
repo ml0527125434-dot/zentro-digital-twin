@@ -34,6 +34,9 @@ import { AlarmBanner } from './AlarmBanner.js';
 import { EquipmentGrid } from './EquipmentGrid.js';
 import { EventTimeline } from './EventTimeline.js';
 import { InspectorPanel } from '../workspace/InspectorPanel.js';
+import { BuilderPalettePanel } from '../builder/BuilderPalettePanel.js';
+import { BuilderPropertyPanel } from '../builder/BuilderPropertyPanel.js';
+import { useBuilder } from '../../builder/useBuilder.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -43,8 +46,10 @@ export interface MissionControlViewProps {
   connectionVMs: Record<string, ConnectionViewModel>;
   alarmStore:    AlarmStore;
   nowMs:         number;
+  buildMode?:          boolean;
   presentationMode?:   boolean;
   onDrawerOpenChange?: (open: boolean) => void;
+  onMutation?:         () => void;
 }
 
 // Small shared button style for panel-toggle controls
@@ -69,19 +74,66 @@ export function MissionControlView({
   connectionVMs,
   alarmStore,
   nowMs,
+  buildMode = false,
   presentationMode = false,
   onDrawerOpenChange,
+  onMutation,
 }: MissionControlViewProps) {
   const { t } = useLocale();
+  const builder = useBuilder();
 
+  // Monitor-mode selection (independent of BuilderContext FSM)
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [leftCollapsed,  setLeftCollapsed]  = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
 
+  // Clear monitor selection when switching to build mode
+  useEffect(() => {
+    if (buildMode) setSelectedComponentId(null);
+  }, [buildMode]);
+
   const handleSelectComponent = useCallback((id: string) => {
-    setSelectedComponentId(id);
-    setRightCollapsed(false); // auto-expand inspector on selection
-  }, []);
+    if (buildMode) {
+      builder.dispatchFsm({ type: 'SELECT_COMPONENT', componentId: id });
+      setRightCollapsed(false);
+    } else {
+      setSelectedComponentId(id);
+      setRightCollapsed(false);
+    }
+  }, [buildMode, builder]);
+
+  const handleEdgeClick = useCallback((connectionId: string) => {
+    if (buildMode) {
+      builder.dispatchFsm({ type: 'SELECT_CONNECTION', connectionId });
+      setRightCollapsed(false);
+    }
+  }, [buildMode, builder]);
+
+  const handlePaneClick = useCallback(() => {
+    if (!buildMode) return;
+    if (builder.state.mode !== 'placing') return;
+    const typeId = builder.state.pendingTypeId;
+    if (!typeId) return;
+
+    // Place at a staggered position; ELK will relayout automatically
+    const existing = stores.graph.getComponents(projectId);
+    const n = existing.length;
+    const position = { x: 60 + (n % 4) * 160, y: 60 + Math.floor(n / 4) * 140 };
+
+    // Auto-generate name: "Heat Pump 2" etc.
+    const def = registry.get(typeId);
+    const sameType = existing.filter(c => c.type === typeId).length;
+    const name = `${def?.label ?? typeId} ${sameType + 1}`;
+
+    try {
+      builder.placeComponent(typeId, name, position);
+      builder.dispatchFsm({ type: 'CANCEL_PLACING' });
+      onMutation?.();
+    } catch {
+      // If placement fails, just cancel placing
+      builder.dispatchFsm({ type: 'CANCEL_PLACING' });
+    }
+  }, [buildMode, builder, stores, registry, projectId, onMutation]);
 
   const handleCloseInspector = useCallback(() => {
     setSelectedComponentId(null);
@@ -92,21 +144,24 @@ export function MissionControlView({
     onDrawerOpenChange?.(selectedComponentId !== null);
   }, [selectedComponentId, onDrawerOpenChange]);
 
-  // ESC clears the inspector selection
+  // ESC clears selection
   useEffect(() => {
+    if (buildMode) return; // builder mode has its own ESC in BuilderContext
     if (!selectedComponentId) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedComponentId(null);
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [selectedComponentId]);
+  }, [selectedComponentId, buildMode]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
 
   const { nodes, edges } = buildFlowGraph(components, connections, componentVMs, connectionVMs);
   const { layoutNodes, isReady } = useElkLayout(nodes, edges);
+
+  const isPlacingMode = buildMode && builder.state.mode === 'placing';
 
   // Presentation mode collapses both sidebars; manual toggles respected otherwise
   const showLeft  = !presentationMode && !leftCollapsed;
@@ -182,35 +237,40 @@ export function MissionControlView({
             </button>
           </div>
 
-          {/* Alarm banner */}
-          <AlarmBanner alarmStore={alarmStore} components={components} />
-
-          {/* Equipment list — fills most of the sidebar */}
-          <div style={{ flex: '1 1 0', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <EquipmentGrid
-              projectId={projectId}
-              stores={stores}
-              componentVMs={componentVMs}
-              alarmStore={alarmStore}
-              onSelectComponent={handleSelectComponent}
-            />
-          </div>
-
-          {/* Event timeline — bottom slice */}
-          <div style={{
-            flex:          '0 0 auto',
-            maxHeight:     '38%',
-            borderTop:     '1px solid var(--border)',
-            display:       'flex',
-            flexDirection: 'column',
-            overflow:      'hidden',
-          }}>
-            <EventTimeline
-              alarmStore={alarmStore}
-              components={components}
-              nowMs={nowMs}
-            />
-          </div>
+          {buildMode ? (
+            /* Build mode: palette fills the sidebar */
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <BuilderPalettePanel registry={registry} />
+            </div>
+          ) : (
+            /* Monitor mode: alarm banner + equipment grid + timeline */
+            <>
+              <AlarmBanner alarmStore={alarmStore} components={components} />
+              <div style={{ flex: '1 1 0', minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <EquipmentGrid
+                  projectId={projectId}
+                  stores={stores}
+                  componentVMs={componentVMs}
+                  alarmStore={alarmStore}
+                  onSelectComponent={handleSelectComponent}
+                />
+              </div>
+              <div style={{
+                flex:          '0 0 auto',
+                maxHeight:     '38%',
+                borderTop:     '1px solid var(--border)',
+                display:       'flex',
+                flexDirection: 'column',
+                overflow:      'hidden',
+              }}>
+                <EventTimeline
+                  alarmStore={alarmStore}
+                  components={components}
+                  nowMs={nowMs}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── CENTER CANVAS ─────────────────────────────────────────────────── */}
@@ -277,6 +337,9 @@ export function MissionControlView({
               nodes={layoutNodes}
               edges={edges}
               onNodeClick={handleSelectComponent}
+              onEdgeClick={buildMode ? handleEdgeClick : undefined}
+              onPaneClick={isPlacingMode ? handlePaneClick : undefined}
+              placingMode={isPlacingMode}
             />
           </div>
         </div>
@@ -331,8 +394,17 @@ export function MissionControlView({
             </button>
           </div>
 
-          {/* Inspector content: detail panel or placeholder */}
-          {selectedComponentId ? (
+          {/* Inspector content: build mode panel OR monitor mode panel */}
+          {buildMode ? (
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <BuilderPropertyPanel
+                projectId={projectId}
+                stores={stores}
+                registry={registry}
+                onMutation={onMutation ?? (() => {})}
+              />
+            </div>
+          ) : selectedComponentId ? (
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
               <InspectorPanel
                 componentId={selectedComponentId}

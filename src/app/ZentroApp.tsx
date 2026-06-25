@@ -31,7 +31,7 @@ export interface ZentroAppProps {
   autoRefreshMs?:  number;
 }
 
-type AppContentProps = Omit<ZentroAppProps, 'createdBy'> & { nowMs: number };
+type AppContentProps = Omit<ZentroAppProps, 'createdBy'> & { nowMs: number; onMutation: () => void };
 
 function AppContent({
   projectId,
@@ -41,15 +41,18 @@ function AppContent({
   profileStore,
   alarmStore,
   nowMs,
+  onMutation,
 }: AppContentProps) {
   const { t, config, setLocale, locale } = useLocale();
   const [showDemoInfo, setShowDemoInfo] = useState(true);
   const [presentationMode, setPresentationMode] = useState(false);
+  const [buildMode, setBuildMode] = useState(false);
   const drawerOpenRef = useRef(false);
 
   const handleDrawerOpenChange = useCallback((open: boolean) => {
     drawerOpenRef.current = open;
   }, []);
+
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -132,6 +135,52 @@ function AppContent({
                 {t('app.all_clear')}
               </span>
             )}
+
+            {/* Build / Monitor mode toggle */}
+            <div style={{
+              display:      'flex',
+              alignItems:   'center',
+              background:   'var(--bg-base)',
+              border:       '1px solid var(--border)',
+              borderRadius: 5,
+              overflow:     'hidden',
+              flexShrink:   0,
+            }}>
+              <button
+                data-testid="mode-monitor-btn"
+                onClick={() => setBuildMode(false)}
+                style={{
+                  background:   buildMode ? 'transparent' : 'var(--bg-mantle)',
+                  border:       'none',
+                  borderInlineEnd: '1px solid var(--border)',
+                  color:        buildMode ? 'var(--text-dim)' : 'var(--text-base)',
+                  cursor:       'pointer',
+                  fontSize:     10,
+                  fontWeight:   buildMode ? 500 : 700,
+                  padding:      '3px 9px',
+                  lineHeight:   1.4,
+                }}
+              >
+                {t('builder.mode_monitor')}
+              </button>
+              <button
+                data-testid="mode-build-btn"
+                onClick={() => setBuildMode(true)}
+                style={{
+                  background:   buildMode ? 'color-mix(in srgb, var(--accent) 12%, var(--bg-mantle))' : 'transparent',
+                  border:       'none',
+                  color:        buildMode ? 'var(--accent)' : 'var(--text-dim)',
+                  cursor:       'pointer',
+                  fontSize:     10,
+                  fontWeight:   buildMode ? 700 : 500,
+                  padding:      '3px 9px',
+                  lineHeight:   1.4,
+                }}
+              >
+                {t('builder.mode_build')}
+              </button>
+            </div>
+
             <button
               data-testid="pres-enter-btn"
               onClick={() => setPresentationMode(true)}
@@ -236,8 +285,10 @@ function AppContent({
         connectionVMs={connectionVMs}
         alarmStore={alarmStore}
         nowMs={nowMs}
+        buildMode={buildMode}
         presentationMode={presentationMode}
         onDrawerOpenChange={handleDrawerOpenChange}
+        onMutation={onMutation}
       />
 
       {/* Floating presentation mode overlay — exit button + badge */}
@@ -302,7 +353,8 @@ export function ZentroApp({
 }: ZentroAppProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
-  const refresh = useCallback(() => setNowMs(Date.now()), []);
+  const refresh     = useCallback(() => setNowMs(Date.now()), []);
+  const onMutation  = useCallback(() => setNowMs(Date.now()), []);
 
   useEffect(() => {
     if (!autoRefreshMs) return;
@@ -326,6 +378,7 @@ export function ZentroApp({
           profileStore={profileStore}
           alarmStore={alarmStore}
           nowMs={nowMs}
+          onMutation={onMutation}
         />
         <button data-testid="refresh-btn" onClick={refresh} style={{ display: 'none' }}>
           Refresh

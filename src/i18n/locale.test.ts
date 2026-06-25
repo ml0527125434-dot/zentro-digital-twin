@@ -53,6 +53,15 @@ const ALL_KEYS: TranslationKey[] = [
   'pres.enter', 'pres.exit', 'pres.badge',
   // Stage 29 keys
   'inspector.empty',
+  // Stage 30 keys
+  'builder.mode_build', 'builder.mode_monitor',
+  'builder.palette_title', 'builder.placing_hint', 'builder.cancel',
+  'builder.props_title', 'builder.name_label', 'builder.rename_btn',
+  'builder.delete_btn', 'builder.delete_blocked',
+  'builder.conn_title', 'builder.conn_from', 'builder.conn_from_port',
+  'builder.conn_to', 'builder.conn_to_port', 'builder.conn_medium',
+  'builder.conn_submit', 'builder.conn_errors', 'builder.conn_delete',
+  'builder.idle_hint',
 ];
 
 describe('Hebrew locale', () => {

@@ -139,4 +139,26 @@ export const HE: Translations = {
 
   // Stage 29: Workspace Redesign
   'inspector.empty': 'בחר רכיב לפרטים',
+
+  // Stage 30: Builder LEGO UI
+  'builder.mode_build':    'בנייה',
+  'builder.mode_monitor':  'ניטור',
+  'builder.palette_title': 'רכיבים',
+  'builder.placing_hint':  'לחץ על הבד להנחה',
+  'builder.cancel':        'בטל',
+  'builder.props_title':   'מאפיינים',
+  'builder.name_label':    'שם',
+  'builder.rename_btn':    'שנה שם',
+  'builder.delete_btn':    'מחק',
+  'builder.delete_blocked':'לא ניתן למחוק: נתק תחילה',
+  'builder.conn_title':    'הוסף חיבור',
+  'builder.conn_from':     'ממרכיב',
+  'builder.conn_from_port':'מיציאה',
+  'builder.conn_to':       'לרכיב',
+  'builder.conn_to_port':  'לכניסה',
+  'builder.conn_medium':   'מדיום',
+  'builder.conn_submit':   'חבר',
+  'builder.conn_errors':   'שגיאות',
+  'builder.conn_delete':   'מחק חיבור',
+  'builder.idle_hint':     'בחר רכיב או חיבור',
 };

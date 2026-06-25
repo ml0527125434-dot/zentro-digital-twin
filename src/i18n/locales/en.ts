@@ -139,4 +139,26 @@ export const EN: Translations = {
 
   // Stage 29: Workspace Redesign
   'inspector.empty': 'Select a component to inspect',
+
+  // Stage 30: Builder LEGO UI
+  'builder.mode_build':    'Build',
+  'builder.mode_monitor':  'Monitor',
+  'builder.palette_title': 'Components',
+  'builder.placing_hint':  'Click canvas to place',
+  'builder.cancel':        'Cancel',
+  'builder.props_title':   'Properties',
+  'builder.name_label':    'Name',
+  'builder.rename_btn':    'Rename',
+  'builder.delete_btn':    'Delete',
+  'builder.delete_blocked':'Cannot delete: disconnect first',
+  'builder.conn_title':    'Add Connection',
+  'builder.conn_from':     'From',
+  'builder.conn_from_port':'From port',
+  'builder.conn_to':       'To',
+  'builder.conn_to_port':  'To port',
+  'builder.conn_medium':   'Medium',
+  'builder.conn_submit':   'Connect',
+  'builder.conn_errors':   'Validation errors',
+  'builder.conn_delete':   'Delete connection',
+  'builder.idle_hint':     'Select a component or connection',
 };
