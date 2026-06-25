@@ -392,7 +392,7 @@ export function BuilderPropertyPanel({
         {/* ── Port definitions ───────────────────────────────────────── */}
         {def && def.ports.length > 0 && (
           <>
-            <SectionHeader label="Ports" />
+            <SectionHeader label={t('builder.ports_section')} />
             <div style={{ padding: '6px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {def.ports.map(port => {
                 const mediumVar =

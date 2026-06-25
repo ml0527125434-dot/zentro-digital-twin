@@ -64,6 +64,10 @@ const ALL_KEYS: TranslationKey[] = [
   'builder.idle_hint',
   // Stage 31
   'valve.open', 'valve.closed',
+  'builder.canvas_empty_title', 'builder.canvas_empty_body',
+  'builder.palette_search', 'builder.palette_no_match', 'builder.ports_section',
+  'category.source', 'category.storage', 'category.pump', 'category.valve',
+  'category.sensor', 'category.meter', 'category.consumer', 'category.zone', 'category.air',
 ];
 
 describe('Hebrew locale', () => {

@@ -145,7 +145,22 @@ export type TranslationKey =
   | 'builder.idle_hint'
   // ── Stage 31: Node labels ─────────────────────────────────────────────────
   | 'valve.open'
-  | 'valve.closed';
+  | 'valve.closed'
+  // ── Stage 31: Builder / palette ───────────────────────────────────────────
+  | 'builder.canvas_empty_title'
+  | 'builder.canvas_empty_body'
+  | 'builder.palette_search'
+  | 'builder.palette_no_match'
+  | 'builder.ports_section'
+  | 'category.source'
+  | 'category.storage'
+  | 'category.pump'
+  | 'category.valve'
+  | 'category.sensor'
+  | 'category.meter'
+  | 'category.consumer'
+  | 'category.zone'
+  | 'category.air';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

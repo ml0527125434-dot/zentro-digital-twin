@@ -400,10 +400,10 @@ export function MissionControlView({
             }}>
               <span style={{ fontSize: 40, opacity: 0.25 }}>⬡</span>
               <span style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 600 }}>
-                Start building your system
+                {t('builder.canvas_empty_title')}
               </span>
               <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-                Pick a component from the palette and click to place it
+                {t('builder.canvas_empty_body')}
               </span>
             </div>
           )}

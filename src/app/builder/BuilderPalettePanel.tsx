@@ -10,6 +10,7 @@ import type { ComponentRegistry, ComponentCategory } from '../../lib/component-r
 import { getPaletteItems } from '../../builder/palette.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 import { useLocale } from '../../i18n/index.js';
+import type { TranslationKey } from '../../i18n/index.js';
 
 const TYPE_ICON: Record<string, string> = {
   storage_tank:         '🛢',
@@ -38,16 +39,16 @@ const TYPE_ICON: Record<string, string> = {
   tap:                  '🚰',
 };
 
-const CATEGORY_LABEL: Record<ComponentCategory, string> = {
-  source:   'Heat Sources',
-  storage:  'Storage',
-  pump:     'Pumps',
-  valve:    'Valves',
-  sensor:   'Sensors',
-  meter:    'Meters',
-  consumer: 'Consumers',
-  zone:     'Distribution',
-  air:      'Auxiliary',
+const CATEGORY_KEY: Record<ComponentCategory, TranslationKey> = {
+  source:   'category.source',
+  storage:  'category.storage',
+  pump:     'category.pump',
+  valve:    'category.valve',
+  sensor:   'category.sensor',
+  meter:    'category.meter',
+  consumer: 'category.consumer',
+  zone:     'category.zone',
+  air:      'category.air',
 };
 
 const CATEGORY_ORDER: ComponentCategory[] = [
@@ -101,7 +102,7 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
       <div style={{ padding: '8px 10px 6px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <input
           type="search"
-          placeholder="Search components…"
+          placeholder={t('builder.palette_search')}
           value={search}
           onChange={e => setSearch(e.currentTarget.value)}
           style={{
@@ -167,7 +168,7 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
               letterSpacing: '0.1em',
               padding:       '8px 4px 4px',
             }}>
-              {CATEGORY_LABEL[cat]}
+              {t(CATEGORY_KEY[cat])}
             </div>
 
             {/* Items in category */}
@@ -244,7 +245,7 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
             color:    'var(--text-dim)',
             fontSize: 11,
           }}>
-            No components match "{search}"
+            {t('builder.palette_no_match')}
           </div>
         )}
       </div>

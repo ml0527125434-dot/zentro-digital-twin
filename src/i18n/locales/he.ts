@@ -167,4 +167,20 @@ export const HE: Translations = {
   // Stage 31: Node labels
   'valve.open':   'פתוח',
   'valve.closed': 'סגור',
+
+  // Stage 31: Builder / palette
+  'builder.canvas_empty_title': 'התחל לבנות את המערכת',
+  'builder.canvas_empty_body':  'בחר רכיב מהלוח ולחץ למיקום',
+  'builder.palette_search':     'חפש רכיבים…',
+  'builder.palette_no_match':   'אין תוצאות',
+  'builder.ports_section':      'פורטים',
+  'category.source':   'מקורות חום',
+  'category.storage':  'אגירה',
+  'category.pump':     'משאבות',
+  'category.valve':    'שסתומים',
+  'category.sensor':   'חיישנים',
+  'category.meter':    'מדים',
+  'category.consumer': 'נקודות צריכה',
+  'category.zone':     'הפצה',
+  'category.air':      'עזר',
 };

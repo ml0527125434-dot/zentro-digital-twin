@@ -167,4 +167,20 @@ export const EN: Translations = {
   // Stage 31: Node labels
   'valve.open':   'Open',
   'valve.closed': 'Closed',
+
+  // Stage 31: Builder / palette
+  'builder.canvas_empty_title': 'Start building your system',
+  'builder.canvas_empty_body':  'Pick a component from the palette and click to place it',
+  'builder.palette_search':     'Search components…',
+  'builder.palette_no_match':   'No match',
+  'builder.ports_section':      'Ports',
+  'category.source':   'Heat Sources',
+  'category.storage':  'Storage',
+  'category.pump':     'Pumps',
+  'category.valve':    'Valves',
+  'category.sensor':   'Sensors',
+  'category.meter':    'Meters',
+  'category.consumer': 'Consumers',
+  'category.zone':     'Distribution',
+  'category.air':      'Auxiliary',
 };
