@@ -65,7 +65,7 @@ These are **pre-existing, non-blocking** TypeScript type errors. They do not aff
 | 27    | Real Runtime Integration Readiness  | **638** | `c9d08a0` |
 | 28    | Frontend LEGO Interface Audit & Plan (audit only, no code) | **638** | `c9d08a0` |
 | 29    | Workspace Redesign — three-column engineering layout | **646** | `494cf66` |
-| 30    | Builder LEGO UI Proof — palette, place, rename, delete, connect | **654** | pending |
+| 30    | Builder LEGO UI Proof — palette, place, rename, delete, connect | **654** | `3707ae8` |
 
 ## Stage 27 Notes
 
