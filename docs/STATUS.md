@@ -19,7 +19,7 @@
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
 | 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
 | 17    | Edge Visuals + App Header Bar | **564** | `c75807c` |
-| 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `` |
+| 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `fb47d65` |
 
 ## Stage 18 Notes
 
