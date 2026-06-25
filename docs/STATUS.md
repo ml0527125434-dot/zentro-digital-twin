@@ -21,6 +21,23 @@
 | 17    | Edge Visuals + App Header Bar | **564** | `c75807c` |
 | 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `fb47d65` |
 | 19    | ELK.js Auto Layout | **572** | `1deca65` |
+| 20    | Animated FlowMap   | **576** | `c974ba2` |
+
+## Stage 20 Notes
+
+**Approved.** Net +4 tests (572 → 576). No skipped tests.
+
+Modified:
+- `src/styles.css` — added `--edge-alarm` CSS variable; added `@keyframes flowDash`, `flowDashReverse`, `alarmPulse`; added `.zentro-edge-{flowing,reverse,noflow,alarm}` animation classes
+- `src/renderer/flow-transformers.ts` — `ConnectionEdgeData` gains `hasActiveAlarm: boolean`; `connectionToEdge` accepts optional third param; `buildFlowGraph` derives `hasActiveAlarm` from endpoint `componentVMs.activeAlarms`
+- `src/renderer/components/edges/FlowEdge.tsx` — replaced `<BaseEdge>` with raw `<path>` supporting CSS animation; color priority: alarm (critical red pulse) > temperature NodeStatus color > FlowState color; animation class selected from FlowState + alarm state
+
+Architecture invariants confirmed:
+- No Component Graph mutations — rendering-only stage
+- Projection, Runtime Stores, LiveStore, telemetry ingestion unchanged
+- Type Contract v3 unchanged
+- `hasActiveAlarm` derived purely in the rendering transform layer (buildFlowGraph) from pre-computed ComponentViewModels — not a new projection
+- FlowEdge reads only from `ConnectionEdgeData` props — no store access
 
 ## Stage 19 Notes
 
