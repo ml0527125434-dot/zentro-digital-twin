@@ -23,10 +23,13 @@
 | 19    | ELK.js Auto Layout | **572** | `1deca65` |
 | 20    | Animated FlowMap   | **576** | `c974ba2` |
 | 21    | Localization (i18n) — Hebrew RTL + English LTR | **593** | `a5d4d96` |
+| 22    | Mission Control UI | **600** | `d70de0b` |
 
-## Stage 21 Notes
+## Stage 22 Notes
 
-**Approved.** Net +17 tests (576 → 593). No skipped tests.
+Net +7 tests (593 → 600). Build clean. 6 new components, 31 new i18n keys (66 total).
+New mission-control panel: KpiBar, SystemStatusBar, AlarmBanner, EquipmentGrid, EventTimeline, MissionControlView.
+ZentroApp wired to MissionControlView. Full Hebrew RTL and English LTR support.
 
 New modules (`src/i18n/`):
 - `types.ts` — `Locale`, `TranslationKey` (35 keys), `Translations`, `LocaleConfig`
