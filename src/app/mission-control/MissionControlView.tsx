@@ -460,7 +460,7 @@ export function MissionControlView({
                 }}>
                   Esc
                 </kbd>
-                <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>to cancel</span>
+                <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{t('builder.cancel').toLowerCase()}</span>
               </div>
             );
           })()}
