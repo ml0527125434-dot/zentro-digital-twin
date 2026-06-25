@@ -1,98 +1,141 @@
-/* Zentro Digital Twin — Global Styles (Stage 16) */
+/* Zentro Digital Twin — Global Styles (Stage 23: Visual Identity) */
 
 /* ---------------------------------------------------------------------------
-   CSS custom properties — all status colours resolved here.
-   Renderer components reference these via var(--name); no hex in TSX files.
+   CSS custom properties — Zentro Visual Identity
+   All colors resolved here. No hex in TSX files.
 --------------------------------------------------------------------------- */
 :root {
-  /* Layout */
+  /* ── Layout tokens ────────────────────────────────────────────────────── */
   --app-flow-height:  60vh;
   --app-panel-height: 40vh;
+  --card-radius:  8px;
+  --card-radius-lg: 12px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 14px;
+  --space-lg: 20px;
 
-  /* Node canvas */
-  --node-bg:    #1e1e2e;
-  --node-label: #cdd6f4;
+  /* ── Zentro dark palette ─────────────────────────────────────────────── */
+  --bg-base:   #0d1117;   /* deep navy — canvas/page base                */
+  --bg-mantle: #131825;   /* dark blue-navy — card surfaces              */
+  --bg-crust:  #0a0e17;   /* deepest — header/chrome/sidebar chrome      */
+  --bg-overlay: rgba(19, 24, 37, 0.92); /* modal / tooltip overlays     */
 
-  /* HealthState */
-  --status-healthy:       #a6e3a1;
-  --status-warning:       #f9e2af;
-  --status-critical:      #f38ba8;
-  --status-offline:       #585b70;
-  --status-maintenance:   #89b4fa;
-  --status-commissioning: #89dceb;
+  /* ── Text ────────────────────────────────────────────────────────────── */
+  --text-base: #e2e8f4;   /* primary copy                                */
+  --text-sub:  #8892a4;   /* secondary / muted labels                    */
+  --text-dim:  #4a5568;   /* placeholder / very muted                    */
 
-  /* NodeStatus */
-  --node-ok:      #a6e3a1;
-  --node-cold:    #89b4fa;
-  --node-warn:    #f9e2af;
-  --node-risk:    #fab387;
-  --node-scald:   #f38ba8;
-  --node-fault:   #cba6f7;
-  --node-unknown: #6c7086;
+  /* ── Borders ─────────────────────────────────────────────────────────── */
+  --border:        #1e2938;   /* default card border                     */
+  --border-bright: #2a3a55;   /* focused / hover border                  */
+  --border-accent: #0369a1;   /* accent border (e.g. selected)           */
 
-  /* SensorState */
-  --sensor-live:    #a6e3a1;
-  --sensor-stale:   #f9e2af;
-  --sensor-lost:    #f38ba8;
-  --sensor-unknown: #6c7086;
+  /* ── HealthState ─────────────────────────────────────────────────────── */
+  --status-healthy:       #22c55e;   /* green                            */
+  --status-warning:       #f59e0b;   /* amber                            */
+  --status-critical:      #ef4444;   /* red                              */
+  --status-offline:       #475569;   /* slate-gray                       */
+  --status-maintenance:   #38bdf8;   /* sky-blue — Zentro accent         */
+  --status-commissioning: #a78bfa;   /* violet                           */
 
-  /* Edge / connection flow states */
-  --edge-flowing: #a6e3a1;
-  --edge-reverse: #fab387;
-  --edge-default: #45475a;
-  --edge-alarm:   #f38ba8;
+  /* ── NodeStatus (temperature axis) ──────────────────────────────────── */
+  --node-ok:      #22c55e;   /* nominal — green                          */
+  --node-cold:    #38bdf8;   /* below setpoint — sky blue                */
+  --node-warn:    #f59e0b;   /* approaching limit — amber                */
+  --node-risk:    #f97316;   /* near limit — orange                      */
+  --node-scald:   #ef4444;   /* overtemp — red                           */
+  --node-fault:   #a78bfa;   /* sensor/hw fault — violet                 */
+  --node-unknown: #475569;   /* no data — slate                          */
 
-  /* App chrome */
-  --bg-base:   #1e1e2e;
-  --bg-mantle: #181825;
-  --bg-crust:  #11111b;
-  --text-base: #cdd6f4;
-  --text-sub:  #a6adc8;
-  --border:    #313244;
+  /* ── SensorState ─────────────────────────────────────────────────────── */
+  --sensor-live:    #22c55e;
+  --sensor-stale:   #f59e0b;
+  --sensor-lost:    #ef4444;
+  --sensor-unknown: #475569;
+
+  /* ── Flow / pipe colors (temperature language) ───────────────────────── */
+  --edge-flowing: #22c55e;   /* active flow — green                      */
+  --edge-reverse: #f97316;   /* reverse flow — orange                    */
+  --edge-default: #1e3a5f;   /* inactive pipe — dark blue                */
+  --edge-alarm:   #ef4444;   /* alarm state — red                        */
+  --pipe-cold:    #38bdf8;   /* cold water feed                          */
+  --pipe-warm:    #fb923c;   /* warm domestic                            */
+  --pipe-hot:     #f97316;   /* hot supply                               */
+  --pipe-scald:   #ef4444;   /* overtemp / scald risk                    */
+
+  /* ── Node canvas ─────────────────────────────────────────────────────── */
+  --node-bg:     #131825;    /* node card fill                           */
+  --node-bg-hot: #1a1425;    /* warm tint for hot equipment nodes        */
+  --node-label:  #e2e8f4;    /* node name text                           */
+
+  /* ── Zentro brand accent ─────────────────────────────────────────────── */
+  --accent:     #0ea5e9;    /* sky-500 — primary interactive accent       */
+  --accent-dim: #0369a1;    /* sky-800 — dimmed accent                   */
+  --accent-glow: rgba(14, 165, 233, 0.2);
+
+  /* ── Shadows & glows ─────────────────────────────────────────────────── */
+  --shadow-card:  0 2px 8px rgba(0, 0, 0, 0.5), 0 0 1px rgba(30, 41, 56, 0.8);
+  --shadow-kpi:   0 4px 12px rgba(0, 0, 0, 0.6);
+  --glow-healthy: 0 0 8px rgba(34, 197, 94, 0.35);
+  --glow-warning: 0 0 8px rgba(245, 158, 11, 0.35);
+  --glow-critical:0 0 12px rgba(239, 68, 68, 0.5);
+  --glow-accent:  0 0 10px rgba(14, 165, 233, 0.35);
+  --glow-node-active: 0 0 0 2px var(--accent), 0 0 14px rgba(14,165,233,0.3);
 }
 
 /* ---------------------------------------------------------------------------
-   Edge flow animations (Stage 20)
+   Edge flow animations (Stage 20 — updated Stage 23)
 --------------------------------------------------------------------------- */
 
 @keyframes flowDash {
-  to { stroke-dashoffset: -24; }
+  to { stroke-dashoffset: -28; }
 }
 
 @keyframes flowDashReverse {
-  to { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 28; }
 }
 
 @keyframes alarmPulse {
-  0%   { opacity: 1;   }
-  50%  { opacity: 0.3; }
-  100% { opacity: 1;   }
+  0%, 100% { opacity: 1; }
+  45%       { opacity: 0.25; }
 }
 
-/* Flowing: animated dashes moving forward along the edge */
+@keyframes nodeAlarmPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+  50%       { box-shadow: 0 0 18px rgba(239, 68, 68, 0.9), 0 0 30px rgba(239, 68, 68, 0.35); }
+}
+
+@keyframes impellerSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Pipe classes */
 .zentro-edge-flowing {
-  stroke-dasharray:  8 4;
+  stroke-dasharray:  10 5;
   stroke-dashoffset: 0;
-  animation: flowDash 0.9s linear infinite;
+  animation: flowDash 0.75s linear infinite;
 }
 
-/* Reverse: same dashes moving backward */
 .zentro-edge-reverse {
-  stroke-dasharray:  8 4;
+  stroke-dasharray:  10 5;
   stroke-dashoffset: 0;
-  animation: flowDashReverse 0.9s linear infinite;
+  animation: flowDashReverse 0.75s linear infinite;
 }
 
-/* No flow / unknown: static dim dashes */
 .zentro-edge-noflow {
-  stroke-dasharray: 4 6;
-  opacity: 0.35;
+  stroke-dasharray: 5 7;
+  opacity: 0.28;
 }
 
-/* Alarm override: fast critical-red pulse, overrides flow class */
 .zentro-edge-alarm {
-  stroke-dasharray: 6 3;
-  animation: alarmPulse 0.55s ease-in-out infinite;
+  stroke-dasharray: 7 4;
+  animation: alarmPulse 0.6s ease-in-out infinite;
 }
 
 /* ---------------------------------------------------------------------------
@@ -109,8 +152,9 @@ html, body {
   width:   100%;
   background: var(--bg-base);
   color:      var(--text-base);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'JetBrains Mono', system-ui, -apple-system, sans-serif;
   font-size:   14px;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
@@ -131,7 +175,7 @@ html, body {
 }
 
 /* ---------------------------------------------------------------------------
-   FlowMap canvas container — ReactFlow requires an explicit height
+   FlowMap canvas container
 --------------------------------------------------------------------------- */
 .zentro-flow-container {
   height: var(--app-flow-height);
@@ -147,7 +191,6 @@ html, body {
 
 /* ---------------------------------------------------------------------------
    RTL layout overrides (Stage 21)
-   dir="rtl" is set on [data-testid="zentro-app"] and document.documentElement.
 --------------------------------------------------------------------------- */
 
 [dir="rtl"] {
@@ -155,13 +198,11 @@ html, body {
   text-align: right;
 }
 
-/* Flip dashboard card chip rows so they read right-to-left */
 [dir="rtl"] [data-testid^="dashboard-item-"] > div {
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
 
-/* Dashboard cards full-width in RTL so content aligns right */
 [dir="rtl"] [data-testid^="dashboard-item-"] {
   align-items: flex-end;
 }
@@ -175,26 +216,285 @@ html, body {
   font-size:       13px;
 }
 
-/* React Flow overrides */
+/* ---------------------------------------------------------------------------
+   React Flow overrides
+--------------------------------------------------------------------------- */
 .react-flow__background {
-  background: var(--bg-mantle) !important;
+  background: var(--bg-base) !important;
+}
+
+.react-flow__background pattern line,
+.react-flow__background pattern circle {
+  stroke: var(--border) !important;
+}
+
+.react-flow__controls {
+  background: var(--bg-crust) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  box-shadow: var(--shadow-card) !important;
 }
 
 .react-flow__controls button {
-  background:   var(--bg-crust) !important;
-  border-color: var(--border)   !important;
-  color:        var(--text-base) !important;
+  background:   var(--bg-mantle) !important;
+  border-color: var(--border)    !important;
+  color:        var(--text-sub)  !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.react-flow__controls button:hover {
+  background: var(--bg-overlay) !important;
+  color:      var(--accent)     !important;
 }
 
 .react-flow__edge-path {
-  stroke: var(--border) !important;
+  /* Do not hard-set stroke here — FlowEdge sets it inline */
+}
+
+/* ---------------------------------------------------------------------------
+   Equipment node base styles
+--------------------------------------------------------------------------- */
+
+.zentro-node {
+  position:   relative;
+  background: var(--node-bg);
+  border:     1.5px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-card);
+  font-family: inherit;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.zentro-node--healthy  { border-color: rgba(34, 197, 94, 0.55); }
+.zentro-node--warning  { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-node--critical {
+  border-color: var(--status-critical);
+  animation: nodeAlarmPulse 1.8s ease-in-out infinite;
+}
+.zentro-node--offline  { border-color: var(--status-offline); opacity: 0.75; }
+
+.zentro-node__header {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  padding:     6px 10px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.zentro-node__icon {
+  font-size:  16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.zentro-node__name {
+  font-size:   10px;
+  font-weight: 700;
+  color:       var(--node-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.zentro-node__body {
+  padding: 6px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.zentro-node__value {
+  font-size:          20px;
+  font-weight:        700;
+  font-variant-numeric: tabular-nums;
+  line-height:        1;
+  color:              var(--text-base);
+}
+
+.zentro-node__unit {
+  font-size:   11px;
+  color:       var(--text-sub);
+  margin-inline-start: 2px;
+}
+
+.zentro-node__sub {
+  font-size:  9px;
+  color:      var(--text-sub);
+  margin-top: 1px;
+}
+
+.zentro-node__status-row {
+  display:     flex;
+  align-items: center;
+  gap:         4px;
+  margin-top:  2px;
+}
+
+.zentro-node__dot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  display:       inline-block;
+  flex-shrink:   0;
+}
+
+.zentro-node__dot--blink {
+  animation: dot-blink 1.2s ease-in-out infinite;
+}
+
+/* ── Tank fill indicator ─────────────────────────────────────────────────── */
+
+.zentro-tank-body {
+  position:      relative;
+  width:         100%;
+  height:        64px;
+  border:        1px solid var(--border);
+  border-radius: 4px;
+  overflow:      hidden;
+  background:    var(--bg-crust);
+  margin: 4px 0;
+}
+
+.zentro-tank-fill {
+  position:   absolute;
+  bottom:     0;
+  left:       0;
+  right:      0;
+  transition: height 1s ease, background 1s ease;
+  opacity:    0.65;
+}
+
+.zentro-tank-ellipse-top,
+.zentro-tank-ellipse-bot {
+  height:        8px;
+  border-radius: 50%;
+  background:    var(--border);
+  margin: 0 4px;
+}
+
+/* ── Pump impeller ───────────────────────────────────────────────────────── */
+
+.zentro-pump-wrapper {
+  width:          88px;
+  height:         88px;
+  border-radius:  50%;
+  border:         1.5px solid var(--border);
+  background:     var(--node-bg);
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  position:       relative;
+  box-shadow:     var(--shadow-card);
+  overflow:       visible;
+  text-align:     center;
+  transition:     border-color 0.25s, box-shadow 0.25s;
+}
+
+.zentro-pump-wrapper--healthy   { border-color: rgba(34, 197, 94, 0.55); }
+.zentro-pump-wrapper--warning   { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-pump-wrapper--critical  {
+  border-color: var(--status-critical);
+  animation: nodeAlarmPulse 1.8s ease-in-out infinite;
+}
+
+.zentro-pump-impeller {
+  font-size:  22px;
+  line-height: 1;
+  color:      var(--accent);
+}
+
+.zentro-pump-impeller--running {
+  animation: impellerSpin 1.4s linear infinite;
+}
+
+.zentro-pump-name {
+  font-size:  8px;
+  font-weight: 700;
+  color:      var(--node-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 3px;
+}
+
+.zentro-pump-state {
+  font-size: 8px;
+  margin-top: 1px;
+}
+
+/* ── Valve diamond ───────────────────────────────────────────────────────── */
+
+.zentro-valve-wrapper {
+  position:   relative;
+  width:      84px;
+  height:     84px;
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zentro-valve-diamond {
+  width:        64px;
+  height:       64px;
+  transform:    rotate(45deg);
+  border:       1.5px solid var(--border);
+  background:   var(--node-bg);
+  box-shadow:   var(--shadow-card);
+  transition:   border-color 0.25s;
+}
+
+.zentro-valve-diamond--healthy  { border-color: rgba(34, 197, 94, 0.55); }
+.zentro-valve-diamond--warning  { border-color: rgba(245, 158, 11, 0.7); }
+.zentro-valve-diamond--critical { border-color: var(--status-critical); }
+
+.zentro-valve-inner {
+  position:       absolute;
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  inset:          0;
+  pointer-events: none;
+}
+
+.zentro-valve-icon {
+  font-size:   16px;
+  line-height: 1;
+  color:       var(--accent);
+}
+
+.zentro-valve-name {
+  font-size:   8px;
+  font-weight: 700;
+  color:       var(--node-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top:  3px;
+}
+
+/* ── Edge label pill ─────────────────────────────────────────────────────── */
+
+.zentro-edge-label {
+  background:    linear-gradient(135deg, var(--bg-crust), var(--bg-mantle));
+  border:        1px solid var(--border-bright);
+  border-radius: 20px;
+  padding:       2px 8px;
+  font-size:     10px;
+  font-weight:   600;
+  display:       flex;
+  gap:           4px;
+  align-items:   center;
+  box-shadow:    0 1px 4px rgba(0,0,0,0.5);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------------------------------------------------------------------------
    Mission Control layout (Stage 22)
 --------------------------------------------------------------------------- */
 
-/* Full-height flex column so MissionControlView fills remaining viewport */
 [data-testid="mission-control"] {
   display:        flex;
   flex-direction: column;
@@ -203,14 +503,12 @@ html, body {
   overflow:       hidden;
 }
 
-/* FlowMap must fill available height in Mission Control */
 [data-testid="mission-control"] .zentro-flow-container {
   height:     100%;
   min-height: 0;
   border:     none;
 }
 
-/* KPI bar: horizontal scroll on small viewports */
 [data-testid="kpi-bar"] {
   scrollbar-width: none;
 }
@@ -218,17 +516,16 @@ html, body {
   display: none;
 }
 
-/* Equipment grid sidebar: override panel max-height from legacy layout */
 [data-testid="mission-control"] [data-testid="dashboard-panel"] {
-  max-height: none;
-  border-top:  none;
-  background:  transparent;
+  max-height:     none;
+  border-top:     none;
+  background:     transparent;
   flex-direction: column;
-  flex-wrap:   nowrap;
+  flex-wrap:      nowrap;
 }
 
 /* ---------------------------------------------------------------------------
-   DashboardPanel (legacy / direct-import path kept for test compatibility)
+   DashboardPanel (legacy path — kept for test compatibility)
 --------------------------------------------------------------------------- */
 [data-testid="dashboard-panel"] {
   list-style: none;
@@ -246,18 +543,19 @@ html, body {
 [data-testid^="dashboard-item-"] {
   background:    var(--bg-mantle);
   border:        1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--card-radius);
   padding:       6px 10px;
   min-width:     160px;
   display:       flex;
   flex-direction: column;
   gap:           2px;
+  box-shadow:    var(--shadow-card);
 }
 
 [data-testid="component-name"] {
   font-weight: 600;
   font-size:   12px;
-  color:       var(--text-base);
+  color:       var(--node-label);
   display:     block;
 }
 

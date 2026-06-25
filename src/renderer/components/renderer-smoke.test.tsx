@@ -87,11 +87,14 @@ function edgeProps(data: ConnectionEdgeData) {
 // Imports after mock setup
 // ---------------------------------------------------------------------------
 
-const { GenericNode } = await import('./nodes/GenericNode.js');
-const { TankNode }    = await import('./nodes/TankNode.js');
-const { PumpNode }    = await import('./nodes/PumpNode.js');
-const { ValveNode }   = await import('./nodes/ValveNode.js');
-const { FlowEdge }    = await import('./edges/FlowEdge.js');
+const { GenericNode }   = await import('./nodes/GenericNode.js');
+const { TankNode }      = await import('./nodes/TankNode.js');
+const { PumpNode }      = await import('./nodes/PumpNode.js');
+const { ValveNode }     = await import('./nodes/ValveNode.js');
+const { HeatPumpNode }  = await import('./nodes/HeatPumpNode.js');
+const { GasBackupNode } = await import('./nodes/GasBackupNode.js');
+const { ShowerNode }    = await import('./nodes/ShowerNode.js');
+const { FlowEdge }      = await import('./edges/FlowEdge.js');
 
 // ---------------------------------------------------------------------------
 // Smoke tests
@@ -156,6 +159,56 @@ describe('ValveNode — smoke', () => {
       <ValveNode {...nodeProps(makeNodeData({ name: 'TMV' }))} />,
     );
     expect(getByText('TMV')).toBeTruthy();
+  });
+});
+
+describe('HeatPumpNode — smoke', () => {
+  it('renders without crashing with default ViewModel', () => {
+    const { container } = render(<HeatPumpNode {...nodeProps(makeNodeData({ typeId: 'heat_pump' }))} />);
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('displays component name', () => {
+    const { getByText } = render(
+      <HeatPumpNode {...nodeProps(makeNodeData({ name: 'Heat Pump' }))} />,
+    );
+    expect(getByText('Heat Pump')).toBeTruthy();
+  });
+});
+
+describe('GasBackupNode — smoke', () => {
+  it('renders without crashing with default ViewModel', () => {
+    const { container } = render(<GasBackupNode {...nodeProps(makeNodeData({ typeId: 'gas_backup' }))} />);
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('displays component name', () => {
+    const { getByText } = render(
+      <GasBackupNode {...nodeProps(makeNodeData({ name: 'Gas Backup' }))} />,
+    );
+    expect(getByText('Gas Backup')).toBeTruthy();
+  });
+});
+
+describe('ShowerNode — smoke', () => {
+  it('renders without crashing with default ViewModel', () => {
+    const { container } = render(<ShowerNode {...nodeProps(makeNodeData({ typeId: 'point_of_use' }))} />);
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('displays component name', () => {
+    const { getByText } = render(
+      <ShowerNode {...nodeProps(makeNodeData({ name: 'Shower' }))} />,
+    );
+    expect(getByText('Shower')).toBeTruthy();
+  });
+
+  it('renders temperature when liveValues contains temp', () => {
+    const vm: ComponentViewModel = { ...DEFAULT_VM, liveValues: { temp: 48 } };
+    const { getByText } = render(
+      <ShowerNode {...nodeProps(makeNodeData({ viewModel: vm }))} />,
+    );
+    expect(getByText(/48/)).toBeTruthy();
   });
 });
 

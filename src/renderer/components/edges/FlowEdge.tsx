@@ -1,10 +1,5 @@
 /**
- * Zentro Digital Twin — Flow Edge (Stage 20)
- *
- * Reads ONLY: connViewModel.flow, connViewModel.sensorState,
- *             connViewModel.value, connViewModel.status,
- *             connectionEdgeData.hasActiveAlarm.
- * Does NOT derive flow from medium, telemetry, bindings, or any other source.
+ * Zentro Digital Twin — Flow Edge (Stage 23 visual update)
  *
  * Visual priority:
  *   1. Alarm (critical red pulse) — overrides everything
@@ -47,7 +42,7 @@ export function FlowEdge({
   const sensorPres = sensorState ? sensorStatePresentation(sensorState) : null;
   const statusPres = status      ? nodeStatusPresentation(status)        : null;
 
-  // --- stroke color (priority: alarm > temperature NodeStatus > FlowState) ---
+  // Stroke color: alarm > temperature status > flow state
   let strokeColor: string;
   if (hasActiveAlarm) {
     strokeColor = 'var(--edge-alarm)';
@@ -61,7 +56,7 @@ export function FlowEdge({
     strokeColor = 'var(--edge-default)';
   }
 
-  // --- animation class ---
+  // Animation class
   let animClass: string;
   if (hasActiveAlarm) {
     animClass = 'zentro-edge-alarm';
@@ -73,42 +68,52 @@ export function FlowEdge({
     animClass = 'zentro-edge-noflow';
   }
 
-  const hasLabel = value !== null || sensorPres !== null;
+  // Show label only when we have a temperature value
+  const showLabel = value !== null && statusPres !== null;
+
+  // Pipe stroke width — thicker for flowing/alarm
+  const strokeWidth = hasActiveAlarm ? 4 : flow === FlowState.Flowing ? 3.5 : 2.5;
 
   return (
     <>
+      {/* Glow layer — rendered behind main pipe */}
+      {(flow === FlowState.Flowing || hasActiveAlarm) && (
+        <path
+          d={edgePath}
+          style={{
+            stroke:      strokeColor,
+            strokeWidth: strokeWidth + 6,
+            fill:        'none',
+            opacity:     0.12,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+
+      {/* Main pipe */}
       <path
         id={id}
         d={edgePath}
         className={`react-flow__edge-path ${animClass}`}
-        style={{ stroke: strokeColor, strokeWidth: 2, fill: 'none' }}
+        style={{ stroke: strokeColor, strokeWidth, fill: 'none' }}
         markerEnd={markerEnd}
       />
-      {hasLabel && (
+
+      {showLabel && (
         <EdgeLabelRenderer>
           <div
             style={{
               position:      'absolute',
               transform:     `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'none',
-              background:    'var(--bg-crust)',
-              border:        '1px solid var(--border)',
-              borderRadius:  4,
-              padding:       '1px 4px',
-              fontSize:      9,
-              display:       'flex',
-              gap:           3,
-              alignItems:    'center',
             }}
-            className="nodrag nopan"
+            className="nodrag nopan zentro-edge-label"
           >
-            {value !== null && statusPres && (
-              <span style={{ color: `var(${statusPres.cssVar})` }}>
-                {typeof value === 'number' ? value.toFixed(1) : String(value)}{t('unit.temperature')}
-              </span>
-            )}
+            <span style={{ color: `var(${statusPres!.cssVar})` }}>
+              {typeof value === 'number' ? value.toFixed(1) : String(value)}{t('unit.temperature')}
+            </span>
             {sensorPres && (
-              <span style={{ color: `var(${sensorPres.cssVar})` }}>
+              <span style={{ color: `var(${sensorPres.cssVar})`, fontSize: 8 }}>
                 {sensorPres.icon}
               </span>
             )}

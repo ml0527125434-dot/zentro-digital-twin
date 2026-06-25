@@ -1,15 +1,6 @@
 /**
  * KpiBar — eight live metric cards across the top of Mission Control.
- *
- * Data sources (all real / simulated):
- *   Tank temp    → componentVMs['cmp_tank'].liveValues['temp']
- *   Supply temp  → connectionVMs['cn_supply'].value
- *   Return temp  → connectionVMs['cn_return'].value
- *   Flow rate    → componentVMs['cmp_recirc_pump'].liveValues['flow']
- *   Heat pump    → componentVMs['cmp_heatpump'].liveValues['runtime'] > 0.5
- *   Gas backup   → componentVMs['cmp_gas_backup'].liveValues['runtime'] > 0.5
- *   Recirc pump  → flow > 0 (DERIVED from real flow data)
- *   Active alarms→ alarmStore query (REAL)
+ * Stage 23: premium card design with gradient headers and status accents.
  *
  * DEMO: component IDs are hardcoded for the hot-water demo seed.
  */
@@ -37,37 +28,87 @@ interface KpiCardProps {
   statusVar?: string;
   secondary?: string;
   alarm?:     boolean;
+  icon?:      string;
 }
 
-function KpiCard({ label, value, unit, statusVar, secondary, alarm }: KpiCardProps) {
-  const color = alarm
+function KpiCard({ label, value, unit, statusVar, secondary, alarm, icon }: KpiCardProps) {
+  const valueColor = alarm
     ? 'var(--status-critical)'
     : statusVar
       ? `var(${statusVar})`
       : 'var(--text-base)';
 
+  const borderColor = alarm
+    ? 'var(--status-critical)'
+    : statusVar && statusVar !== '--text-sub' && statusVar !== '--node-unknown'
+      ? `var(${statusVar})`
+      : 'var(--border)';
+
   return (
     <div style={{
-      background:   'var(--bg-mantle)',
-      border:       `1px solid ${alarm ? 'var(--edge-alarm)' : 'var(--border)'}`,
-      borderRadius: 8,
-      padding:      '10px 14px',
-      minWidth:     100,
-      flex:         '1 1 0',
-      display:      'flex',
-      flexDirection: 'column',
-      gap:          4,
-      transition:   'border-color 0.3s',
+      background:      'linear-gradient(160deg, var(--bg-mantle) 0%, var(--bg-crust) 100%)',
+      border:          `1px solid ${borderColor}`,
+      borderRadius:    'var(--card-radius)',
+      padding:         '10px 14px 10px',
+      minWidth:        108,
+      flex:            '1 1 0',
+      display:         'flex',
+      flexDirection:   'column',
+      gap:             4,
+      boxShadow:       alarm ? 'var(--glow-critical)' : 'var(--shadow-kpi)',
+      transition:      'border-color 0.3s, box-shadow 0.3s',
+      position:        'relative',
+      overflow:        'hidden',
     }}>
-      <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      {/* Subtle accent bar at top */}
+      <div style={{
+        position:     'absolute',
+        top:          0,
+        left:         0,
+        right:        0,
+        height:       2,
+        background:   valueColor,
+        opacity:      alarm ? 0.9 : 0.4,
+        borderRadius: 'var(--card-radius) var(--card-radius) 0 0',
+        transition:   'opacity 0.3s',
+      }} />
+
+      <span style={{
+        fontSize:      9,
+        fontWeight:    700,
+        color:         'var(--text-sub)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.09em',
+        display:       'flex',
+        alignItems:    'center',
+        gap:           4,
+      }}>
+        {icon && <span aria-hidden="true">{icon}</span>}
         {label}
       </span>
-      <span style={{ fontSize: 22, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+
+      <span style={{
+        fontSize:           alarm ? 22 : 24,
+        fontWeight:         700,
+        color:              valueColor,
+        fontVariantNumeric: 'tabular-nums',
+        lineHeight:         1,
+        transition:         'color 0.3s',
+      }}>
         {value}
-        {unit && <span style={{ fontSize: 12, marginInlineStart: 3, color: 'var(--text-sub)' }}>{unit}</span>}
+        {unit && (
+          <span style={{ fontSize: 12, marginInlineStart: 3, color: 'var(--text-sub)', fontWeight: 400 }}>
+            {unit}
+          </span>
+        )}
       </span>
+
       {secondary && (
-        <span style={{ fontSize: 10, color: alarm ? 'var(--status-critical)' : 'var(--text-sub)' }}>
+        <span style={{
+          fontSize:   10,
+          color:      alarm ? 'var(--status-critical)' : 'var(--text-sub)',
+          marginTop:  1,
+        }}>
           {secondary}
         </span>
       )}
@@ -78,13 +119,13 @@ function KpiCard({ label, value, unit, statusVar, secondary, alarm }: KpiCardPro
 export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, components }: KpiBarProps) {
   const { t } = useLocale();
 
-  // ── DEMO: hardcoded component/connection IDs for hot-water seed ──
-  const tankVM      = componentVMs['cmp_tank'];
-  const hpVM        = componentVMs['cmp_heatpump'];
-  const gasVM       = componentVMs['cmp_gas_backup'];
-  const recircVM    = componentVMs['cmp_recirc_pump'];
-  const supplyConn  = connectionVMs['cn_supply'];
-  const returnConn  = connectionVMs['cn_return'];
+  // DEMO: hardcoded component/connection IDs for hot-water seed
+  const tankVM     = componentVMs['cmp_tank'];
+  const hpVM       = componentVMs['cmp_heatpump'];
+  const gasVM      = componentVMs['cmp_gas_backup'];
+  const recircVM   = componentVMs['cmp_recirc_pump'];
+  const supplyConn = connectionVMs['cn_supply'];
+  const returnConn = connectionVMs['cn_return'];
 
   const tankTemp   = tankVM   ? (tankVM.liveValues['temp']    as number | null ?? null) : null;
   const supplyTemp = supplyConn ? supplyConn.value : null;
@@ -97,24 +138,18 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
   const gasRunning   = gasRuntime !== null ? gasRuntime > 0.5 : null;
   const recircActive = flowRate   !== null ? flowRate   > 0   : null;
 
-  // Active alarm count — accurate query (vm.activeAlarms is string[] including cleared)
   const activeAlarmCount = components.reduce((n, c) =>
     n + alarmStore.getAlarmsForComponent(c.id).filter(a => a.state === 'active').length, 0);
 
   const fmtTemp = (v: number | null) =>
     v !== null ? v.toFixed(1) : t('kpi.no_value');
 
-  const statusForTemp = (v: number | null, statusVar: string | undefined) =>
-    v !== null ? statusVar : '--text-sub';
-
   const supplyPres = supplyConn ? nodeStatusPresentation(supplyConn.status) : null;
   const returnPres = returnConn ? nodeStatusPresentation(returnConn.status) : null;
   const tankPres   = tankVM    ? nodeStatusPresentation(tankVM.operationalStatus) : null;
 
   const runLabel = (running: boolean | null) =>
-    running === null
-      ? t('kpi.no_value')
-      : running ? t('kpi.running') : t('kpi.standby');
+    running === null ? t('kpi.no_value') : running ? t('kpi.running') : t('kpi.standby');
 
   const runStatusVar = (running: boolean | null) =>
     running === null ? '--text-sub' : running ? '--status-healthy' : '--text-sub';
@@ -122,35 +157,39 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
   return (
     <div style={{
       display:       'flex',
-      gap:           8,
-      padding:       '8px 14px',
+      gap:           6,
+      padding:       '8px 12px',
       background:    'var(--bg-crust)',
       borderBottom:  '1px solid var(--border)',
       overflowX:     'auto',
       flexShrink:    0,
     }} data-testid="kpi-bar">
       <KpiCard
+        icon="🛢"
         label={t('kpi.tank_temp')}
         value={fmtTemp(tankTemp)}
         unit={tankTemp !== null ? t('unit.temperature') : undefined}
-        statusVar={tankPres ? statusForTemp(tankTemp, tankPres.cssVar) : '--text-sub'}
+        statusVar={tankPres ? (tankTemp !== null ? tankPres.cssVar : '--text-sub') : '--text-sub'}
         secondary={tankPres && tankTemp !== null ? t(tankPres.label as TranslationKey) : undefined}
       />
       <KpiCard
+        icon="→"
         label={t('kpi.supply_temp')}
         value={fmtTemp(supplyTemp)}
         unit={supplyTemp !== null ? t('unit.temperature') : undefined}
-        statusVar={supplyPres ? statusForTemp(supplyTemp, supplyPres.cssVar) : '--text-sub'}
+        statusVar={supplyPres ? (supplyTemp !== null ? supplyPres.cssVar : '--text-sub') : '--text-sub'}
         secondary={supplyPres && supplyTemp !== null ? t(supplyPres.label as TranslationKey) : undefined}
       />
       <KpiCard
+        icon="←"
         label={t('kpi.return_temp')}
         value={fmtTemp(returnTemp)}
         unit={returnTemp !== null ? t('unit.temperature') : undefined}
-        statusVar={returnPres ? statusForTemp(returnTemp, returnPres.cssVar) : '--text-sub'}
+        statusVar={returnPres ? (returnTemp !== null ? returnPres.cssVar : '--text-sub') : '--text-sub'}
         secondary={returnPres && returnTemp !== null ? t(returnPres.label as TranslationKey) : undefined}
       />
       <KpiCard
+        icon="〜"
         label={t('kpi.flow_rate')}
         value={flowRate !== null ? flowRate.toFixed(1) : t('kpi.no_value')}
         unit={flowRate !== null ? t('pump.flow_unit') : undefined}
@@ -158,16 +197,19 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
         secondary={flowRate !== null ? (flowRate > 0 ? t('kpi.running') : t('kpi.standby')) : undefined}
       />
       <KpiCard
+        icon="♨"
         label={t('kpi.heat_pump')}
         value={runLabel(hpRunning)}
         statusVar={runStatusVar(hpRunning)}
       />
       <KpiCard
+        icon="🔥"
         label={t('kpi.gas_backup')}
         value={runLabel(gasRunning)}
         statusVar={runStatusVar(gasRunning)}
       />
       <KpiCard
+        icon="◎"
         label={t('kpi.recirc_pump')}
         value={runLabel(recircActive)}
         statusVar={runStatusVar(recircActive)}
@@ -176,6 +218,7 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
           : undefined}
       />
       <KpiCard
+        icon="⚠"
         label={t('kpi.active_alarms')}
         value={String(activeAlarmCount)}
         alarm={activeAlarmCount > 0}
