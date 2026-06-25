@@ -87,14 +87,17 @@ function edgeProps(data: ConnectionEdgeData) {
 // Imports after mock setup
 // ---------------------------------------------------------------------------
 
-const { GenericNode }   = await import('./nodes/GenericNode.js');
-const { TankNode }      = await import('./nodes/TankNode.js');
-const { PumpNode }      = await import('./nodes/PumpNode.js');
-const { ValveNode }     = await import('./nodes/ValveNode.js');
-const { HeatPumpNode }  = await import('./nodes/HeatPumpNode.js');
-const { GasBackupNode } = await import('./nodes/GasBackupNode.js');
-const { ShowerNode }    = await import('./nodes/ShowerNode.js');
-const { FlowEdge }      = await import('./edges/FlowEdge.js');
+const { GenericNode }       = await import('./nodes/GenericNode.js');
+const { TankNode }          = await import('./nodes/TankNode.js');
+const { PumpNode }          = await import('./nodes/PumpNode.js');
+const { ValveNode }         = await import('./nodes/ValveNode.js');
+const { HeatPumpNode }      = await import('./nodes/HeatPumpNode.js');
+const { GasBackupNode }     = await import('./nodes/GasBackupNode.js');
+const { ShowerNode }        = await import('./nodes/ShowerNode.js');
+const { SensorNode }        = await import('./nodes/SensorNode.js');
+const { ExchangerNode }     = await import('./nodes/ExchangerNode.js');
+const { ElectricHeaterNode} = await import('./nodes/ElectricHeaterNode.js');
+const { FlowEdge }          = await import('./edges/FlowEdge.js');
 
 // ---------------------------------------------------------------------------
 // Smoke tests
@@ -209,6 +212,70 @@ describe('ShowerNode — smoke', () => {
       <ShowerNode {...nodeProps(makeNodeData({ viewModel: vm }))} />,
     );
     expect(getByText(/48/)).toBeTruthy();
+  });
+});
+
+describe('SensorNode — smoke', () => {
+  it('renders temperature_sensor without crashing', () => {
+    const { container } = render(
+      <SensorNode {...nodeProps(makeNodeData({ typeId: 'temperature_sensor' }))} />,
+    );
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('renders temperature value when liveValues contains temp', () => {
+    const vm: ComponentViewModel = { ...DEFAULT_VM, liveValues: { temp: 57.3 } };
+    const { getByText } = render(
+      <SensorNode {...nodeProps(makeNodeData({ typeId: 'temperature_sensor', viewModel: vm }))} />,
+    );
+    expect(getByText(/57\.3/)).toBeTruthy();
+  });
+
+  it('renders flow_sensor without crashing', () => {
+    const { container } = render(
+      <SensorNode {...nodeProps(makeNodeData({ typeId: 'flow_sensor' }))} />,
+    );
+    expect(container.firstChild).not.toBeNull();
+  });
+});
+
+describe('ExchangerNode — smoke', () => {
+  it('renders plate_heat_exchanger without crashing', () => {
+    const { container } = render(
+      <ExchangerNode {...nodeProps(makeNodeData({ typeId: 'plate_heat_exchanger' }))} />,
+    );
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('renders solar_collector without crashing', () => {
+    const { container } = render(
+      <ExchangerNode {...nodeProps(makeNodeData({ typeId: 'solar_collector' }))} />,
+    );
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('shows temperature value for solar_collector when available', () => {
+    const vm: ComponentViewModel = { ...DEFAULT_VM, liveValues: { temp: 72.5 } };
+    const { getByText } = render(
+      <ExchangerNode {...nodeProps(makeNodeData({ typeId: 'solar_collector', viewModel: vm }))} />,
+    );
+    expect(getByText(/72\.5/)).toBeTruthy();
+  });
+});
+
+describe('ElectricHeaterNode — smoke', () => {
+  it('renders without crashing with default ViewModel', () => {
+    const { container } = render(
+      <ElectricHeaterNode {...nodeProps(makeNodeData({ typeId: 'electric_heater' }))} />,
+    );
+    expect(container.firstChild).not.toBeNull();
+  });
+
+  it('displays component name', () => {
+    const { getByText } = render(
+      <ElectricHeaterNode {...nodeProps(makeNodeData({ name: 'Electric Booster' }))} />,
+    );
+    expect(getByText('Electric Booster')).toBeTruthy();
   });
 });
 
