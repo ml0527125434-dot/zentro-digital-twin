@@ -62,6 +62,8 @@ const ALL_KEYS: TranslationKey[] = [
   'builder.conn_to', 'builder.conn_to_port', 'builder.conn_medium',
   'builder.conn_submit', 'builder.conn_errors', 'builder.conn_delete',
   'builder.idle_hint',
+  // Stage 31
+  'valve.open', 'valve.closed',
 ];
 
 describe('Hebrew locale', () => {

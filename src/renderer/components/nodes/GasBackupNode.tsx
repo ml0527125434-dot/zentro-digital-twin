@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
-import { healthPresentation } from '../../theme.js';
+import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
@@ -10,6 +10,8 @@ export function GasBackupNode({ data }: NodeProps<ComponentNodeData>) {
   const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
+  const sensorPres = sensorStatePresentation(viewModel.sensorState);
+  const isLive     = sensorPres.cssVar === '--sensor-live';
 
   const runtime = viewModel.liveValues['runtime'];
   const hasRuntime = runtime !== null && runtime !== undefined;
@@ -51,7 +53,10 @@ export function GasBackupNode({ data }: NodeProps<ComponentNodeData>) {
         </span>
 
         <div className="zentro-node__status-row">
-          <span className="zentro-node__dot" style={{ background: `var(${healthPres.cssVar})` }} />
+          <span
+            className={`zentro-node__dot${isLive ? ' zentro-node__dot--blink' : ''}`}
+            style={{ background: `var(${sensorPres.cssVar})` }}
+          />
           <span className="zentro-node__sub">
             {t(healthPres.label as TranslationKey)}
           </span>

@@ -50,7 +50,10 @@ export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
           </span>
         )}
         <div className="zentro-node__status-row">
-          <span className="zentro-node__dot" style={{ background: `var(${healthPres.cssVar})` }} />
+          <span
+            className={`zentro-node__dot${sensorPres.cssVar === '--sensor-live' ? ' zentro-node__dot--blink' : ''}`}
+            style={{ background: `var(${sensorPres.cssVar})` }}
+          />
           <span className="zentro-node__sub">
             {t(healthPres.label as TranslationKey)}
           </span>

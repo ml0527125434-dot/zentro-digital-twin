@@ -163,4 +163,8 @@ export const HE: Translations = {
   'builder.conn_errors':   'שגיאות',
   'builder.conn_delete':   'מחק חיבור',
   'builder.idle_hint':     'בחר רכיב או חיבור',
+
+  // Stage 31: Node labels
+  'valve.open':   'פתוח',
+  'valve.closed': 'סגור',
 };

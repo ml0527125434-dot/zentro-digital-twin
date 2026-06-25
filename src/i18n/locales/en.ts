@@ -163,4 +163,8 @@ export const EN: Translations = {
   'builder.conn_errors':   'Validation errors',
   'builder.conn_delete':   'Delete connection',
   'builder.idle_hint':     'Select a component or connection',
+
+  // Stage 31: Node labels
+  'valve.open':   'Open',
+  'valve.closed': 'Closed',
 };

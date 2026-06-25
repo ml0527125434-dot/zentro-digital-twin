@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
-import { healthPresentation, nodeStatusPresentation } from '../../theme.js';
+import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
@@ -11,6 +11,8 @@ export function ShowerNode({ data }: NodeProps<ComponentNodeData>) {
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
   const statusPres = nodeStatusPresentation(viewModel.operationalStatus);
+  const sensorPres = sensorStatePresentation(viewModel.sensorState);
+  const isLive     = sensorPres.cssVar === '--sensor-live';
 
   const temp = viewModel.liveValues['temperature'] ?? viewModel.liveValues['temp'] ?? null;
   const tempNum = typeof temp === 'number' ? temp : null;
@@ -61,7 +63,10 @@ export function ShowerNode({ data }: NodeProps<ComponentNodeData>) {
         )}
 
         <div className="zentro-node__status-row">
-          <span className="zentro-node__dot" style={{ background: `var(${healthPres.cssVar})` }} />
+          <span
+            className={`zentro-node__dot${isLive ? ' zentro-node__dot--blink' : ''}`}
+            style={{ background: `var(${sensorPres.cssVar})` }}
+          />
           <span className="zentro-node__sub">
             {t(healthPres.label as TranslationKey)}
           </span>

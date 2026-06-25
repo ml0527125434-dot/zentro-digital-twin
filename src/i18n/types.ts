@@ -142,7 +142,10 @@ export type TranslationKey =
   | 'builder.conn_submit'
   | 'builder.conn_errors'
   | 'builder.conn_delete'
-  | 'builder.idle_hint';
+  | 'builder.idle_hint'
+  // ── Stage 31: Node labels ─────────────────────────────────────────────────
+  | 'valve.open'
+  | 'valve.closed';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

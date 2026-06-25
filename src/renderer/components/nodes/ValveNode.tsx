@@ -31,9 +31,9 @@ export function ValveNode({ data }: NodeProps<ComponentNodeData>) {
       : 'var(--text-dim)';
 
   const stateLabel = isOpen === true
-    ? t('kpi.running')   // "Running" → valve open
+    ? t('valve.open')
     : isOpen === false
-      ? t('kpi.standby') // "Standby" → valve closed
+      ? t('valve.closed')
       : null;
 
   const diamondClass =
