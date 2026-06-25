@@ -189,4 +189,18 @@ export const HE: Translations = {
   'equip.filter_placeholder':  'סינון…',
   'equip.no_match':            'אין תוצאות',
   'builder.deselect_tip':      'טיפ: לחץ Del או Esc לביטול הבחירה',
+
+  // Stage 31: Alarm severity labels
+  'alarm.severity_critical': 'קריטי',
+  'alarm.severity_warning':  'אזהרה',
+  'alarm.severity_info':     'מידע',
+
+  // Stage 31: Pipe medium labels
+  'medium.hot_water':  'מים חמים',
+  'medium.cold_water': 'מים קרים',
+  'medium.recirc':     'רה-סירקולציה',
+  'medium.gas':        'גז',
+  'medium.electric':   'חשמל',
+  'medium.air':        'אוויר',
+  'medium.mixed':      'מעורב',
 };

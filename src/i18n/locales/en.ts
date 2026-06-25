@@ -189,4 +189,18 @@ export const EN: Translations = {
   'equip.filter_placeholder':  'Filter…',
   'equip.no_match':            'No match',
   'builder.deselect_tip':      'Tip: press Del or Esc to deselect',
+
+  // Stage 31: Alarm severity labels
+  'alarm.severity_critical': 'Critical',
+  'alarm.severity_warning':  'Warning',
+  'alarm.severity_info':     'Info',
+
+  // Stage 31: Pipe medium labels
+  'medium.hot_water':  'Hot Water',
+  'medium.cold_water': 'Cold Water',
+  'medium.recirc':     'Recirculation',
+  'medium.gas':        'Gas',
+  'medium.electric':   'Electric',
+  'medium.air':        'Air',
+  'medium.mixed':      'Mixed',
 };

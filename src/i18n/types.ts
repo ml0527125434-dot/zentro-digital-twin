@@ -165,7 +165,18 @@ export type TranslationKey =
   | 'inspector.title'
   | 'equip.filter_placeholder'
   | 'equip.no_match'
-  | 'builder.deselect_tip';
+  | 'builder.deselect_tip'
+  // ── Stage 31: Alarm severity + pipe medium labels ─────────────────────────
+  | 'alarm.severity_critical'
+  | 'alarm.severity_warning'
+  | 'alarm.severity_info'
+  | 'medium.hot_water'
+  | 'medium.cold_water'
+  | 'medium.recirc'
+  | 'medium.gas'
+  | 'medium.electric'
+  | 'medium.air'
+  | 'medium.mixed';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

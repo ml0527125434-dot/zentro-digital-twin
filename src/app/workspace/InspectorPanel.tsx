@@ -302,7 +302,10 @@ export function InspectorPanel({
                   letterSpacing: '0.05em',
                   flexShrink:    0,
                 }}>
-                  {rule?.severity ?? 'alarm'}
+                  {rule?.severity === 'critical' ? t('alarm.severity_critical') :
+                   rule?.severity === 'warning'  ? t('alarm.severity_warning')  :
+                   rule?.severity === 'info'     ? t('alarm.severity_info')     :
+                   t('alarm.severity_warning')}
                 </span>
                 <span style={{ color: 'var(--text-base)', fontWeight: 600 }}>
                   {rule?.message ?? alarm.id}
@@ -358,7 +361,7 @@ export function InspectorPanel({
                   {peer?.name ?? peerId}
                 </span>
                 <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>
-                  {portDef?.label ?? portId} · {conn.medium.replace('_', ' ')}
+                  {portDef?.label ?? portId} · {t(`medium.${conn.medium}` as `medium.${typeof conn.medium}`)}
                 </span>
               </div>
             </div>

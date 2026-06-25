@@ -71,6 +71,9 @@ const ALL_KEYS: TranslationKey[] = [
   // Inspector / equipment
   'inspector.title', 'equip.filter_placeholder', 'equip.no_match',
   'builder.deselect_tip',
+  // Alarm severity + pipe medium labels
+  'alarm.severity_critical', 'alarm.severity_warning', 'alarm.severity_info',
+  'medium.hot_water', 'medium.cold_water', 'medium.recirc', 'medium.gas', 'medium.electric', 'medium.air', 'medium.mixed',
 ];
 
 describe('Hebrew locale', () => {

@@ -18,6 +18,7 @@ import type { ComponentRegistry } from '../../lib/component-registry.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 import { validateConnectionDraft } from '../../builder/port-validator.js';
 import { useLocale } from '../../i18n/index.js';
+import type { TranslationKey } from '../../i18n/index.js';
 
 export interface BuilderPropertyPanelProps {
   projectId:  string;
@@ -270,7 +271,7 @@ export function BuilderPropertyPanel({
               <div style={{ padding: '2px 0', color: 'var(--text-dim)', fontSize: 10 }}>↓</div>
               <div>{toComp?.name ?? conn.toComponentId} <span style={{ color: 'var(--text-dim)' }}>({conn.toPortId})</span></div>
               <div style={{ marginTop: 6, fontSize: 10, color: 'var(--text-dim)' }}>
-                {t('builder.conn_medium')}: {conn.medium}
+                {t('builder.conn_medium')}: {t(`medium.${conn.medium}` as `medium.${typeof conn.medium}`)}
               </div>
             </div>
             <div style={{ padding: '8px 16px' }}>
@@ -430,7 +431,7 @@ export function BuilderPropertyPanel({
                       letterSpacing:'0.06em',
                       flexShrink:   0,
                     }}>
-                      {port.medium.replace('_', ' ')}
+                      {t(`medium.${port.medium}` as `medium.${typeof port.medium}`)}
                     </span>
                   </div>
                 );
@@ -514,7 +515,7 @@ export function BuilderPropertyPanel({
           {/* Medium preview */}
           {medium && connFromPort && (
             <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>
-              {t('builder.conn_medium')}: <strong style={{ color: 'var(--text-sub)' }}>{medium}</strong>
+              {t('builder.conn_medium')}: <strong style={{ color: 'var(--text-sub)' }}>{t(`medium.${medium}` as TranslationKey)}</strong>
             </div>
           )}
 
