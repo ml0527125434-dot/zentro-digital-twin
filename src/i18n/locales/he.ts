@@ -203,4 +203,10 @@ export const HE: Translations = {
   'medium.electric':   'חשמל',
   'medium.air':        'אוויר',
   'medium.mixed':      'מעורב',
+
+  // Stage 31: Alarm rule messages
+  'alarm.rule.tank_risk':     'טמפרטורת מיכל מתחת לסף הבטיחות — סכנת לגיונלה',
+  'alarm.rule.tank_warn':     'טמפרטורת מיכל באזור אזהרה',
+  'alarm.rule.shower_scald':  'טמפרטורת מקלחת מעל הגבול הבטוח — סכנת כוויה',
+  'alarm.rule.shower_cold':   'טמפרטורת מקלחת מתחת לסף הנוחות',
 };

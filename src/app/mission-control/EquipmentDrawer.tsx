@@ -369,7 +369,9 @@ export function EquipmentDrawer({
                          t('alarm.severity_warning')}
                       </span>
                       <span style={{ color: 'var(--text-base)', fontWeight: 600 }}>
-                        {rule?.message ?? alarm.id}
+                        {rule?.message?.startsWith('alarm.rule.')
+                          ? t(rule.message as TranslationKey)
+                          : rule?.message ?? alarm.id}
                       </span>
                     </div>
                     <div style={{ fontSize: 9, color: 'var(--text-dim)', paddingInlineStart: 2 }}>

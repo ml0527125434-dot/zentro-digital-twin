@@ -176,7 +176,12 @@ export type TranslationKey =
   | 'medium.gas'
   | 'medium.electric'
   | 'medium.air'
-  | 'medium.mixed';
+  | 'medium.mixed'
+  // ── Stage 31: Alarm rule messages ────────────────────────────────────────
+  | 'alarm.rule.tank_risk'
+  | 'alarm.rule.tank_warn'
+  | 'alarm.rule.shower_scald'
+  | 'alarm.rule.shower_cold';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

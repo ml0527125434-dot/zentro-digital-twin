@@ -203,4 +203,10 @@ export const EN: Translations = {
   'medium.electric':   'Electric',
   'medium.air':        'Air',
   'medium.mixed':      'Mixed',
+
+  // Stage 31: Alarm rule messages (stored as i18n keys in AlarmRule.message)
+  'alarm.rule.tank_risk':     'Tank temperature below safe threshold — Legionella risk',
+  'alarm.rule.tank_warn':     'Tank temperature in warning zone',
+  'alarm.rule.shower_scald':  'Shower temperature above safe limit — scald risk',
+  'alarm.rule.shower_cold':   'Shower temperature below comfort threshold',
 };

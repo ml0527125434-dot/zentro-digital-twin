@@ -74,6 +74,8 @@ const ALL_KEYS: TranslationKey[] = [
   // Alarm severity + pipe medium labels
   'alarm.severity_critical', 'alarm.severity_warning', 'alarm.severity_info',
   'medium.hot_water', 'medium.cold_water', 'medium.recirc', 'medium.gas', 'medium.electric', 'medium.air', 'medium.mixed',
+  // Alarm rule messages
+  'alarm.rule.tank_risk', 'alarm.rule.tank_warn', 'alarm.rule.shower_scald', 'alarm.rule.shower_cold',
 ];
 
 describe('Hebrew locale', () => {

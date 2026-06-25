@@ -6,6 +6,7 @@
 import React from 'react';
 import type { AlarmStore } from '../../alarm/alarm-store.js';
 import { useLocale } from '../../i18n/index.js';
+import type { TranslationKey } from '../../i18n/index.js';
 
 export interface AlarmBannerProps {
   alarmStore:  AlarmStore;
@@ -77,7 +78,7 @@ export function AlarmBanner({ alarmStore, components }: AlarmBannerProps) {
 
       {/* Alarm message */}
       <span style={{ fontSize: 12, color: accentColor, fontWeight: 600 }}>
-        {primary.rule?.message}
+        {primary.rule?.message?.startsWith('alarm.rule.') ? t(primary.rule.message as TranslationKey) : primary.rule?.message}
       </span>
 
       {/* Component attribution */}

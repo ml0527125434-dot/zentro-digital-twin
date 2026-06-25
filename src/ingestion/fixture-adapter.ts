@@ -45,7 +45,7 @@ export const HOT_WATER_ALARM_RULES: readonly AlarmRule[] = [
     triggerStatus:   [NodeStatus.Risk],
     debounceSeconds: 5,
     severity:        'critical',
-    message:         'Tank temperature below safe threshold — Legionella risk',
+    message:         'alarm.rule.tank_risk',
   },
   {
     id:              'rule_tank_warn',
@@ -53,7 +53,7 @@ export const HOT_WATER_ALARM_RULES: readonly AlarmRule[] = [
     triggerStatus:   [NodeStatus.Warn],
     debounceSeconds: 10,
     severity:        'warning',
-    message:         'Tank temperature in warning zone',
+    message:         'alarm.rule.tank_warn',
   },
   {
     id:              'rule_shower_scald',
@@ -61,7 +61,7 @@ export const HOT_WATER_ALARM_RULES: readonly AlarmRule[] = [
     triggerStatus:   [NodeStatus.Scald],
     debounceSeconds: 0,
     severity:        'critical',
-    message:         'Shower temperature above safe limit — scald risk',
+    message:         'alarm.rule.shower_scald',
   },
   {
     id:              'rule_shower_cold',
@@ -69,7 +69,7 @@ export const HOT_WATER_ALARM_RULES: readonly AlarmRule[] = [
     triggerStatus:   [NodeStatus.Cold],
     debounceSeconds: 10,
     severity:        'warning',
-    message:         'Shower temperature below comfort threshold',
+    message:         'alarm.rule.shower_cold',
   },
 ];
 

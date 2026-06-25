@@ -11,6 +11,7 @@
 import React, { useRef } from 'react';
 import type { AlarmStore } from '../../alarm/alarm-store.js';
 import { useLocale } from '../../i18n/index.js';
+import type { TranslationKey } from '../../i18n/index.js';
 
 export interface EventTimelineProps {
   alarmStore: AlarmStore;
@@ -174,7 +175,9 @@ export function EventTimeline({ alarmStore, components, nowMs }: EventTimelinePr
                     textOverflow: 'ellipsis',
                     whiteSpace:  'nowrap',
                   }}>
-                    {ev.message}
+                    {ev.message?.startsWith('alarm.rule.')
+                      ? t(ev.message as TranslationKey)
+                      : ev.message}
                   </div>
                 )}
               </div>
