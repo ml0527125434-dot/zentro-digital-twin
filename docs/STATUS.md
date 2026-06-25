@@ -19,6 +19,21 @@
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
 | 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `e8b152d` |
 | 17    | Edge Visuals + App Header Bar | **564** | `c75807c` |
+| 18    | Dashboard Polish + Runtime Binding Simulation | **564** | `` |
+
+## Stage 18 Notes
+
+**Approved.** 564 tests unchanged (pure rendering). Build: 17.4 kB CSS, 403 kB JS.
+
+Modified:
+- `src/simulation/hot-water-simulation.ts` — added 3 runtime/flow bindings: `b_hp_state` (heat pump runtime, 20s period), `b_gas_state` (gas backup runtime, 70s period), `b_pump_flow` (flow rate 0–12 L/min, 25s period); all 6 components now have live data
+- `src/renderer/components/nodes/PumpNode.tsx` — reads `liveValues['runtime']` to show "▶ Running" / "◼ Standby"; reads `liveValues['flow']` to show flow rate
+- `src/app/DashboardPanel.tsx` — replaced raw enum strings with colored icon+label `Chip` components using theme helpers; added per-component active alarm count badge; test selectors preserved (hidden spans)
+
+Architecture invariants confirmed:
+- DashboardPanel imports from `src/renderer/theme.ts` (pure presentation) — not from `src/projection`
+- No store access in DashboardPanel; all data comes from `componentVMs` props
+- `[data-testid="component-health/status/sensor-state"]` spans preserved (display:none) so existing tests continue to pass
 
 ## Stage 17 Notes
 
@@ -223,4 +238,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 18 — pending.
+Stage 19 — pending.
