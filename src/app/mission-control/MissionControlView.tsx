@@ -364,6 +364,29 @@ export function MissionControlView({
             </div>
           )}
 
+          {/* Empty canvas hint — shown in build mode when no components placed yet */}
+          {buildMode && components.length === 0 && !isPlacingMode && (
+            <div style={{
+              position:      'absolute',
+              inset:         0,
+              zIndex:        5,
+              display:       'flex',
+              flexDirection: 'column',
+              alignItems:    'center',
+              justifyContent:'center',
+              gap:           12,
+              pointerEvents: 'none',
+            }}>
+              <span style={{ fontSize: 40, opacity: 0.25 }}>⬡</span>
+              <span style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 600 }}>
+                Start building your system
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+                Pick a component from the palette and click to place it
+              </span>
+            </div>
+          )}
+
           {/* FlowMap — fills the entire center column */}
           <div style={{ position: 'absolute', inset: 0 }}>
             <FlowMap

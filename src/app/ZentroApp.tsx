@@ -159,8 +159,13 @@ function AppContent({
                   fontWeight:   buildMode ? 500 : 700,
                   padding:      '3px 9px',
                   lineHeight:   1.4,
+                  display:      'flex',
+                  alignItems:   'center',
+                  gap:          5,
+                  transition:   'background 0.15s, color 0.15s',
                 }}
               >
+                {!buildMode && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--status-healthy)', display: 'inline-block', flexShrink: 0 }} />}
                 {t('builder.mode_monitor')}
               </button>
               <button
@@ -175,8 +180,13 @@ function AppContent({
                   fontWeight:   buildMode ? 700 : 500,
                   padding:      '3px 9px',
                   lineHeight:   1.4,
+                  display:      'flex',
+                  alignItems:   'center',
+                  gap:          5,
+                  transition:   'background 0.15s, color 0.15s',
                 }}
               >
+                {buildMode && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', flexShrink: 0 }} />}
                 {t('builder.mode_build')}
               </button>
             </div>
