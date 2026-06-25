@@ -502,9 +502,13 @@ export function MissionControlView({
               overflow:      'hidden',
               textOverflow:  'ellipsis',
             }}>
-              {selectedComponentId
-                ? (stores.graph.getComponents(projectId).find(c => c.id === selectedComponentId)?.name ?? '')
-                : 'Inspector'}
+              {buildMode
+                ? (builder.state.mode === 'selected-component' && builder.state.selectedComponentId
+                    ? (stores.graph.getComponents(projectId).find(c => c.id === (builder.state as { selectedComponentId: string }).selectedComponentId)?.name ?? t('builder.props_title'))
+                    : t('builder.props_title'))
+                : selectedComponentId
+                  ? (stores.graph.getComponents(projectId).find(c => c.id === selectedComponentId)?.name ?? '')
+                  : 'Inspector'}
             </span>
             <button
               data-testid="inspector-right-toggle"

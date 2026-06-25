@@ -4,7 +4,7 @@
  * for test compatibility.
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ComponentViewModel } from '../../domain/types.js';
 import type { EngineStores } from '../../engine/graph-engine.js';
 import type { AlarmStore } from '../../alarm/alarm-store.js';
@@ -79,7 +79,14 @@ function Badge({ cssVar, label }: { cssVar: string; label: string }) {
 
 export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onSelectComponent }: EquipmentGridProps) {
   const { t } = useLocale();
-  const components = stores.graph.getComponents(projectId);
+  const [search, setSearch] = useState('');
+  const allComponents = stores.graph.getComponents(projectId);
+
+  const components = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return allComponents;
+    return allComponents.filter(c => c.name.toLowerCase().includes(q));
+  }, [allComponents, search]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -93,9 +100,38 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
         borderBottom:  '1px solid var(--border)',
         flexShrink:    0,
         background:    'var(--bg-crust)',
+        display:       'flex',
+        alignItems:    'center',
+        gap:           6,
       }}>
-        {t('equip.title')}
+        <span style={{ flex: 1 }}>{t('equip.title')}</span>
+        <span style={{ fontSize: 8, color: 'var(--text-dim)', fontWeight: 500 }}>
+          {allComponents.length}
+        </span>
       </div>
+
+      {/* Search filter — only shown when there are enough components */}
+      {allComponents.length > 4 && (
+        <div style={{ padding: '5px 8px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <input
+            type="search"
+            placeholder="Filter…"
+            value={search}
+            onChange={e => setSearch(e.currentTarget.value)}
+            style={{
+              width:        '100%',
+              background:   'var(--bg-base)',
+              border:       '1px solid var(--border)',
+              borderRadius: 3,
+              color:        'var(--text-base)',
+              fontSize:     10,
+              padding:      '3px 7px',
+              outline:      'none',
+              boxSizing:    'border-box',
+            }}
+          />
+        </div>
+      )}
 
       <ul data-testid="dashboard-panel" style={{
         listStyle:     'none',
@@ -107,9 +143,14 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
         overflowY:     'auto',
         flex:          1,
       }}>
-        {components.length === 0 && (
+        {allComponents.length === 0 && (
           <li style={{ color: 'var(--text-sub)', fontSize: 11, padding: 8 }}>
             {t('dashboard.empty')}
+          </li>
+        )}
+        {allComponents.length > 0 && components.length === 0 && (
+          <li style={{ color: 'var(--text-dim)', fontSize: 10, padding: '8px 4px', textAlign: 'center' }}>
+            No match for "{search}"
           </li>
         )}
         {components.map(component => {
@@ -142,17 +183,22 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
           const flow     = vm.liveValues['flow'] ?? null;
           const runtime  = vm.liveValues['runtime'] ?? null;
 
+          const isRunning =
+            typeof runtime === 'boolean' ? runtime :
+            typeof runtime === 'number'  ? runtime > 0.5 :
+            null;
+
           const primaryValue: string = (() => {
-            if (typeof temp    === 'number') return `${temp.toFixed(1)}${t('unit.temperature')}`;
-            if (typeof flow    === 'number') return `${flow.toFixed(1)} ${t('pump.flow_unit')}`;
-            if (typeof runtime === 'number') return runtime > 0.5 ? t('kpi.running') : t('kpi.standby');
+            if (typeof temp === 'number') return `${temp.toFixed(1)}${t('unit.temperature')}`;
+            if (typeof flow === 'number') return `${flow.toFixed(1)} ${t('pump.flow_unit')}`;
+            if (isRunning !== null) return isRunning ? t('kpi.running') : t('kpi.standby');
             return t('equip.no_sensor_data');
           })();
 
           const primaryColor: string = (() => {
-            if (typeof temp    === 'number') return `var(${statusPres.cssVar})`;
-            if (typeof flow    === 'number') return flow > 0 ? 'var(--status-healthy)' : 'var(--text-sub)';
-            if (typeof runtime === 'number') return runtime > 0.5 ? 'var(--status-healthy)' : 'var(--text-sub)';
+            if (typeof temp === 'number') return `var(${statusPres.cssVar})`;
+            if (typeof flow === 'number') return flow > 0 ? 'var(--status-healthy)' : 'var(--text-sub)';
+            if (isRunning !== null) return isRunning ? 'var(--status-healthy)' : 'var(--text-sub)';
             return 'var(--text-dim)';
           })();
 
