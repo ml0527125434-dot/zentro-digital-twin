@@ -6,9 +6,19 @@ import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
 
+const TYPE_ICON: Record<string, string> = {
+  expansion_vessel:     '⊕',
+  filter:               '⊡',
+  air_separator:        '⊞',
+  distribution_manifold:'⊢',
+  tap:                  '🚰',
+  electric_heater:      '⚡',
+  generic:              '⬡',
+};
+
 export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
   const { t } = useLocale();
-  const { name, viewModel } = data;
+  const { name, typeId, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
   const statusPres = nodeStatusPresentation(viewModel.operationalStatus);
   const sensorPres = sensorStatePresentation(viewModel.sensorState);
@@ -28,7 +38,7 @@ export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
       <Handle type="source" position={Position.Right} />
 
       <div className="zentro-node__header">
-        <span className="zentro-node__icon" aria-hidden="true">⬡</span>
+        <span className="zentro-node__icon" aria-hidden="true">{TYPE_ICON[typeId] ?? '⬡'}</span>
         <span className="zentro-node__name">{name}</span>
       </div>
 

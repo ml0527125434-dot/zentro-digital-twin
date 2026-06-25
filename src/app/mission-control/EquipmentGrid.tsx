@@ -26,12 +26,30 @@ export interface EquipmentGridProps {
 
 // Icon per component type
 const TYPE_ICON: Record<string, string> = {
-  storage_tank: '🛢',
-  heat_pump:    '♨',
-  gas_backup:   '🔥',
-  recirc_pump:  '◎',
-  mixing_valve: '⬡',
-  point_of_use: '🚿',
+  storage_tank:         '🛢',
+  buffer_tank:          '🪣',
+  expansion_vessel:     '⊕',
+  heat_pump:            '♨',
+  gas_backup:           '🔥',
+  electric_heater:      '⚡',
+  solar_collector:      '☀',
+  plate_heat_exchanger: '⇄',
+  recirc_pump:          '◎',
+  variable_speed_pump:  '⟳',
+  mixing_valve:         '⬡',
+  control_valve:        '⊛',
+  isolation_valve:      '🔒',
+  safety_valve:         '🛡',
+  temperature_sensor:   '🌡',
+  pressure_sensor:      '⦿',
+  flow_sensor:          '≋',
+  energy_meter:         '⚡',
+  water_meter:          '💧',
+  filter:               '⊡',
+  air_separator:        '⊞',
+  distribution_manifold:'⊢',
+  point_of_use:         '🚿',
+  tap:                  '🚰',
 };
 
 function Badge({ cssVar, label }: { cssVar: string; label: string }) {
