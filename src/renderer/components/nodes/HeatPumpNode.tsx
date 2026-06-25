@@ -27,7 +27,7 @@ export function HeatPumpNode({ data }: NodeProps<ComponentNodeData>) {
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 130 }}>
-      <Handle type="source" position={Position.Right} id="heat_out_1" />
+      <Handle type="source" position={Position.Right} id="out" />
       <Handle type="source" position={Position.Right} id="heat_out_2" style={{ top: '70%' }} />
 
       <div className="zentro-node__header">

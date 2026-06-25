@@ -101,7 +101,8 @@ export function MissionControlView({
               {t('flowmap.loading')}
             </div>
           )}
-          <div style={{ height: '100%' }}>
+          {/* position:absolute gives ReactFlow a concrete pixel height to measure */}
+          <div style={{ position: 'absolute', inset: 0 }}>
             <FlowMap nodes={layoutNodes} edges={edges} />
           </div>
         </div>

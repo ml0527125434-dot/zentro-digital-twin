@@ -26,7 +26,7 @@ export function GasBackupNode({ data }: NodeProps<ComponentNodeData>) {
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 130 }}>
-      <Handle type="source" position={Position.Right} id="heat_out" />
+      <Handle type="source" position={Position.Right} id="out" />
 
       <div className="zentro-node__header">
         <span className="zentro-node__icon">🔥</span>

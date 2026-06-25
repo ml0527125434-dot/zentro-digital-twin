@@ -27,7 +27,8 @@ export function ShowerNode({ data }: NodeProps<ComponentNodeData>) {
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 110 }}>
-      <Handle type="target" position={Position.Left} id="hot_in" />
+      <Handle type="target" position={Position.Left}  id="hot_in"    />
+      <Handle type="source" position={Position.Right} id="drain_out" />
 
       <div className="zentro-node__header">
         <span className="zentro-node__icon">🚿</span>
