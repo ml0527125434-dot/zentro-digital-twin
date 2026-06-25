@@ -160,7 +160,11 @@ export type TranslationKey =
   | 'category.meter'
   | 'category.consumer'
   | 'category.zone'
-  | 'category.air';
+  | 'category.air'
+  // ── Stage 31: Inspector / equipment ───────────────────────────────────────
+  | 'inspector.title'
+  | 'equip.filter_placeholder'
+  | 'equip.no_match';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

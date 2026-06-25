@@ -183,4 +183,9 @@ export const EN: Translations = {
   'category.consumer': 'Consumers',
   'category.zone':     'Distribution',
   'category.air':      'Auxiliary',
+
+  // Stage 31: Inspector / equipment
+  'inspector.title':           'Inspector',
+  'equip.filter_placeholder':  'Filter…',
+  'equip.no_match':            'No match',
 };

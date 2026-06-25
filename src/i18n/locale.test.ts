@@ -68,6 +68,8 @@ const ALL_KEYS: TranslationKey[] = [
   'builder.palette_search', 'builder.palette_no_match', 'builder.ports_section',
   'category.source', 'category.storage', 'category.pump', 'category.valve',
   'category.sensor', 'category.meter', 'category.consumer', 'category.zone', 'category.air',
+  // Inspector / equipment
+  'inspector.title', 'equip.filter_placeholder', 'equip.no_match',
 ];
 
 describe('Hebrew locale', () => {

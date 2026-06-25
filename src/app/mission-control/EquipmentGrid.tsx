@@ -123,7 +123,7 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
         <div style={{ padding: '5px 8px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <input
             type="search"
-            placeholder="Filter…"
+            placeholder={t('equip.filter_placeholder')}
             value={search}
             onChange={e => setSearch(e.currentTarget.value)}
             style={{
@@ -158,7 +158,7 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
         )}
         {allComponents.length > 0 && components.length === 0 && (
           <li style={{ color: 'var(--text-dim)', fontSize: 10, padding: '8px 4px', textAlign: 'center' }}>
-            No match for "{search}"
+            {t('equip.no_match')}
           </li>
         )}
         {components.map(component => {

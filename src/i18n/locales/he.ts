@@ -183,4 +183,9 @@ export const HE: Translations = {
   'category.consumer': 'נקודות צריכה',
   'category.zone':     'הפצה',
   'category.air':      'עזר',
+
+  // Stage 31: Inspector / equipment
+  'inspector.title':           'מפקח',
+  'equip.filter_placeholder':  'סינון…',
+  'equip.no_match':            'אין תוצאות',
 };

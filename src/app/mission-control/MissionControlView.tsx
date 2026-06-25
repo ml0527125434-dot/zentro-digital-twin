@@ -448,7 +448,7 @@ export function MissionControlView({
                   {label}
                 </span>
                 <span style={{ fontSize: 11, color: 'var(--text-sub)' }}>
-                  — click canvas to place
+                  — {t('builder.placing_hint').toLowerCase()}
                 </span>
                 <kbd style={{
                   fontSize:     10,
@@ -508,7 +508,7 @@ export function MissionControlView({
                     : t('builder.props_title'))
                 : selectedComponentId
                   ? (stores.graph.getComponents(projectId).find(c => c.id === selectedComponentId)?.name ?? '')
-                  : 'Inspector'}
+                  : t('inspector.title')}
             </span>
             <button
               data-testid="inspector-right-toggle"
