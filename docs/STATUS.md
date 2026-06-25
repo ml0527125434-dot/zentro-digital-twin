@@ -61,6 +61,42 @@ These are **pre-existing, non-blocking** TypeScript type errors. They do not aff
 | 23    | Zentro Visual Identity Alignment | **607** | `d00389f` |
 | 24    | Equipment Detail Drawer          | **612** | `cab20d4` |
 | 25    | Operational Polish & Demo Readiness | **614** | `d7b4a29` |
+| 26    | Presentation Mode                   | **617** | `833a317` |
+
+## Stage 26 Notes
+
+Net +3 tests (614 → 617). 3 new i18n keys (94 total). Zero pre-existing TypeScript errors added.
+
+Modified:
+- `src/app/ZentroApp.tsx` — `presentationMode` boolean state; `drawerOpenRef` tracks drawer open
+  state via `onDrawerOpenChange` callback; global `keydown` listener: F toggles, Esc exits when
+  drawer is closed; `▶ הצגה מלאה` / `▶ Present` button in header; header + demo strip collapse via
+  `maxHeight` transition (0.3s cubic-bezier); `position: fixed; inset: 0; zIndex: 200` on root div
+  when active; floating `PRESENT/מצג` badge + `✕ Exit/יציאה` button (RTL-aware positioning)
+- `src/app/mission-control/MissionControlView.tsx` — `presentationMode` prop; SystemStatusBar
+  collapses via `maxHeight` wrapper; sidebar `width` transitions 320→0 (0.3s); `onDrawerOpenChange`
+  callback fires on `selectedComponentId` change
+- `src/i18n/types.ts` — +3 keys: `pres.enter`, `pres.exit`, `pres.badge` (94 total)
+- `src/i18n/locales/he.ts` — `'הצגה מלאה'`, `'יציאה'`, `'מצג'`
+- `src/i18n/locales/en.ts` — `'Present'`, `'Exit'`, `'PRESENT'`
+- `src/i18n/locale.test.ts` — ALL_KEYS updated to 94 entries
+- `src/app/mission-control/mission-control.test.tsx` — +3 tests: enter button renders,
+  enter→exit shows exit button, exit→normal restores enter button
+
+Architecture invariants confirmed:
+- No Component Graph, Projection, Runtime Stores, LiveStore, or telemetry changes
+- No COMMAND plane behavior; no Builder work
+- F key does not interfere with text inputs (target tag check)
+- ESC priority: drawer ESC fires first (from EquipmentDrawer useEffect); app-level handler
+  skips exit-pres-mode when drawerOpenRef.current is true
+
+Visual QA summary (2026-06-25):
+- Hebrew RTL: header "▶ הצגה מלאה" button visible on LEFT ✓; enter button activates mode ✓;
+  header + demo strip + status bar collapse ✓; sidebar collapses (FlowMap full width) ✓;
+  floating "מצג" badge + "✕ יציאה" button on LEFT (RTL) ✓; exit restores normal layout ✓;
+  smooth transition animations (0.3s) ✓
+- English LTR: "▶ Present" button on RIGHT ✓; presentation mode collapses all chrome ✓;
+  "PRESENT | ✕ Exit" floating overlay on RIGHT (LTR) ✓; exit transition smooth ✓
 
 ## Stage 25 Notes
 
