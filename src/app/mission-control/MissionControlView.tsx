@@ -375,6 +375,51 @@ export function MissionControlView({
               placingMode={isPlacingMode}
             />
           </div>
+
+          {/* Placing hint banner — shows type name + instructions while in placing mode */}
+          {isPlacingMode && builder.state.mode === 'placing' && (() => {
+            const typeId = builder.state.pendingTypeId;
+            const def    = typeId ? registry.get(typeId) : null;
+            const label  = def?.label ?? typeId ?? '';
+            return (
+              <div style={{
+                position:      'absolute',
+                bottom:        16,
+                left:          '50%',
+                transform:     'translateX(-50%)',
+                zIndex:        20,
+                display:       'flex',
+                alignItems:    'center',
+                gap:           10,
+                background:    'var(--bg-crust)',
+                border:        '1px solid var(--accent)',
+                borderRadius:  8,
+                padding:       '8px 18px',
+                boxShadow:     '0 4px 20px rgba(0,0,0,0.35)',
+                pointerEvents: 'none',
+                whiteSpace:    'nowrap',
+              }}>
+                <span style={{ fontSize: 14 }}>✛</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)' }}>
+                  {label}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--text-sub)' }}>
+                  — click canvas to place
+                </span>
+                <kbd style={{
+                  fontSize:     10,
+                  color:        'var(--text-dim)',
+                  background:   'var(--bg-mantle)',
+                  border:       '1px solid var(--border)',
+                  borderRadius: 3,
+                  padding:      '1px 5px',
+                }}>
+                  Esc
+                </kbd>
+                <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>to cancel</span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* ── RIGHT INSPECTOR ───────────────────────────────────────────────── */}
