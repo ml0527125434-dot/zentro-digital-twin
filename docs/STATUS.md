@@ -25,6 +25,37 @@
 | 21    | Localization (i18n) — Hebrew RTL + English LTR | **593** | `a5d4d96` |
 | 22    | Mission Control UI | **600** | `d70de0b` |
 | 23    | Zentro Visual Identity Alignment | **607** | `d00389f` |
+| 24    | Equipment Detail Drawer          | **612** | `cab20d4` |
+
+## Stage 24 Notes
+
+Net +5 tests (607 → 612). 20 new i18n keys (86 total). Zero pre-existing TypeScript errors added.
+
+New modules:
+- `src/app/mission-control/EquipmentDrawer.tsx` — slide-in detail panel: backdrop + panel with CSS
+  transform animation (RTL-aware), ESC/backdrop/close-button dismissal. Sections: status badges
+  (three orthogonal axes), equipment type + mode + provenance rows, live values with SensorSlot
+  labels and units, active alarms with rule message, connections with peer names and direction arrows.
+
+Modified:
+- `src/i18n/types.ts` — +20 `drawer.*` keys (86 total)
+- `src/i18n/locales/he.ts` — Hebrew translations for all 20 keys
+- `src/i18n/locales/en.ts` — English translations for all 20 keys
+- `src/i18n/locale.test.ts` — ALL_KEYS array updated to 86 entries
+- `src/renderer/components/FlowMap.tsx` — added `onNodeClick?: (componentId: string) => void` prop;
+  wraps ReactFlow `onNodeClick` to extract node ID
+- `src/app/mission-control/EquipmentGrid.tsx` — added `onSelectComponent?` prop; `<li>` items gain
+  `onClick` handler and `cursor: pointer`
+- `src/app/mission-control/MissionControlView.tsx` — added `registry: ComponentRegistry` prop;
+  `selectedComponentId` state; `position: relative` on root div; FlowMap and EquipmentGrid wired
+  to `handleSelectComponent`; `EquipmentDrawer` rendered as absolute sibling
+- `src/app/ZentroApp.tsx` — passes `registry` to MissionControlView
+- `src/app/mission-control/mission-control.test.tsx` — +5 EquipmentDrawer tests
+
+Architecture invariants confirmed:
+- Drawer is presentation-only: reads componentVMs, alarmStore, registry, graph connections — no writes
+- ESC handler attached/detached via `useEffect` gated on `componentId !== null`
+- RTL uses `insetInlineStart: 0`, slide-hide uses `translateX(-100%)` vs `translateX(100%)` for LTR
 
 ## Stage 22 Notes
 
