@@ -21,6 +21,7 @@ import {
 import type { ConnectionEdgeData } from '../../flow-transformers.js';
 import { sensorStatePresentation, nodeStatusPresentation } from '../../theme.js';
 import { FlowState } from '../../../domain/types.js';
+import { useLocale } from '../../../i18n/index.js';
 
 export function FlowEdge({
   id,
@@ -31,6 +32,7 @@ export function FlowEdge({
   data,
   markerEnd,
 }: EdgeProps<ConnectionEdgeData>) {
+  const { t } = useLocale();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
@@ -102,7 +104,7 @@ export function FlowEdge({
           >
             {value !== null && statusPres && (
               <span style={{ color: `var(${statusPres.cssVar})` }}>
-                {typeof value === 'number' ? value.toFixed(1) : String(value)}°C
+                {typeof value === 'number' ? value.toFixed(1) : String(value)}{t('unit.temperature')}
               </span>
             )}
             {sensorPres && (

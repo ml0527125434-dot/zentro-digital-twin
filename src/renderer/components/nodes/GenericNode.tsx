@@ -2,8 +2,11 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
+import { useLocale } from '../../../i18n/index.js';
+import type { TranslationKey } from '../../../i18n/index.js';
 
 export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
+  const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
   const statusPres = nodeStatusPresentation(viewModel.operationalStatus);
@@ -43,11 +46,11 @@ export function GenericNode({ data }: NodeProps<ComponentNodeData>) {
       </div>
       {temp !== null && (
         <div style={{ fontSize: 13, color: `var(${statusPres.cssVar})` }}>
-          {typeof temp === 'number' ? temp.toFixed(1) : String(temp)}°C
+          {typeof temp === 'number' ? temp.toFixed(1) : String(temp)}{t('unit.temperature')}
         </div>
       )}
-      <div style={{ fontSize: 9, color: `var(${sensorPres.cssVar})`, marginTop: 2 }}>
-        {healthPres.icon} {healthPres.label}
+      <div style={{ fontSize: 9, color: `var(${healthPres.cssVar})`, marginTop: 2 }}>
+        {healthPres.icon} {t(healthPres.label as TranslationKey)}
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export interface ConnectionEdgeData extends Record<string, unknown> {
   /** Animated when flow === Flowing */
   animated:      boolean;
   /** True when either endpoint component has at least one active alarm */
-  hasActiveAlarm: boolean;
+  hasActiveAlarm?: boolean;
 }
 
 export type ConnectionEdge = Edge<ConnectionEdgeData>;

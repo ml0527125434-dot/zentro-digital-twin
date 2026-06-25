@@ -2,8 +2,10 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation } from '../../theme.js';
+import { useLocale } from '../../../i18n/index.js';
 
 export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
+  const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres = healthPresentation(viewModel.health);
 
@@ -16,8 +18,8 @@ export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
     ? isRunning ? 'var(--status-healthy)' : 'var(--text-sub)'
     : 'var(--text-sub)';
   const runLabel   = hasRuntime
-    ? isRunning ? '▶ Running' : '◼ Standby'
-    : '? No data';
+    ? isRunning ? t('pump.running') : t('pump.standby')
+    : t('pump.no_data');
 
   return (
     <div
@@ -46,7 +48,7 @@ export function PumpNode({ data }: NodeProps<ComponentNodeData>) {
       </div>
       {flowRate !== null && flowRate !== undefined && (
         <div style={{ fontSize: 9, color: 'var(--text-sub)', marginTop: 1 }}>
-          {typeof flowRate === 'number' ? flowRate.toFixed(1) : String(flowRate)} L/m
+          {typeof flowRate === 'number' ? flowRate.toFixed(1) : String(flowRate)} {t('pump.flow_unit')}
         </div>
       )}
     </div>

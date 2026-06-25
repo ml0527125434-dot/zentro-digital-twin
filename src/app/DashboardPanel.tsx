@@ -1,5 +1,5 @@
 /**
- * Zentro Digital Twin — DashboardPanel (Stage 6, updated Stage 18)
+ * Zentro Digital Twin — DashboardPanel (Stage 6, updated Stage 18, Stage 21)
  *
  * Minimal read-only component list: name, health, operationalStatus.
  * Receives pre-computed ViewModels as props — never calls projection.
@@ -14,6 +14,8 @@ import {
   nodeStatusPresentation,
   sensorStatePresentation,
 } from '../renderer/theme.js';
+import { useLocale } from '../i18n/index.js';
+import type { TranslationKey } from '../i18n/index.js';
 
 export interface DashboardPanelProps {
   projectId:    string;
@@ -43,7 +45,18 @@ export function DashboardPanel({
   stores,
   componentVMs,
 }: DashboardPanelProps) {
+  const { t } = useLocale();
   const components = stores.graph.getComponents(projectId);
+
+  if (components.length === 0) {
+    return (
+      <ul data-testid="dashboard-panel">
+        <li style={{ color: 'var(--text-sub)', fontSize: 11, padding: '8px 12px' }}>
+          {t('dashboard.empty')}
+        </li>
+      </ul>
+    );
+  }
 
   return (
     <ul data-testid="dashboard-panel">
@@ -67,19 +80,19 @@ export function DashboardPanel({
               <Chip
                 cssVar={healthPres.cssVar}
                 icon={healthPres.icon}
-                label={healthPres.label}
+                label={t(healthPres.label as TranslationKey)}
               />
               <span data-testid="component-health" style={{ display: 'none' }}>{vm.health}</span>
               <Chip
                 cssVar={statusPres.cssVar}
                 icon={statusPres.icon}
-                label={statusPres.label}
+                label={t(statusPres.label as TranslationKey)}
               />
               <span data-testid="component-status" style={{ display: 'none' }}>{vm.operationalStatus}</span>
               <Chip
                 cssVar={sensorPres.cssVar}
                 icon={sensorPres.icon}
-                label={sensorPres.label}
+                label={t(sensorPres.label as TranslationKey)}
               />
               <span data-testid="component-sensor-state" style={{ display: 'none' }}>{vm.sensorState}</span>
               {activeAlarmCount > 0 && (
@@ -88,7 +101,7 @@ export function DashboardPanel({
                   background: 'color-mix(in srgb, var(--status-critical) 12%, transparent)',
                   borderRadius: 4, padding: '1px 5px',
                 }}>
-                  ⚠ {activeAlarmCount} alarm{activeAlarmCount !== 1 ? 's' : ''}
+                  ⚠ {t('app.alarms_count', { count: activeAlarmCount })}
                 </span>
               )}
             </div>

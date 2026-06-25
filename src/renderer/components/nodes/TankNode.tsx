@@ -2,8 +2,11 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNodeData } from '../../flow-transformers.js';
 import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
+import { useLocale } from '../../../i18n/index.js';
+import type { TranslationKey } from '../../../i18n/index.js';
 
 export function TankNode({ data }: NodeProps<ComponentNodeData>) {
+  const { t } = useLocale();
   const { name, viewModel } = data;
   const healthPres  = healthPresentation(viewModel.health);
   const statusPres  = nodeStatusPresentation(viewModel.operationalStatus);
@@ -24,7 +27,6 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
         position:     'relative',
       }}
     >
-      {/* Ports */}
       <Handle type="target" position={Position.Bottom} id="cold_in"    />
       <Handle type="target" position={Position.Left}   id="heat_in_1"  />
       <Handle type="target" position={Position.Left}   id="heat_in_2"  style={{ top: '70%' }} />
@@ -48,11 +50,11 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
       </div>
       {temp !== null && (
         <div style={{ fontSize: 13, color: `var(${statusPres.cssVar})` }}>
-          {typeof temp === 'number' ? temp.toFixed(1) : String(temp)}°C
+          {typeof temp === 'number' ? temp.toFixed(1) : String(temp)}{t('unit.temperature')}
         </div>
       )}
       <div style={{ fontSize: 9, color: `var(${sensorPres.cssVar})`, marginTop: 2 }}>
-        {sensorPres.icon} {sensorPres.label}
+        {sensorPres.icon} {t(sensorPres.label as TranslationKey)}
       </div>
     </div>
   );
