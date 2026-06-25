@@ -93,8 +93,8 @@ export function assignComponentBinding(
     source:     draft.source,
     address:    draft.address.trim(),
     metric:     slot.metric,      // derived from slot — never from draft
-    unit:       draft.unit,
     ttlSeconds: draft.ttlSeconds,
+    ...(draft.unit !== undefined ? { unit: draft.unit } : {}),
   };
 
   // Replace existing binding for the same metric, or append
@@ -156,8 +156,8 @@ export function assignConnectionBinding(
     source:     draft.source,
     address:    draft.address.trim(),
     metric:     slot.metric,
-    unit:       draft.unit,
     ttlSeconds: draft.ttlSeconds,
+    ...(draft.unit !== undefined ? { unit: draft.unit } : {}),
   };
 
   const existing  = (connection.bindings ?? []).filter(b => b.metric !== slot.metric);
@@ -190,11 +190,11 @@ export function removeConnectionBinding(
     );
   }
 
-  const patch: Parameters<typeof updateConnection>[2] = { bindings };
-  // Clear valueBindingId if it referenced the removed binding
-  if (connection.valueBindingId === bindingId) {
-    patch.valueBindingId = undefined as never;
-  }
+  const clearValue = connection.valueBindingId === bindingId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const patch: Parameters<typeof updateConnection>[2] = clearValue
+    ? { bindings, valueBindingId: undefined } as any
+    : { bindings };
 
   return updateConnection(projectId, connectionId, patch, createdBy, stores);
 }

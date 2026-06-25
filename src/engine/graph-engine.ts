@@ -14,7 +14,8 @@
 
 import type { Project, Component, Connection } from '../domain/types.js';
 import type { VersionStore, ProjectVersion } from '../domain/project-version.js';
-import type { EventStore, DomainEvent } from '../domain/events.js';
+import type { EventStore } from '../domain/event-store.js';
+import type { DomainEvent } from '../domain/events.js';
 import {
   projectCreatedEvent,
   componentAddedEvent,
