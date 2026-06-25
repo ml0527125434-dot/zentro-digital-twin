@@ -86,7 +86,28 @@ export type TranslationKey =
   | 'timeline.alarm_pending'
   | 'timeline.alarm_cleared'
   | 'timeline.session_start'
-  | 'timeline.no_events';
+  | 'timeline.no_events'
+  // ── Stage 24: Equipment Detail Drawer ────────────────────────────────────
+  | 'drawer.title'
+  | 'drawer.close'
+  | 'drawer.section_status'
+  | 'drawer.section_telemetry'
+  | 'drawer.section_alarms'
+  | 'drawer.section_connections'
+  | 'drawer.equipment_type'
+  | 'drawer.mode'
+  | 'drawer.mode_normal'
+  | 'drawer.mode_maintenance'
+  | 'drawer.mode_commissioning'
+  | 'drawer.no_live_data'
+  | 'drawer.no_alarms'
+  | 'drawer.no_connections'
+  | 'drawer.provenance_measured'
+  | 'drawer.provenance_inferred'
+  | 'drawer.provenance_unknown'
+  | 'drawer.demo_source'
+  | 'drawer.conn_in'
+  | 'drawer.conn_out';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

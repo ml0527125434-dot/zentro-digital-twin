@@ -13,6 +13,7 @@ import {
   BackgroundVariant,
   type NodeTypes,
   type EdgeTypes,
+  type Node,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { TankNode }      from './nodes/TankNode.js';
@@ -41,9 +42,17 @@ const EDGE_TYPES: EdgeTypes = {
 export interface FlowMapProps {
   nodes: ComponentNode[];
   edges: ConnectionEdge[];
+  onNodeClick?: (componentId: string) => void;
 }
 
-export function FlowMap({ nodes, edges }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick }: FlowMapProps) {
+  const handleNodeClick = React.useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      onNodeClick?.(node.id);
+    },
+    [onNodeClick],
+  );
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -55,6 +64,7 @@ export function FlowMap({ nodes, edges }: FlowMapProps) {
       proOptions={{ hideAttribution: true }}
       minZoom={0.3}
       maxZoom={2}
+      onNodeClick={onNodeClick ? handleNodeClick : undefined}
     >
       <Background
         variant={BackgroundVariant.Lines}

@@ -20,6 +20,11 @@ import { SystemStatusBar } from './SystemStatusBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
 import { EquipmentGrid } from './EquipmentGrid.js';
 import { EventTimeline } from './EventTimeline.js';
+import { EquipmentDrawer } from './EquipmentDrawer.js';
+import {
+  SensorState, HealthState, NodeStatus, ValueProvenance,
+} from '../../domain/types.js';
+import type { ComponentViewModel } from '../../domain/types.js';
 
 function makeStores(): EngineStores {
   return {
@@ -177,5 +182,76 @@ describe('EventTimeline', () => {
     );
     // Session start key renders some text — just verify no crash and list present
     expect(document.querySelector('[data-testid]')).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EquipmentDrawer
+// ---------------------------------------------------------------------------
+
+describe('EquipmentDrawer', () => {
+  const TANK_VM: ComponentViewModel = {
+    componentId:       'cmp_tank',
+    health:            HealthState.Healthy,
+    operationalStatus: NodeStatus.Ok,
+    sensorState:       SensorState.Live,
+    provenance:        ValueProvenance.Measured,
+    liveValues:        { temp: 55 },
+    activeCommands:    [],
+    activeAlarms:      [],
+  };
+
+  function makeDrawerProps(
+    componentId: string | null,
+    vms: Record<string, ComponentViewModel> = {},
+    onClose = () => {},
+  ) {
+    const stores   = makeStores();
+    const registry = makeFullRegistry();
+    const alarmStore = createInMemoryAlarmStore();
+    buildHotWaterSeed(stores, registry);
+    return {
+      componentId,
+      projectId: HOT_WATER_PROJECT_ID,
+      stores,
+      registry,
+      componentVMs: vms,
+      alarmStore,
+      onClose,
+    };
+  }
+
+  it('renders drawer element (closed when componentId is null)', () => {
+    const props = makeDrawerProps(null);
+    render(<LocaleProvider><EquipmentDrawer {...props} /></LocaleProvider>);
+    expect(screen.getByTestId('equipment-drawer')).toBeTruthy();
+  });
+
+  it('renders close button when a component and VM are provided', () => {
+    const props = makeDrawerProps('cmp_tank', { cmp_tank: TANK_VM });
+    render(<LocaleProvider><EquipmentDrawer {...props} /></LocaleProvider>);
+    expect(screen.getByTestId('drawer-close-btn')).toBeTruthy();
+  });
+
+  it('calls onClose when close button is clicked', () => {
+    let closed = false;
+    const props = makeDrawerProps('cmp_tank', { cmp_tank: TANK_VM }, () => { closed = true; });
+    render(<LocaleProvider><EquipmentDrawer {...props} /></LocaleProvider>);
+    screen.getByTestId('drawer-close-btn').click();
+    expect(closed).toBe(true);
+  });
+
+  it('calls onClose when backdrop is clicked', () => {
+    let closed = false;
+    const props = makeDrawerProps('cmp_tank', { cmp_tank: TANK_VM }, () => { closed = true; });
+    render(<LocaleProvider><EquipmentDrawer {...props} /></LocaleProvider>);
+    screen.getByTestId('drawer-backdrop').click();
+    expect(closed).toBe(true);
+  });
+
+  it('shows component name when a VM is provided', () => {
+    const props = makeDrawerProps('cmp_tank', { cmp_tank: TANK_VM });
+    render(<LocaleProvider><EquipmentDrawer {...props} /></LocaleProvider>);
+    expect(screen.getAllByText('Storage Tank').length).toBeGreaterThan(0);
   });
 });

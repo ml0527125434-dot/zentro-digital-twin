@@ -12,9 +12,10 @@
  * All data received as props — no store access inside this component.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ComponentViewModel, ConnectionViewModel } from '../../domain/types.js';
 import type { EngineStores } from '../../engine/graph-engine.js';
+import type { ComponentRegistry } from '../../lib/component-registry.js';
 import type { AlarmStore } from '../../alarm/alarm-store.js';
 import { buildFlowGraph } from '../../renderer/flow-transformers.js';
 import { useElkLayout } from '../../renderer/useElkLayout.js';
@@ -25,10 +26,12 @@ import { SystemStatusBar } from './SystemStatusBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
 import { EquipmentGrid } from './EquipmentGrid.js';
 import { EventTimeline } from './EventTimeline.js';
+import { EquipmentDrawer } from './EquipmentDrawer.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
   stores:        EngineStores;
+  registry:      ComponentRegistry;
   componentVMs:  Record<string, ComponentViewModel>;
   connectionVMs: Record<string, ConnectionViewModel>;
   alarmStore:    AlarmStore;
@@ -38,12 +41,23 @@ export interface MissionControlViewProps {
 export function MissionControlView({
   projectId,
   stores,
+  registry,
   componentVMs,
   connectionVMs,
   alarmStore,
   nowMs,
 }: MissionControlViewProps) {
   const { t } = useLocale();
+
+  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+
+  const handleSelectComponent = useCallback((id: string) => {
+    setSelectedComponentId(id);
+  }, []);
+
+  const handleCloseDrawer = useCallback(() => {
+    setSelectedComponentId(null);
+  }, []);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -58,6 +72,7 @@ export function MissionControlView({
       flex:           1,
       minHeight:      0,
       overflow:       'hidden',
+      position:       'relative',
     }} data-testid="mission-control">
 
       {/* System status strip */}
@@ -103,7 +118,11 @@ export function MissionControlView({
           )}
           {/* position:absolute gives ReactFlow a concrete pixel height to measure */}
           <div style={{ position: 'absolute', inset: 0 }}>
-            <FlowMap nodes={layoutNodes} edges={edges} />
+            <FlowMap
+              nodes={layoutNodes}
+              edges={edges}
+              onNodeClick={handleSelectComponent}
+            />
           </div>
         </div>
 
@@ -124,6 +143,7 @@ export function MissionControlView({
               stores={stores}
               componentVMs={componentVMs}
               alarmStore={alarmStore}
+              onSelectComponent={handleSelectComponent}
             />
           </div>
 
@@ -137,6 +157,17 @@ export function MissionControlView({
           </div>
         </div>
       </div>
+
+      {/* Equipment Detail Drawer — absolute sibling, slides over the main area */}
+      <EquipmentDrawer
+        componentId={selectedComponentId}
+        projectId={projectId}
+        stores={stores}
+        registry={registry}
+        componentVMs={componentVMs}
+        alarmStore={alarmStore}
+        onClose={handleCloseDrawer}
+      />
     </div>
   );
 }

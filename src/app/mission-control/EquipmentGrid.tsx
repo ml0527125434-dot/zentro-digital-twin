@@ -17,10 +17,11 @@ import { useLocale } from '../../i18n/index.js';
 import type { TranslationKey } from '../../i18n/index.js';
 
 export interface EquipmentGridProps {
-  projectId:    string;
-  stores:       EngineStores;
-  componentVMs: Record<string, ComponentViewModel>;
-  alarmStore:   AlarmStore;
+  projectId:          string;
+  stores:             EngineStores;
+  componentVMs:       Record<string, ComponentViewModel>;
+  alarmStore:         AlarmStore;
+  onSelectComponent?: (componentId: string) => void;
 }
 
 // Icon per component type
@@ -58,7 +59,7 @@ function Badge({ cssVar, label }: { cssVar: string; label: string }) {
   );
 }
 
-export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore }: EquipmentGridProps) {
+export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onSelectComponent }: EquipmentGridProps) {
   const { t } = useLocale();
   const components = stores.graph.getComponents(projectId);
 
@@ -143,6 +144,7 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore }: E
 
           return (
             <li key={component.id} data-testid={`dashboard-item-${component.id}`}
+              onClick={() => onSelectComponent?.(component.id)}
               style={{
                 padding:      '8px 10px',
                 background:   'linear-gradient(160deg, var(--bg-mantle), var(--bg-crust))',
@@ -153,6 +155,7 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore }: E
                 gap:           5,
                 boxShadow:    activeAlarmCount > 0 ? 'var(--glow-critical)' : 'var(--shadow-card)',
                 transition:   'border-color 0.3s, box-shadow 0.3s',
+                cursor:       onSelectComponent ? 'pointer' : 'default',
               }}>
               {/* Header row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

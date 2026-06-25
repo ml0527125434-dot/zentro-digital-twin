@@ -124,6 +124,7 @@ function AppContent({
       <MissionControlView
         projectId={projectId}
         stores={stores}
+        registry={registry}
         componentVMs={componentVMs}
         connectionVMs={connectionVMs}
         alarmStore={alarmStore}
