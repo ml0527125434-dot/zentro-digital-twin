@@ -51,6 +51,8 @@ const ALL_KEYS: TranslationKey[] = [
   'demo.info_title', 'demo.info_body', 'demo.dismiss', 'demo.not_available',
   // Stage 26 keys
   'pres.enter', 'pres.exit', 'pres.badge',
+  // Stage 29 keys
+  'inspector.empty',
 ];
 
 describe('Hebrew locale', () => {

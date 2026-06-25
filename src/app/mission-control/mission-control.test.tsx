@@ -1,7 +1,7 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect } from 'vitest';
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 
 import { createInMemoryGraphStore, type EngineStores } from '../../engine/graph-engine.js';
 import { createInMemoryVersionStore } from '../../domain/project-version.js';
@@ -16,6 +16,7 @@ import { POINT_OF_USE } from '../../lib/definitions/point-of-use.def.js';
 import { buildHotWaterSeed, HOT_WATER_PROJECT_ID } from '../../seed/hot-water.seed.js';
 import { LocaleProvider } from '../../i18n/index.js';
 import { ZentroApp } from '../ZentroApp.js';
+import { MissionControlView } from './MissionControlView.js';
 import { KpiBar } from './KpiBar.js';
 import { SystemStatusBar } from './SystemStatusBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
@@ -135,6 +136,143 @@ describe('Demo Info Strip', () => {
 
     act(() => { screen.getByTestId('demo-info-dismiss').click(); });
     expect(screen.queryByTestId('demo-info-strip')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// MissionControlView — Stage 29 workspace layout
+// ---------------------------------------------------------------------------
+
+describe('MissionControlView', () => {
+  function makeMCVProps() {
+    const stores       = makeStores();
+    const registry     = makeFullRegistry();
+    const alarmStore   = createInMemoryAlarmStore();
+    buildHotWaterSeed(stores, registry);
+    return {
+      projectId:     HOT_WATER_PROJECT_ID,
+      stores,
+      registry,
+      componentVMs:  {},
+      connectionVMs: {},
+      alarmStore,
+      nowMs:         Date.now(),
+    };
+  }
+
+  it('renders mission-control testid', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    expect(screen.getByTestId('mission-control')).toBeTruthy();
+  });
+
+  it('renders workspace-left and workspace-right panels', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    expect(screen.getByTestId('workspace-left')).toBeTruthy();
+    expect(screen.getByTestId('workspace-right')).toBeTruthy();
+  });
+
+  it('shows inspector-placeholder when no component is selected', () => {
+    render(
+      <LocaleProvider defaultLocale="en">
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    expect(screen.getByTestId('inspector-placeholder')).toBeTruthy();
+  });
+
+  it('collapses left sidebar when sidebar-left-toggle is clicked', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    act(() => { screen.getByTestId('sidebar-left-toggle').click(); });
+    // Width collapses to 0 — expand button should appear
+    expect(screen.getByTestId('sidebar-left-expand')).toBeTruthy();
+  });
+
+  it('collapses right inspector when inspector-right-toggle is clicked', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    act(() => { screen.getByTestId('inspector-right-toggle').click(); });
+    expect(screen.getByTestId('inspector-right-expand')).toBeTruthy();
+  });
+
+  it('re-expands left sidebar via sidebar-left-expand button', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    act(() => { screen.getByTestId('sidebar-left-toggle').click(); });
+    act(() => { screen.getByTestId('sidebar-left-expand').click(); });
+    expect(screen.queryByTestId('sidebar-left-expand')).toBeNull();
+  });
+
+  it('selecting a component via EquipmentGrid hides inspector-placeholder', () => {
+    render(
+      <LocaleProvider>
+        <MissionControlView {...makeMCVProps()} />
+      </LocaleProvider>,
+    );
+    // Placeholder visible before selection
+    expect(screen.getByTestId('inspector-placeholder')).toBeTruthy();
+    const items = screen.getAllByTestId(/^dashboard-item-/);
+    act(() => { fireEvent.click(items[0]); });
+    // Placeholder replaced by inspector content branch
+    expect(screen.queryByTestId('inspector-placeholder')).toBeNull();
+  });
+
+  it('closes inspector and restores placeholder when inspector-close-btn is clicked', () => {
+    const stores       = makeStores();
+    const registry     = makeFullRegistry();
+    const alarmStore   = createInMemoryAlarmStore();
+    buildHotWaterSeed(stores, registry);
+    const components   = stores.graph.getComponents(HOT_WATER_PROJECT_ID);
+    // Build minimal VMs so InspectorPanel renders content
+    const vms: Record<string, ComponentViewModel> = {};
+    for (const c of components) {
+      vms[c.id] = {
+        componentId:       c.id,
+        health:            HealthState.Healthy,
+        operationalStatus: NodeStatus.Ok,
+        sensorState:       SensorState.Live,
+        provenance:        ValueProvenance.Measured,
+        liveValues:        {},
+        activeCommands:    [],
+        activeAlarms:      [],
+      };
+    }
+    render(
+      <LocaleProvider>
+        <MissionControlView
+          projectId={HOT_WATER_PROJECT_ID}
+          stores={stores}
+          registry={registry}
+          componentVMs={vms}
+          connectionVMs={{}}
+          alarmStore={alarmStore}
+          nowMs={Date.now()}
+        />
+      </LocaleProvider>,
+    );
+    const items = screen.getAllByTestId(/^dashboard-item-/);
+    act(() => { fireEvent.click(items[0]); });
+    expect(screen.getByTestId('inspector-panel')).toBeTruthy();
+    act(() => { fireEvent.click(screen.getByTestId('inspector-close-btn')); });
+    expect(screen.queryByTestId('inspector-panel')).toBeNull();
+    expect(screen.getByTestId('inspector-placeholder')).toBeTruthy();
   });
 });
 

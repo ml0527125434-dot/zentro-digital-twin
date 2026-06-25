@@ -136,4 +136,7 @@ export const HE: Translations = {
   'pres.enter': 'הצגה מלאה',
   'pres.exit':  'יציאה',
   'pres.badge': 'מצג',
+
+  // Stage 29: Workspace Redesign
+  'inspector.empty': 'בחר רכיב לפרטים',
 };

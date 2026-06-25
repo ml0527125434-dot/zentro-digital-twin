@@ -117,7 +117,9 @@ export type TranslationKey =
   // ── Stage 26: Presentation Mode ──────────────────────────────────────────
   | 'pres.enter'
   | 'pres.exit'
-  | 'pres.badge';
+  | 'pres.badge'
+  // ── Stage 29: Workspace Redesign ─────────────────────────────────────────
+  | 'inspector.empty';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

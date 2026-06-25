@@ -98,11 +98,13 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
           const vm = componentVMs[component.id];
           if (!vm) return (
             <li key={component.id} data-testid={`dashboard-item-${component.id}`}
+              onClick={() => onSelectComponent?.(component.id)}
               style={{
                 padding:      '6px 10px',
                 background:   'var(--bg-mantle)',
                 border:       '1px solid var(--border)',
                 borderRadius: 'var(--card-radius)',
+                cursor:       onSelectComponent ? 'pointer' : 'default',
               }}>
               <span data-testid="component-name" style={{ fontSize: 11, color: 'var(--text-sub)' }}>
                 {component.name}

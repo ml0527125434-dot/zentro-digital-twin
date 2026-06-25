@@ -136,4 +136,7 @@ export const EN: Translations = {
   'pres.enter': 'Present',
   'pres.exit':  'Exit',
   'pres.badge': 'PRESENT',
+
+  // Stage 29: Workspace Redesign
+  'inspector.empty': 'Select a component to inspect',
 };
