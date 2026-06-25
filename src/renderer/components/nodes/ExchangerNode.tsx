@@ -59,8 +59,8 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
         <Handle type="source" position={Position.Top}    id="secondary_out" style={{ background: 'var(--pipe-hot)', width: 7, height: 7 }} />
       </>}
       {isSolar && <>
-        <Handle type="target" position={Position.Bottom} id="cold_in" style={{ background: 'var(--pipe-cold)', width: 7, height: 7, display: 'none' }} />
-        <Handle type="source" position={Position.Top}    id="hot_out" style={{ background: 'var(--pipe-hot)', width: 7, height: 7, display: 'none' }} />
+        <Handle type="target" position={Position.Bottom} id="cold_in_b" style={{ background: 'var(--pipe-cold)', width: 7, height: 7, display: 'none' }} />
+        <Handle type="source" position={Position.Top}    id="hot_out_t" style={{ background: 'var(--pipe-hot)', width: 7, height: 7, display: 'none' }} />
       </>}
 
       {/* Icon with active glow */}
@@ -92,7 +92,7 @@ export function ExchangerNode({ data }: NodeProps<ComponentNodeData>) {
         </span>
       ) : (
         <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>
-          {isActive ? 'פועל' : 'המתנה'}
+          {isActive ? 'Running' : 'Standby'}
         </span>
       )}
     </div>

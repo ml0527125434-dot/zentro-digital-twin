@@ -39,8 +39,8 @@ const TYPE_ICON: Record<string, string> = {
 };
 
 const CATEGORY_LABEL: Record<ComponentCategory, string> = {
-  storage:  'Storage',
   source:   'Heat Sources',
+  storage:  'Storage',
   pump:     'Pumps',
   valve:    'Valves',
   sensor:   'Sensors',
