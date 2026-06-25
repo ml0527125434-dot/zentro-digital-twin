@@ -1,0 +1,148 @@
+/* Zentro Digital Twin — Global Styles (Stage 16) */
+
+/* ---------------------------------------------------------------------------
+   CSS custom properties — all status colours resolved here.
+   Renderer components reference these via var(--name); no hex in TSX files.
+--------------------------------------------------------------------------- */
+:root {
+  /* Layout */
+  --app-flow-height:  60vh;
+  --app-panel-height: 40vh;
+
+  /* Node canvas */
+  --node-bg:    #1e1e2e;
+  --node-label: #cdd6f4;
+
+  /* HealthState */
+  --status-healthy:       #a6e3a1;
+  --status-warning:       #f9e2af;
+  --status-critical:      #f38ba8;
+  --status-offline:       #585b70;
+  --status-maintenance:   #89b4fa;
+  --status-commissioning: #89dceb;
+
+  /* NodeStatus */
+  --node-ok:      #a6e3a1;
+  --node-cold:    #89b4fa;
+  --node-warn:    #f9e2af;
+  --node-risk:    #fab387;
+  --node-scald:   #f38ba8;
+  --node-fault:   #cba6f7;
+  --node-unknown: #6c7086;
+
+  /* SensorState */
+  --sensor-live:    #a6e3a1;
+  --sensor-stale:   #f9e2af;
+  --sensor-lost:    #f38ba8;
+  --sensor-unknown: #6c7086;
+
+  /* App chrome */
+  --bg-base:   #1e1e2e;
+  --bg-mantle: #181825;
+  --bg-crust:  #11111b;
+  --text-base: #cdd6f4;
+  --text-sub:  #a6adc8;
+  --border:    #313244;
+}
+
+/* ---------------------------------------------------------------------------
+   Reset + viewport fill
+--------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin:  0;
+  padding: 0;
+  height:  100%;
+  width:   100%;
+  background: var(--bg-base);
+  color:      var(--text-base);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size:   14px;
+}
+
+#root {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  width:          100%;
+}
+
+/* ---------------------------------------------------------------------------
+   ZentroApp layout
+--------------------------------------------------------------------------- */
+[data-testid="zentro-app"] {
+  display:        flex;
+  flex-direction: column;
+  height:         100%;
+  width:          100%;
+}
+
+/* ---------------------------------------------------------------------------
+   FlowMap canvas container — ReactFlow requires an explicit height
+--------------------------------------------------------------------------- */
+.zentro-flow-container {
+  height: var(--app-flow-height);
+  flex:   1 1 auto;
+  min-height: 300px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* React Flow overrides */
+.react-flow__background {
+  background: var(--bg-mantle) !important;
+}
+
+.react-flow__controls button {
+  background:   var(--bg-crust) !important;
+  border-color: var(--border)   !important;
+  color:        var(--text-base) !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--border) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   DashboardPanel
+--------------------------------------------------------------------------- */
+[data-testid="dashboard-panel"] {
+  list-style: none;
+  margin:     0;
+  padding:    8px 12px;
+  display:    flex;
+  flex-wrap:  wrap;
+  gap:        8px;
+  background: var(--bg-crust);
+  overflow-y: auto;
+  max-height: var(--app-panel-height);
+  border-top: 1px solid var(--border);
+}
+
+[data-testid^="dashboard-item-"] {
+  background:    var(--bg-mantle);
+  border:        1px solid var(--border);
+  border-radius: 6px;
+  padding:       6px 10px;
+  min-width:     160px;
+  display:       flex;
+  flex-direction: column;
+  gap:           2px;
+}
+
+[data-testid="component-name"] {
+  font-weight: 600;
+  font-size:   12px;
+  color:       var(--text-base);
+  display:     block;
+}
+
+[data-testid="component-health"],
+[data-testid="component-status"],
+[data-testid="component-sensor-state"] {
+  font-size: 10px;
+  color:     var(--text-sub);
+  display:   block;
+}

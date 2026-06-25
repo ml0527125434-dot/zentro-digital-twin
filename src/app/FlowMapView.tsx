@@ -35,5 +35,9 @@ export function FlowMapView({
     connectionVMs,
   );
 
-  return <FlowMap nodes={nodes} edges={edges} />;
+  return (
+    <div className="zentro-flow-container">
+      <FlowMap nodes={nodes} edges={edges} />
+    </div>
+  );
 }

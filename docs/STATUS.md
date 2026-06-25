@@ -17,6 +17,25 @@
 | 13    | Build Pipeline + Vercel Entry Point | **542** | `94ae0a7` |
 | 14    | Demo Telemetry Simulation Layer | **556** | `e43dcc1` |
 | 15    | Alarm Rule Seeding + Live Evaluation Loop | **564** | `8b17231` |
+| 16    | CSS Layer + FlowMap Layout + Node Visual Polish | **564** | `` |
+
+## Stage 16 Notes
+
+**Approved.** 564 tests unchanged (pure CSS/layout — no logic changes). Build: 17 kB CSS bundle.
+
+New files:
+- `src/styles.css` — global CSS custom properties (dark Catppuccin-inspired theme); all `--status-*`, `--node-*`, `--sensor-*` variables; viewport layout; DashboardPanel card grid
+
+Modified:
+- `src/main.tsx` — imports `@xyflow/react/dist/style.css` and `./styles.css`
+- `src/app/FlowMapView.tsx` — wraps canvas in `<div className="zentro-flow-container">` (60 vh height; required for ReactFlow to render)
+- `src/renderer/components/nodes/TankNode.tsx` — rounded temperature to 1 d.p.; added alarm count badge (red circle top-right when active alarms > 0)
+- `src/renderer/components/nodes/GenericNode.tsx` — added temperature display, sensor state row, alarm count badge; now reads `liveValues['temperature']`
+
+Architecture invariants confirmed:
+- All colour values live in CSS only — no hex in TSX files
+- Node components read from `viewModel` props — no store access, no projection calls
+- Alarm badge reads `viewModel.activeAlarms` (pre-computed by useProjection)
 
 ## Stage 15 Notes
 
@@ -189,4 +208,4 @@ Stage 7-introduced. They do not affect test correctness or runtime behavior.
 
 ## Next
 
-Stage 16 — pending.
+Stage 17 — pending.

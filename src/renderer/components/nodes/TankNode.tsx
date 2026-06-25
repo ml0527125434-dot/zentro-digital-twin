@@ -11,6 +11,8 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
 
   const temp = viewModel.liveValues['temp'] ?? null;
 
+  const alarmCount = viewModel.activeAlarms.filter(a => a.state === 'active').length;
+
   return (
     <div
       style={{
@@ -19,6 +21,7 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
         padding:      '8px 12px',
         background:   'var(--node-bg)',
         minWidth:     140,
+        position:     'relative',
       }}
     >
       {/* Ports */}
@@ -28,12 +31,24 @@ export function TankNode({ data }: NodeProps<ComponentNodeData>) {
       <Handle type="target" position={Position.Right}  id="recirc_in"  />
       <Handle type="source" position={Position.Top}    id="hot_out"    />
 
+      {alarmCount > 0 && (
+        <span style={{
+          position:   'absolute', top: -6, right: -6,
+          background: 'var(--status-critical)', color: '#fff',
+          borderRadius: '50%', width: 16, height: 16,
+          fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 700,
+        }}>
+          {alarmCount}
+        </span>
+      )}
+
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--node-label)', marginBottom: 4 }}>
         {name}
       </div>
       {temp !== null && (
         <div style={{ fontSize: 13, color: `var(${statusPres.cssVar})` }}>
-          {String(temp)}°C
+          {typeof temp === 'number' ? temp.toFixed(1) : String(temp)}°C
         </div>
       )}
       <div style={{ fontSize: 9, color: `var(${sensorPres.cssVar})`, marginTop: 2 }}>
