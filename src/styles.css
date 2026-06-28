@@ -764,3 +764,90 @@ button[data-testid$="-expand"]:hover {
 [data-testid^="dashboard-item-"] span[style*="status-critical"] {
   animation: alarmPulse 1.8s ease-in-out infinite;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Stage 32E — Full UI/UX Polish
+   Typography, RTL, accessibility, responsive behavior, transitions
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Typography refinements ──────────────────────────────────────────────── */
+body {
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering:          optimizeLegibility;
+}
+
+/* ── RTL-aware improvements ──────────────────────────────────────────────── */
+
+/* Panel sidebar toggle buttons flip in RTL */
+[dir="rtl"] button[data-testid="sidebar-left-toggle"]  { transform: scaleX(-1); }
+[dir="rtl"] button[data-testid="sidebar-left-expand"]  { transform: scaleX(-1); }
+[dir="rtl"] button[data-testid="inspector-right-toggle"]{ transform: scaleX(-1); }
+[dir="rtl"] button[data-testid="inspector-right-expand"]{ transform: scaleX(-1); }
+
+/* RTL: alarm banner text direction */
+[dir="rtl"] [data-testid="alarm-banner"] {
+  text-align: right;
+}
+
+/* RTL: palette items flow right-to-left */
+[dir="rtl"] [data-testid^="palette-item-"] {
+  flex-direction: row-reverse;
+  text-align:     right;
+}
+
+/* ── Accessibility: high-contrast focus indicators ────────────────────────── */
+:focus-visible {
+  outline:        2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius:  2px;
+}
+
+/* Screen-reader only utility */
+.zentro-sr-only {
+  position:   absolute;
+  width:       1px;
+  height:      1px;
+  padding:     0;
+  margin:      -1px;
+  overflow:    hidden;
+  clip:        rect(0,0,0,0);
+  white-space: nowrap;
+  border:      0;
+}
+
+/* ── Responsive: compact mode for narrow viewports ───────────────────────── */
+@media (max-width: 960px) {
+  [data-testid="workspace-left"]  { max-width: 220px; }
+  [data-testid="workspace-right"] { max-width: 260px; }
+  [data-testid="kpi-bar"] { flex-wrap: wrap; gap: 4px; }
+}
+
+/* ── Context menu animation ───────────────────────────────────────────────── */
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+[role="menu"] {
+  animation:        menuFadeIn 0.12s ease-out forwards;
+  transform-origin: top left;
+}
+
+/* ── Edge label backdrop for readability ──────────────────────────────────── */
+.zentro-edge-label {
+  background:      color-mix(in srgb, var(--bg-crust) 80%, transparent);
+  border:          1px solid var(--border);
+  border-radius:   4px;
+  padding:         2px 6px;
+  font-size:       9px;
+  font-weight:     700;
+  backdrop-filter: blur(4px);
+  display:         flex;
+  align-items:     center;
+  gap:             4px;
+}
+
+/* ── Better selection ring for all node types ─────────────────────────────── */
+.react-flow__node.selected .zentro-node {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow-card);
+}

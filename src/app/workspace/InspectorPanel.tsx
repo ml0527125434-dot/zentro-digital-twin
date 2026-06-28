@@ -235,27 +235,62 @@ export function InspectorPanel({
         </span>
       </Row>
 
-      {/* ── Live Values ──────────────────────────────────────────────── */}
+      {/* ── Live Values — metric card grid ───────────────────────────── */}
       <SectionHeader label={t('drawer.section_telemetry')} />
       {(() => {
         const entries = Object.entries(vm.liveValues).filter(([, v]) => v !== null);
         if (entries.length === 0) {
           return (
-            <div style={{ padding: '8px 16px', fontSize: 11, color: 'var(--text-dim)' }}>
+            <div style={{ padding: '12px 16px', fontSize: 11, color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ opacity: 0.5 }}>◯</span>
               {t('drawer.no_live_data')}
             </div>
           );
         }
-        return entries.map(([key, rawVal]) => {
-          const slot  = definition?.sensorSlots.find(s => s.id === key);
-          const label = slot?.label ?? key;
-          const unit  = slot?.unit ?? '';
-          const val =
-            typeof rawVal === 'boolean' ? (rawVal ? '✓' : '✗') :
-            typeof rawVal === 'number'  ? `${rawVal.toFixed(1)}${unit ? ' ' + unit : ''}` :
-            String(rawVal);
-          return <Row key={key} label={label}>{val}</Row>;
-        });
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, padding: '10px 16px 6px', borderBottom: '1px solid var(--border)' }}>
+            {entries.map(([key, rawVal]) => {
+              const slot   = definition?.sensorSlots.find(s => s.id === key);
+              const label  = slot?.label ?? key;
+              const unit   = slot?.unit ?? '';
+              const isNum  = typeof rawVal === 'number';
+              const isBool = typeof rawVal === 'boolean';
+              const dispVal = isBool
+                ? (rawVal ? '✓ On' : '✗ Off')
+                : isNum
+                  ? rawVal.toFixed(1)
+                  : String(rawVal);
+              const valColor = isBool
+                ? (rawVal ? 'var(--status-healthy)' : 'var(--text-dim)')
+                : key.includes('temp') ? `var(${statusPres.cssVar})`
+                : key.includes('flow') ? (isNum && (rawVal as number) > 0 ? 'var(--status-healthy)' : 'var(--text-sub)')
+                : 'var(--text-base)';
+
+              return (
+                <div key={key} style={{
+                  background:   'var(--bg-base)',
+                  border:       '1px solid var(--border)',
+                  borderRadius: 'var(--card-radius)',
+                  padding:      '8px 10px',
+                  display:      'flex',
+                  flexDirection:'column',
+                  gap:          3,
+                  minWidth:     0,
+                }}>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.08em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: valColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                    {dispVal}
+                  </span>
+                  {unit && isNum && (
+                    <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>{unit}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
       })()}
 
       {/* ── Alarms ───────────────────────────────────────────────────── */}
