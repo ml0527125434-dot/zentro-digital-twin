@@ -139,7 +139,7 @@ export function KpiBar({ componentVMs, connectionVMs, alarmStore, projectId, com
   const recircActive = flowRate   !== null ? flowRate   > 0   : null;
 
   const activeAlarmCount = components.reduce((n, c) =>
-    n + alarmStore.getAlarmsForComponent(c.id).filter(a => a.state === 'active').length, 0);
+    n + alarmStore.getAlarmsForComponent(c.id).filter(a => a.state === 'active' || a.state === 'pending').length, 0);
 
   const fmtTemp = (v: number | null) =>
     v !== null ? v.toFixed(1) : t('kpi.no_value');
