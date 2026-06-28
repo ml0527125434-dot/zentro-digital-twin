@@ -59,6 +59,11 @@ export interface BuilderPalettePanelProps {
   registry: ComponentRegistry;
 }
 
+// Get port count for a type from registry
+function portCount(registry: ComponentRegistry, typeId: string): number {
+  return registry.get(typeId)?.ports.length ?? 0;
+}
+
 export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
   const { t } = useLocale();
   const { state, dispatchFsm } = useBuilder();
@@ -221,6 +226,25 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
                     }}>
                       {item.label}
                     </span>
+                    {/* Port count badge */}
+                    {!isActive && (() => {
+                      const n = portCount(registry, item.typeId);
+                      return n > 0 ? (
+                        <span title={`${n} port${n !== 1 ? 's' : ''}`} style={{
+                          fontSize:     8,
+                          fontWeight:   700,
+                          color:        'var(--text-dim)',
+                          background:   'var(--bg-base)',
+                          border:       '1px solid var(--border)',
+                          borderRadius: 3,
+                          padding:      '1px 4px',
+                          flexShrink:   0,
+                          lineHeight:   1.3,
+                        }}>
+                          {n}⬡
+                        </span>
+                      ) : null;
+                    })()}
                     {isActive && (
                       <span style={{
                         fontSize:  9,

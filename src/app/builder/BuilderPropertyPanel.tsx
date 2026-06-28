@@ -432,15 +432,31 @@ export function BuilderPropertyPanel({
                   port.medium === 'air'        ? '--pipe-air'     :
                   '--pipe-warm';
                 const roleIcon = port.role === 'outlet' ? '→' : port.role === 'inlet' ? '←' : '↔';
+
+                // Check if this port already has a connection
+                const isConnected = allConnections.some(cn =>
+                  (cn.fromComponentId === selectedId && cn.fromPortId === port.id) ||
+                  (cn.toComponentId   === selectedId && cn.toPortId   === port.id)
+                );
+
                 return (
                   <div key={port.id} style={{
                     display:      'flex',
                     alignItems:   'center',
                     gap:          7,
                     fontSize:     10,
-                    padding:      '3px 0',
+                    padding:      '4px 0',
                     borderBottom: '1px solid color-mix(in srgb, var(--border) 40%, transparent)',
                   }}>
+                    {/* Connected indicator */}
+                    <span title={isConnected ? 'Connected' : 'Not connected'} style={{
+                      fontSize:   9,
+                      color:      isConnected ? 'var(--status-healthy)' : 'var(--text-dim)',
+                      flexShrink: 0,
+                      lineHeight: 1,
+                    }}>
+                      {isConnected ? '●' : '○'}
+                    </span>
                     <span style={{ color: `var(${mediumVar})`, fontWeight: 700, flexShrink: 0, fontSize: 11 }}>
                       {roleIcon}
                     </span>
