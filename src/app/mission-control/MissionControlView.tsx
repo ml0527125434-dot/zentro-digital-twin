@@ -359,21 +359,23 @@ export function MissionControlView({
       )}
 
       {/* ── Three-column workspace ─────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden', width: '100%' }}>
 
         {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
         <div
           data-testid="workspace-left"
           style={{
+            flex:            `0 0 ${showLeft ? (buildMode ? 300 : 280) : 0}px`,
             width:           showLeft ? (buildMode ? 300 : 280) : 0,
-            flexShrink:      0,
+            maxWidth:        showLeft ? (buildMode ? 300 : 280) : 0,
             overflow:        'hidden',
-            transition:      'width 0.25s cubic-bezier(0.4,0,0.2,1)',
+            transition:      'width 0.25s cubic-bezier(0.4,0,0.2,1), flex 0.25s cubic-bezier(0.4,0,0.2,1)',
             display:         'flex',
             flexDirection:   'column',
             background:      'var(--bg-crust)',
             borderInlineEnd: '1px solid var(--border)',
             minHeight:       0,
+            minWidth:        0,
           }}
         >
           {/* Sidebar header: section label + collapse button */}
@@ -444,7 +446,7 @@ export function MissionControlView({
         </div>
 
         {/* ── CENTER CANVAS ─────────────────────────────────────────────────── */}
-        <div style={{ flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ flex: '1 1 0px', minWidth: 1, position: 'relative', overflow: 'hidden' }}>
 
           {/* Expand left panel when collapsed */}
           {!presentationMode && leftCollapsed && (
@@ -660,15 +662,17 @@ export function MissionControlView({
         <div
           data-testid="workspace-right"
           style={{
-            width:             showRight ? 360 : 0,
-            flexShrink:        0,
+            flex:              `0 0 ${showRight ? (buildMode ? 280 : 360) : 0}px`,
+            width:             showRight ? (buildMode ? 280 : 360) : 0,
+            maxWidth:          showRight ? (buildMode ? 280 : 360) : 0,
             overflow:          'hidden',
-            transition:        'width 0.25s cubic-bezier(0.4,0,0.2,1)',
+            transition:        'width 0.25s cubic-bezier(0.4,0,0.2,1), flex 0.25s cubic-bezier(0.4,0,0.2,1)',
             display:           'flex',
             flexDirection:     'column',
             background:        'var(--bg-crust)',
             borderInlineStart: '1px solid var(--border)',
             minHeight:         0,
+            minWidth:          0,
           }}
         >
           {/* Inspector header: title or empty label + collapse button */}
