@@ -172,7 +172,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
 
   return (
     <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
-      {/* @ts-expect-error — @xyflow/react optional props conflict with exactOptionalPropertyTypes */}
+      {/* @ts-expect-error — exactOptionalPropertyTypes conflicts with @xyflow/react prop signatures */}
       <ReactFlow
         nodes={stableNodes}
         edges={edges}
@@ -191,7 +191,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
         onConnect={onConnect ? handleConnect : undefined}
         onEdgesDelete={onEdgeDelete ? handleEdgesDelete : undefined}
-        onNodeDragStop={onNodeMoved ? handleNodeDragStop : undefined}
+        onNodeDragStop={onNodeMoved ? handleNodeDragStop as never : undefined}
         deleteKeyCode={builderMode ? 'Delete' : null}
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
         selectionOnDrag={builderMode && !placingMode}

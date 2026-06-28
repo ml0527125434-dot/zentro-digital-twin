@@ -1,39 +1,37 @@
 /**
- * Zentro Digital Twin — Flow Edge
- *
- * Visual priority:
- *   1. Alarm (critical red pulse) — overrides everything
- *   2. Temperature-based NodeStatus color — when value is available
- *   3. FlowState color — green (Flowing), orange (Reverse), dim (Unknown/NoFlow)
- *
- * Stage 32A additions:
- *   - Animated flow-direction arrow dot travelling along the pipe
- *   - Pipe thickness scales with flow magnitude when available
- *   - Temperature gradient: single color tinted to status when value present
+ * FlowEdge — premium pipe visualization.
+ * Stage 33: dramatic visual transformation — thick colored pipes,
+ * 3 animated direction arrows, strong glow, 3D pipe highlight.
  */
 
-import React, { useId } from 'react';
+import React from 'react';
 import {
   EdgeLabelRenderer,
   getBezierPath,
   type EdgeProps,
 } from '@xyflow/react';
-import type { ConnectionEdge, ConnectionEdgeData } from '../../flow-transformers.js';
+import type { ConnectionEdge } from '../../flow-transformers.js';
 import { sensorStatePresentation, nodeStatusPresentation } from '../../theme.js';
 import { FlowState } from '../../../domain/types.js';
-import { useLocale } from '../../../i18n/index.js';
 
-// Medium → static pipe color for inactive/unknown flow state
 function mediumColor(medium?: string): string {
   switch (medium) {
-    case 'cold_water': return 'var(--pipe-cold)';
-    case 'recirc':     return 'var(--pipe-recirc)';
-    case 'gas':        return 'var(--pipe-gas)';
-    case 'electric':   return 'var(--pipe-electric)';
-    case 'air':        return 'var(--pipe-air)';
-    case 'hot_water':  return 'var(--pipe-hot)';
-    default:           return 'var(--edge-default)';
+    case 'cold_water': return '#38bdf8';
+    case 'recirc':     return '#2dd4bf';
+    case 'gas':        return '#fbbf24';
+    case 'electric':   return '#a78bfa';
+    case 'air':        return '#94a3b8';
+    case 'hot_water':  return '#f97316';
+    default:           return '#1e3a5f';
   }
+}
+
+function mediumStrokeWidth(medium?: string, isFlowing?: boolean): number {
+  const base = medium === 'hot_water' ? 10
+    : medium === 'cold_water' || medium === 'recirc' ? 9
+    : medium === 'gas' ? 8
+    : 7;
+  return isFlowing ? base : base - 2;
 }
 
 export function FlowEdge({
@@ -43,9 +41,7 @@ export function FlowEdge({
   sourcePosition,
   targetPosition,
   data,
-  markerEnd,
 }: EdgeProps<ConnectionEdge>) {
-  const { t } = useLocale();
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
@@ -61,21 +57,23 @@ export function FlowEdge({
   const sensorPres = sensorState ? sensorStatePresentation(sensorState) : null;
   const statusPres = status      ? nodeStatusPresentation(status)        : null;
 
-  // Stroke color: alarm > temperature status > flow state > medium identity
+  const isFlowing = flow === FlowState.Flowing || flow === FlowState.Reverse;
+
+  // Stroke color priority: alarm > status-tinted flow > medium identity
   let strokeColor: string;
   if (hasActiveAlarm) {
-    strokeColor = 'var(--edge-alarm)';
-  } else if (flow === FlowState.Flowing && value !== null && statusPres) {
+    strokeColor = '#ef4444';
+  } else if (isFlowing && statusPres && value !== null) {
     strokeColor = `var(${statusPres.cssVar})`;
-  } else if (flow === FlowState.Flowing) {
-    strokeColor = 'var(--edge-flowing)';
-  } else if (flow === FlowState.Reverse) {
-    strokeColor = 'var(--edge-reverse)';
   } else {
     strokeColor = mediumColor(medium);
   }
 
-  // Animation class
+  const strokeWidth = hasActiveAlarm
+    ? 10
+    : mediumStrokeWidth(medium, isFlowing);
+
+  // Animation class for dash pattern
   let animClass: string;
   if (hasActiveAlarm) {
     animClass = 'zentro-edge-alarm';
@@ -87,81 +85,93 @@ export function FlowEdge({
     animClass = 'zentro-edge-noflow';
   }
 
-  // Show label only when we have a temperature value
-  const showLabel = value !== null && statusPres !== null;
-
-  // Pipe stroke width — scale slightly with flow magnitude when available
-  const flowMagnitude = typeof (data?.viewModel.value) === 'number' ? data!.viewModel.value : null;
-  const baseWidth = hasActiveAlarm ? 4 : flow === FlowState.Flowing ? 3.5 : 2.5;
-  // For flowing pipes with a flow rate sensor, scale up to 5px at high flow
-  const strokeWidth = (flow === FlowState.Flowing && flowMagnitude !== null && flowMagnitude > 0)
-    ? Math.min(5, baseWidth + flowMagnitude * 0.15)
-    : baseWidth;
-
-  // Direction arrow travel duration: faster when actively flowing
-  const arrowDuration = flow === FlowState.Flowing ? '1.8s' : '2.8s';
-  const showArrow = flow === FlowState.Flowing || flow === FlowState.Reverse;
-  // Reverse flow: arrow travels target→source (keyTimes reversed)
+  const showArrow  = isFlowing || hasActiveAlarm;
   const arrowReverse = flow === FlowState.Reverse;
+  const arrowDur   = flow === FlowState.Flowing ? '1.6s' : '2.4s';
+
+  // Temperature label (only when flowing with a value)
+  const showLabel = isFlowing && value !== null && statusPres !== null;
 
   return (
     <>
-      {/* Glow layer — rendered behind main pipe */}
-      {(flow === FlowState.Flowing || hasActiveAlarm) && (
+      {/* Strong glow layer */}
+      {(isFlowing || hasActiveAlarm) && (
         <path
           d={edgePath}
           style={{
             stroke:        strokeColor,
-            strokeWidth:   strokeWidth + 6,
+            strokeWidth:   strokeWidth + 14,
             fill:          'none',
-            opacity:       0.12,
+            opacity:       0.22,
             pointerEvents: 'none',
           }}
         />
       )}
 
-      {/* Main pipe */}
+      {/* Main pipe body */}
       <path
         id={id}
         d={edgePath}
         className={`react-flow__edge-path ${animClass}`}
-        style={{ stroke: strokeColor, strokeWidth, fill: 'none' }}
-        markerEnd={markerEnd}
+        style={{
+          stroke:      strokeColor,
+          strokeWidth,
+          fill:        'none',
+          strokeLinecap: 'round',
+        }}
       />
 
-      {/* Animated flow-direction arrow dot */}
+      {/* Inner highlight stripe — 3D pipe depth effect */}
+      {isFlowing && (
+        <path
+          d={edgePath}
+          style={{
+            stroke:        'rgba(255,255,255,0.18)',
+            strokeWidth:   strokeWidth * 0.35,
+            fill:          'none',
+            pointerEvents: 'none',
+            strokeLinecap: 'round',
+          }}
+        />
+      )}
+
+      {/* Animated flow arrows — 3 evenly spaced */}
       {showArrow && (
         <g pointerEvents="none" aria-hidden="true">
-          {/* Arrow triangle pointing in flow direction */}
-          <polygon
-            points="-5,0 4,-3.5 4,3.5"
-            fill={strokeColor}
-            opacity={0.85}
-            style={{ filter: `drop-shadow(0 0 3px ${strokeColor})` }}
-          >
-            <animateMotion
-              dur={arrowDuration}
-              repeatCount="indefinite"
-              rotate="auto"
-              keyTimes={arrowReverse ? '0;1' : '0;1'}
-              keyPoints={arrowReverse ? '1;0' : '0;1'}
-              calcMode="linear"
+          {[0, 0.33, 0.66].map((offset, i) => (
+            <polygon
+              key={i}
+              points="-7,0 6,-4.5 6,4.5"
+              fill={strokeColor}
+              opacity={0.95}
+              style={{ filter: `drop-shadow(0 0 5px ${strokeColor})` }}
             >
-              <mpath href={`#${id}`} />
-            </animateMotion>
-          </polygon>
+              <animateMotion
+                dur={arrowDur}
+                repeatCount="indefinite"
+                rotate="auto"
+                begin={`${-offset * parseFloat(arrowDur)}s`}
+                keyPoints={arrowReverse ? '1;0' : '0;1'}
+                keyTimes="0;1"
+                calcMode="linear"
+              >
+                <mpath href={`#${id}`} />
+              </animateMotion>
+            </polygon>
+          ))}
         </g>
       )}
 
-      {/* Wide invisible hit area — matches React Flow BaseEdge pattern for reliable clicking */}
+      {/* Wide invisible hit area */}
       <path
         d={edgePath}
         fill="none"
         strokeOpacity={0}
-        strokeWidth={20}
+        strokeWidth={24}
         className="react-flow__edge-interaction"
       />
 
+      {/* Temperature label at midpoint */}
       {showLabel && (
         <EdgeLabelRenderer>
           <div
@@ -169,14 +179,22 @@ export function FlowEdge({
               position:      'absolute',
               transform:     `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'none',
+              background:    `color-mix(in srgb, ${strokeColor} 20%, #0a0e17)`,
+              border:        `1px solid ${strokeColor}`,
+              borderRadius:  12,
+              padding:       '2px 8px',
+              fontSize:       10,
+              fontWeight:     700,
+              color:          strokeColor,
+              backdropFilter: 'blur(4px)',
+              lineHeight:     1.4,
+              whiteSpace:     'nowrap',
             }}
-            className="nodrag nopan zentro-edge-label"
+            className="nodrag nopan"
           >
-            <span style={{ color: `var(${statusPres!.cssVar})` }}>
-              {typeof value === 'number' ? value.toFixed(1) : String(value)}{t('unit.temperature')}
-            </span>
+            {typeof value === 'number' ? value.toFixed(1) : String(value)}°C
             {sensorPres && (
-              <span style={{ color: `var(${sensorPres.cssVar})`, fontSize: 8 }}>
+              <span style={{ marginInlineStart: 4, fontSize: 8, opacity: 0.8 }}>
                 {sensorPres.icon}
               </span>
             )}
