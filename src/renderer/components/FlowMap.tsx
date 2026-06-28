@@ -18,6 +18,7 @@ import {
   type Edge,
   type NodeChange,
   type OnSelectionChangeParams,
+  type Connection as RFConnection,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { TankNode }           from './nodes/TankNode.js';
@@ -83,11 +84,13 @@ export interface FlowMapProps {
   onPaneClick?:          (() => void) | undefined;
   onSelectionChange?:    ((ids: string[]) => void) | undefined;
   onNodeContextMenu?:    ((componentId: string, x: number, y: number) => void) | undefined;
+  onConnect?:            ((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => void) | undefined;
+  onEdgeDelete?:         ((edgeId: string) => void) | undefined;
   placingMode?:          boolean | undefined;
   builderMode?:          boolean | undefined;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, placingMode, builderMode }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, placingMode, builderMode }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -139,6 +142,26 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
     [onNodeContextMenu],
   );
 
+  const handleConnect = useCallback(
+    (params: RFConnection) => {
+      if (!params.source || !params.target) return;
+      onConnect?.(
+        params.source,
+        params.sourceHandle ?? 'out',
+        params.target,
+        params.targetHandle ?? 'in',
+      );
+    },
+    [onConnect],
+  );
+
+  const handleEdgesDelete = useCallback(
+    (deletedEdges: Edge[]) => {
+      for (const e of deletedEdges) onEdgeDelete?.(e.id);
+    },
+    [onEdgeDelete],
+  );
+
   return (
     <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
       {/* @ts-expect-error — @xyflow/react optional props conflict with exactOptionalPropertyTypes */}
@@ -158,6 +181,9 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         onPaneClick={onPaneClick}
         onSelectionChange={onSelectionChange ? handleSelectionChange : undefined}
         onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
+        onConnect={onConnect ? handleConnect : undefined}
+        onEdgesDelete={onEdgeDelete ? handleEdgesDelete : undefined}
+        deleteKeyCode={builderMode ? 'Delete' : null}
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
         selectionOnDrag={builderMode && !placingMode}
         selectionMode={SelectionMode.Partial}

@@ -92,6 +92,10 @@ export function MissionControlView({
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
 
+  // Connection validation toast
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const connectErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Context menu state
   const [ctxMenu, setCtxMenu] = useState<{ componentId: string; x: number; y: number } | null>(null);
   const closeCtxMenu = useCallback(() => setCtxMenu(null), []);
@@ -181,6 +185,44 @@ export function MissionControlView({
     document.dispatchEvent(new CustomEvent('zentro:builder:focusRename', { detail: ctxMenu.componentId }));
     setRightCollapsed(false);
   }, [ctxMenu]);
+
+  // Drag-to-connect: fired by FlowMap when user drags handle-to-handle in build mode
+  const handleConnect = useCallback((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => {
+    if (!buildMode) return;
+    // Infer medium from source port definition
+    const sourceComp = stores.graph.getComponents(projectId).find(c => c.id === sourceId);
+    if (!sourceComp) return;
+    const sourceDef  = registry.get(sourceComp.type);
+    const sourcePort = sourceDef?.ports.find(p => p.id === sourceHandle);
+    if (!sourcePort) return;
+    try {
+      builder.connectPorts(
+        { componentId: sourceId, portId: sourceHandle },
+        { componentId: targetId, portId: targetHandle },
+        sourcePort.medium,
+        'forward',
+      );
+      onMutation?.();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Connection failed';
+      setConnectError(msg);
+      if (connectErrorTimer.current) clearTimeout(connectErrorTimer.current);
+      connectErrorTimer.current = setTimeout(() => setConnectError(null), 3500);
+    }
+  }, [buildMode, stores, registry, projectId, builder, onMutation]);
+
+  // Edge deletion via Delete key on selected edge (from RF onEdgesDelete)
+  const handleEdgeDelete = useCallback((edgeId: string) => {
+    if (!buildMode) return;
+    try {
+      builder.disconnectPorts(edgeId);
+      builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+      onMutation?.();
+    } catch { /* ignore */ }
+  }, [buildMode, builder, onMutation]);
+
+  // Cleanup connect error timer on unmount
+  useEffect(() => () => { if (connectErrorTimer.current) clearTimeout(connectErrorTimer.current); }, []);
 
   // Signal to ZentroApp whether inspector has content (ESC-key priority)
   useEffect(() => {
@@ -462,6 +504,32 @@ export function MissionControlView({
             </div>
           )}
 
+          {/* Connection validation toast */}
+          {connectError && (
+            <div style={{
+              position:     'absolute',
+              bottom:       16,
+              left:         '50%',
+              transform:    'translateX(-50%)',
+              zIndex:       30,
+              background:   'color-mix(in srgb, var(--status-critical) 15%, var(--bg-crust))',
+              border:       '1px solid var(--status-critical)',
+              borderRadius: 6,
+              padding:      '8px 16px',
+              fontSize:     11,
+              fontWeight:   600,
+              color:        'var(--status-critical)',
+              pointerEvents:'none',
+              boxShadow:    'var(--glow-critical)',
+              whiteSpace:   'nowrap',
+              maxWidth:     400,
+              overflow:     'hidden',
+              textOverflow: 'ellipsis',
+            }}>
+              ⚠ {connectError}
+            </div>
+          )}
+
           {/* FlowMap — fills the entire center column */}
           <div style={{ position: 'absolute', inset: 0 }}>
             <FlowMap
@@ -472,6 +540,8 @@ export function MissionControlView({
               onPaneClick={isPlacingMode ? handlePaneClick : undefined}
               onSelectionChange={buildMode ? handleSelectionChange : undefined}
               onNodeContextMenu={buildMode ? handleNodeContextMenu : undefined}
+              onConnect={buildMode ? handleConnect : undefined}
+              onEdgeDelete={buildMode ? handleEdgeDelete : undefined}
               placingMode={isPlacingMode}
               builderMode={buildMode}
             />
