@@ -106,10 +106,18 @@ function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: stri
       if (e.dataTransfer?.types.includes('application/zentro-type')) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
+        container.classList.add('flowmap-drag-active');
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      if (!container.contains(e.relatedTarget as Node | null)) {
+        container.classList.remove('flowmap-drag-active');
       }
     };
 
     const handleDrop = (e: DragEvent) => {
+      container.classList.remove('flowmap-drag-active');
       const typeId = e.dataTransfer?.getData('application/zentro-type');
       if (!typeId) return;
       e.preventDefault();
@@ -118,10 +126,13 @@ function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: stri
     };
 
     container.addEventListener('dragover', handleDragOver);
+    container.addEventListener('dragleave', handleDragLeave);
     container.addEventListener('drop', handleDrop);
     return () => {
       container.removeEventListener('dragover', handleDragOver);
+      container.removeEventListener('dragleave', handleDragLeave);
       container.removeEventListener('drop', handleDrop);
+      container.classList.remove('flowmap-drag-active');
     };
   }, [onDropComponent, screenToFlowPosition]);
 

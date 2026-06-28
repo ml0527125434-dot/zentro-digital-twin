@@ -503,7 +503,7 @@ export function MissionControlView({
             </div>
           )}
 
-          {/* Empty canvas hint — shown in build mode when no components placed yet */}
+          {/* Empty canvas — warm LEGO invitation */}
           {buildMode && components.length === 0 && !isPlacingMode && (
             <div style={{
               position:      'absolute',
@@ -513,16 +513,42 @@ export function MissionControlView({
               flexDirection: 'column',
               alignItems:    'center',
               justifyContent:'center',
-              gap:           12,
+              gap:           20,
               pointerEvents: 'none',
             }}>
-              <span style={{ fontSize: 40, opacity: 0.25 }}>⬡</span>
-              <span style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 600 }}>
-                {t('builder.canvas_empty_title')}
-              </span>
-              <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-                {t('builder.canvas_empty_body')}
-              </span>
+              {/* Animated dashed drop target */}
+              <svg width={160} height={160} viewBox="0 0 160 160" style={{ overflow: 'visible' }}>
+                <circle
+                  cx={80} cy={80} r={68}
+                  fill="none"
+                  stroke="#fb923c"
+                  strokeWidth={2}
+                  strokeDasharray="12 8"
+                  opacity={0.35}
+                  style={{ animation: 'emptyPulse 2s ease-in-out infinite' }}
+                />
+                <circle
+                  cx={80} cy={80} r={50}
+                  fill="none"
+                  stroke="#fb923c"
+                  strokeWidth={1.5}
+                  strokeDasharray="8 6"
+                  opacity={0.2}
+                  style={{ animation: 'emptyPulse 2s ease-in-out infinite', animationDelay: '0.5s' }}
+                />
+                <text x={80} y={88} textAnchor="middle" fontSize={44} fill="#fb923c" opacity={0.45}
+                  style={{ animation: 'emptyPulse 2s ease-in-out infinite' }}>
+                  ⬡
+                </text>
+              </svg>
+              <div style={{ textAlign: 'center', direction: 'rtl' }}>
+                <div style={{ fontSize: 17, fontWeight: 800, color: '#fb923c', opacity: 0.7, marginBottom: 6 }}>
+                  גרור רכיב לכאן
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', opacity: 0.6 }}>
+                  בחר מהרשימה משמאל ורשור ישירות אל הבד
+                </div>
+              </div>
             </div>
           )}
 
