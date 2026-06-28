@@ -1,266 +1,356 @@
 /**
- * BuilderPalettePanel — LEGO-style visual component library.
+ * BuilderPalettePanel — LEGO component shelf.
  *
- * Design: category tabs → large visual cards → drag-to-canvas.
- * Hebrew-first. Touch-friendly. Zero technical jargon on the surface.
+ * Product design principles:
+ * - Hebrew-first, no English visible to operator
+ * - Large tactile cards — feel like picking up a physical brick
+ * - Category tabs are bold shelf dividers, not navigation links
+ * - Search is hidden by default (secondary action)
+ * - Drag is the PRIMARY interaction
  */
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import type { ComponentRegistry, ComponentCategory } from '../../lib/component-registry.js';
+import type { ComponentRegistry } from '../../lib/component-registry.js';
 import { getPaletteItems } from '../../builder/palette.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 import { useLocale } from '../../i18n/index.js';
-import type { TranslationKey } from '../../i18n/index.js';
+import { ComponentIllustration } from './ComponentIllustration.js';
 
-// ── Category meta ─────────────────────────────────────────────────────────────
+// ── Hebrew component names (operator language, not engineering labels) ────────
+
+const HE_NAME: Record<string, string> = {
+  storage_tank:          'מיכל אחסון',
+  buffer_tank:           'מיכל חיץ',
+  expansion_vessel:      'כלי התפשטות',
+  heat_pump:             'משאבת חום',
+  gas_backup:            'תנור גז',
+  electric_heater:       'מחמם חשמלי',
+  solar_collector:       'קולט שמש',
+  plate_heat_exchanger:  'מחליף חום',
+  recirc_pump:           'משאבת סירקולציה',
+  variable_speed_pump:   'משאבה מתכווננת',
+  mixing_valve:          'שסתום ערבוב',
+  control_valve:         'שסתום בקרה',
+  isolation_valve:       'שסתום ניתוק',
+  safety_valve:          'שסתום בטיחות',
+  temperature_sensor:    'חיישן טמפרטורה',
+  pressure_sensor:       'חיישן לחץ',
+  flow_sensor:           'חיישן זרימה',
+  energy_meter:          'מד אנרגיה',
+  water_meter:           'מד מים',
+  filter:                'מסנן',
+  air_separator:         'מפריד אוויר',
+  distribution_manifold: 'מניפולד הפצה',
+  point_of_use:          'מקלחת',
+  tap:                   'ברז',
+};
+
+// ── Category palette ──────────────────────────────────────────────────────────
 
 interface CatMeta {
   icon:    string;
+  heLabel: string;
   accent:  string;
-  bg:      string;
-  labelHe: string;
-  labelEn: string;
+  cardBg:  string;  // rich gradient start
 }
 
-const CAT_META: Record<string, CatMeta> = {
-  source:   { icon: '♨',  accent: '#fb923c', bg: '#2a1000', labelHe: 'מקורות', labelEn: 'Sources'  },
-  storage:  { icon: '🛢', accent: '#60a5fa', bg: '#001230', labelHe: 'אגירה',  labelEn: 'Storage'  },
-  pump:     { icon: '⚙',  accent: '#22d3ee', bg: '#001e2a', labelHe: 'משאבות', labelEn: 'Pumps'    },
-  valve:    { icon: '⊛',  accent: '#c084fc', bg: '#1a0030', labelHe: 'שסתומים',labelEn: 'Valves'   },
-  sensor:   { icon: '📡', accent: '#4ade80', bg: '#001a0a', labelHe: 'חיישנים',labelEn: 'Sensors'  },
-  meter:    { icon: '📊', accent: '#facc15', bg: '#1a1200', labelHe: 'מדים',   labelEn: 'Meters'   },
-  consumer: { icon: '🚿', accent: '#2dd4bf', bg: '#001a18', labelHe: 'צריכה',  labelEn: 'Consumers'},
-  zone:     { icon: '🔀', accent: '#818cf8', bg: '#10103a', labelHe: 'הפצה',   labelEn: 'Zones'    },
-  air:      { icon: '💨', accent: '#94a3b8', bg: '#0a0f1a', labelHe: 'עזר',    labelEn: 'Aux'      },
+const CAT: Record<string, CatMeta> = {
+  source:   { icon: '♨',  heLabel: 'מקורות חום',  accent: '#fb923c', cardBg: '#3a1800' },
+  storage:  { icon: '🛢', heLabel: 'אגירה',        accent: '#60a5fa', cardBg: '#001535' },
+  pump:     { icon: '⚙',  heLabel: 'משאבות',       accent: '#22d3ee', cardBg: '#002030' },
+  valve:    { icon: '⊛',  heLabel: 'שסתומים',      accent: '#c084fc', cardBg: '#200038' },
+  sensor:   { icon: '📡', heLabel: 'חיישנים',      accent: '#4ade80', cardBg: '#001c08' },
+  meter:    { icon: '📊', heLabel: 'מדים',          accent: '#facc15', cardBg: '#1e1400' },
+  consumer: { icon: '🚿', heLabel: 'נקודות צריכה', accent: '#2dd4bf', cardBg: '#001e1c' },
+  zone:     { icon: '🔀', heLabel: 'הפצה',          accent: '#818cf8', cardBg: '#141040' },
+  air:      { icon: '💨', heLabel: 'עזר',           accent: '#94a3b8', cardBg: '#101820' },
 };
 
-const CAT_ORDER: ComponentCategory[] = [
-  'source', 'storage', 'pump', 'valve', 'sensor', 'meter', 'consumer', 'zone', 'air',
-];
+const CAT_ORDER = ['source','storage','pump','valve','sensor','meter','consumer','zone','air'];
 
-// ── Mini SVG icons (48×48) ────────────────────────────────────────────────────
+// ComponentIllustration is imported from ./ComponentIllustration.js above.
 
-function MiniIcon({ typeId, accent }: { typeId: string; accent: string }) {
-  const dim = '#1e2938';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _noop_illustration_stub({ typeId, accent }: { typeId: never; accent: never }) {
+  const dim  = '#0d1829';
+  const dim2 = '#1e3a5f';
 
   switch (typeId) {
-    case 'storage_tank':
-    case 'buffer_tank':
+
+    case 'storage_tank': case 'buffer_tank':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <ellipse cx={24} cy={12} rx={17} ry={5} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <rect x={7} y={12} width={34} height={24} fill={dim} />
-          <rect x={7} y={26} width={34} height={10} fill={accent} opacity="0.25" rx="1" />
-          <ellipse cx={24} cy={36} rx={17} ry={5} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <line x1={24} y1={36} x2={24} y2={44} stroke={accent} strokeWidth="2" opacity="0.6" />
-          <text x={24} y={28} textAnchor="middle" fill={accent} fontSize="10" fontWeight="800">58°</text>
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <defs>
+            <linearGradient id={`si-t-${typeId}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accent} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={accent} stopOpacity="0.05" />
+            </linearGradient>
+          </defs>
+          <ellipse cx={32} cy={13} rx={22} ry={6} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <rect x={10} y={13} width={44} height={36} fill={`url(#si-t-${typeId})`} stroke={accent} strokeWidth="1.5" />
+          <rect x={11} y={34} width={42} height={15} fill={accent} opacity="0.18" rx="1" />
+          <ellipse cx={32} cy={49} rx={22} ry={6} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <text x={32} y={36} textAnchor="middle" fill={accent} fontSize="13" fontWeight="900">58°C</text>
+          <line x1={32} y1={49} x2={32} y2={58} stroke={accent} strokeWidth="2.5" opacity="0.6" />
         </svg>
       );
 
     case 'expansion_vessel':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <ellipse cx={24} cy={24} rx={18} ry={20} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <line x1={6} y1={24} x2={42} y2={24} stroke={accent} strokeWidth="1" strokeDasharray="3 2" opacity="0.7" />
-          <text x={24} y={20} textAnchor="middle" fill={accent} fontSize="8" opacity="0.7">AIR</text>
-          <rect x={21} y={40} width={6} height={6} rx={2} fill={dim} stroke={accent} strokeWidth="1.2" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <ellipse cx={32} cy={32} rx={24} ry={27} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <line x1={8} y1={32} x2={56} y2={32} stroke={accent} strokeWidth="1.2" strokeDasharray="4 3" opacity="0.6" />
+          <text x={32} y={26} textAnchor="middle" fill={accent} fontSize="9" opacity="0.65">אוויר</text>
+          <circle cx={24} cy={20} r={4} fill="none" stroke={accent} strokeWidth="1" opacity="0.4" />
+          <circle cx={38} cy={23} r={2.5} fill="none" stroke={accent} strokeWidth="1" opacity="0.3" />
+          <text x={32} y={44} textAnchor="middle" fill={accent} fontSize="9" opacity="0.5">מים</text>
+          <rect x={29} y={55} width={6} height={8} rx={2} fill={dim} stroke={accent} strokeWidth="1.2" />
         </svg>
       );
 
     case 'heat_pump':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={4} y={10} width={40} height={28} rx={5} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <circle cx={24} cy={24} r={8} fill="none" stroke={accent} strokeWidth="1.5" opacity="0.7" />
-          <path d="M18,24 C18,20 22,18 24,18 C26,18 30,20 30,24" fill="none" stroke={accent} strokeWidth="1.5" />
-          <path d="M28,24 L32,24 M16,24 L12,24" stroke={accent} strokeWidth="1.5" strokeLinecap="round" />
-          <circle cx={24} cy={24} r={2.5} fill={accent} />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={6} y={12} width={52} height={38} rx={7} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <circle cx={32} cy={31} r={11} fill="none" stroke={accent} strokeWidth="1.5" opacity="0.7" />
+          <circle cx={32} cy={31} r={4} fill={accent} opacity="0.85" />
+          <path d="M21,31 C21,24 27,21 32,21" fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" />
+          <path d="M43,31 C43,38 37,41 32,41" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" />
+          <text x={13} y={29} fill="#f97316" fontSize="7" fontWeight="800">HOT</text>
+          <text x={43} y={40} fill="#38bdf8" fontSize="7" fontWeight="800">COLD</text>
         </svg>
       );
 
-    case 'recirc_pump':
-    case 'variable_speed_pump':
+    case 'recirc_pump': case 'variable_speed_pump':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <circle cx={24} cy={24} r={19} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <circle cx={24} cy={24} r={5} fill={accent} opacity="0.8" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle cx={32} cy={32} r={26} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <circle cx={32} cy={32} r={7} fill={accent} opacity="0.85" />
           {[0,90,180,270].map(deg => {
-            const r = deg * Math.PI / 180;
-            const x1 = 24 + Math.cos(r) * 5;
-            const y1 = 24 + Math.sin(r) * 5;
-            const x2 = 24 + Math.cos(r + 0.5) * 14;
-            const y2 = 24 + Math.sin(r + 0.5) * 14;
-            return <path key={deg} d={`M${x1},${y1} Q${x2},${y2} ${x2},${y2}`}
-              fill={accent} opacity="0.6" stroke="none" />;
+            const r = deg * Math.PI / 180 + 0.4;
+            const x1 = 32 + 7 * Math.cos(r - 0.4);
+            const y1 = 32 + 7 * Math.sin(r - 0.4);
+            const x2 = 32 + 19 * Math.cos(r);
+            const y2 = 32 + 19 * Math.sin(r);
+            return <path key={deg}
+              d={`M${x1},${y1} Q${x2},${y2} ${x2},${y2}`}
+              fill={accent} opacity="0.55" />;
           })}
-          <circle cx={24} cy={24} r={13} fill="none" stroke={accent} strokeWidth="0.8" opacity="0.3" />
+          <circle cx={32} cy={32} r={17} fill="none" stroke={accent} strokeWidth="0.8" opacity="0.25" />
         </svg>
       );
 
-    case 'mixing_valve':
-    case 'control_valve':
-    case 'isolation_valve':
-    case 'safety_valve': {
-      const isOpen = typeId !== 'isolation_valve';
+    case 'mixing_valve': case 'control_valve':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <polygon points="6,10 6,38 22,24" fill={isOpen ? accent : dim}
-            stroke={accent} strokeWidth="1.5" opacity={isOpen ? 0.8 : 0.6} />
-          <polygon points="42,10 42,38 26,24" fill={dim}
-            stroke={accent} strokeWidth="1.5" opacity="0.6" />
-          <circle cx={24} cy={24} r={4} fill={accent} />
-          <line x1={24} y1={8} x2={24} y2={16} stroke={accent} strokeWidth="2" opacity="0.6" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <polygon points="8,14 8,50 28,32" fill={accent} opacity="0.75" stroke={accent} strokeWidth="1" />
+          <polygon points="56,14 56,50 36,32" fill={dim} stroke={accent} strokeWidth="1.5" opacity="0.7" />
+          <circle cx={32} cy={32} r={6} fill={accent} />
+          <line x1={32} y1={12} x2={32} y2={22} stroke={accent} strokeWidth="3" opacity="0.6" strokeLinecap="round" />
+          <text x={32} y={58} textAnchor="middle" fill={accent} fontSize="8" fontWeight="800">פתוח</text>
         </svg>
       );
-    }
+
+    case 'isolation_valve':
+      return (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <polygon points="8,14 8,50 28,32" fill={dim} stroke={accent} strokeWidth="1.5" opacity="0.6" />
+          <polygon points="56,14 56,50 36,32" fill={dim} stroke={accent} strokeWidth="1.5" opacity="0.6" />
+          <circle cx={32} cy={32} r={6} fill={accent} />
+          <line x1={32} y1={32} x2={32} y2={14} stroke={accent} strokeWidth="3" opacity="0.7" strokeLinecap="round" />
+          <line x1={26} y1={12} x2={38} y2={12} stroke={accent} strokeWidth="2.5" strokeLinecap="round" />
+          <text x={32} y={58} textAnchor="middle" fill="#ef4444" fontSize="8" fontWeight="800">סגור</text>
+        </svg>
+      );
+
+    case 'safety_valve':
+      return (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <polygon points="8,14 8,50 28,32" fill={dim} stroke={accent} strokeWidth="1.5" opacity="0.7" />
+          <polygon points="56,14 56,50 36,32" fill={dim} stroke={accent} strokeWidth="1.5" opacity="0.7" />
+          <circle cx={32} cy={32} r={6} fill={accent} />
+          <path d="M32,8 L32,24 M28,10 L32,8 L36,10" stroke={accent} strokeWidth="2" fill="none" strokeLinecap="round" />
+          <path d="M32,8 C28,4 36,4 32,8" fill={accent} opacity="0.5" />
+          <text x={32} y={58} textAnchor="middle" fill={accent} fontSize="8" fontWeight="800">בטיחות</text>
+        </svg>
+      );
 
     case 'temperature_sensor':
-    case 'pressure_sensor':
-    case 'flow_sensor':
-    case 'energy_meter':
-    case 'water_meter': {
-      const color =
-        typeId === 'temperature_sensor' ? '#f97316' :
-        typeId === 'pressure_sensor'    ? '#818cf8' :
-        typeId === 'flow_sensor'        ? '#22d3ee' :
-        typeId === 'energy_meter'       ? '#facc15' :
-        '#60a5fa';
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <circle cx={24} cy={26} r={18} fill={dim} stroke={color} strokeWidth="1.5" />
-          <path d={`M 9,34 A 18,18 0 1,1 39,34`} fill="none" stroke={dim} strokeWidth="5" />
-          <path d={`M 9,34 A 18,18 0 0,1 ${24 + 18 * Math.cos(Math.PI * 0.7)},${26 + 18 * Math.sin(Math.PI * 0.7)}`}
-            fill="none" stroke={color} strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
-          <line x1={24} y1={26} x2={24} y2={14} stroke={color} strokeWidth="2" strokeLinecap="round" opacity="0.9"
-            style={{ transformOrigin: '24px 26px', transform: 'rotate(-30deg)' }} />
-          <circle cx={24} cy={26} r={3} fill={color} />
-          <text x={24} y={42} textAnchor="middle" fill={color} fontSize="7" fontWeight="700">
-            {typeId === 'temperature_sensor' ? '°C' : typeId === 'pressure_sensor' ? 'bar' : typeId === 'flow_sensor' ? 'ℓ/m' : typeId === 'energy_meter' ? 'kWh' : 'm³'}
-          </text>
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle cx={32} cy={34} r={24} fill={dim} stroke="#f97316" strokeWidth="1.5" />
+          <path d="M 12,46 A 24,24 0 1,1 52,46" fill="none" stroke={dim2} strokeWidth="5" />
+          <path d="M 12,46 A 24,24 0 0,1 42,16" fill="none" stroke="#f97316" strokeWidth="4" strokeLinecap="round" />
+          <line x1={32} y1={34} x2={26} y2={18} stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={32} cy={34} r={4} fill="#f97316" />
+          <text x={32} y={56} textAnchor="middle" fill="#f97316" fontSize="9" fontWeight="800">°C</text>
         </svg>
       );
-    }
+
+    case 'pressure_sensor':
+      return (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle cx={32} cy={34} r={24} fill={dim} stroke="#818cf8" strokeWidth="1.5" />
+          <path d="M 12,46 A 24,24 0 1,1 52,46" fill="none" stroke={dim2} strokeWidth="5" />
+          <path d="M 12,46 A 24,24 0 0,1 48,30" fill="none" stroke="#818cf8" strokeWidth="4" strokeLinecap="round" />
+          <line x1={32} y1={34} x2={44} y2={22} stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={32} cy={34} r={4} fill="#818cf8" />
+          <text x={32} y={56} textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="800">bar</text>
+        </svg>
+      );
+
+    case 'flow_sensor':
+      return (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle cx={32} cy={34} r={24} fill={dim} stroke="#22d3ee" strokeWidth="1.5" />
+          <path d="M 12,46 A 24,24 0 1,1 52,46" fill="none" stroke={dim2} strokeWidth="5" />
+          <path d="M 12,46 A 24,24 0 0,1 32,10" fill="none" stroke="#22d3ee" strokeWidth="4" strokeLinecap="round" />
+          <line x1={32} y1={34} x2={32} y2={14} stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx={32} cy={34} r={4} fill="#22d3ee" />
+          <text x={32} y={56} textAnchor="middle" fill="#22d3ee" fontSize="9" fontWeight="800">ל/ד</text>
+        </svg>
+      );
+
+    case 'energy_meter': case 'water_meter':
+      return (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={8} y={14} width={48} height={36} rx={6} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <rect x={14} y={22} width={36} height={16} rx={3} fill={dim2} stroke={accent} strokeWidth="0.8" opacity="0.6" />
+          <text x={32} y={34} textAnchor="middle" fill={accent} fontSize="13" fontWeight="900" fontFamily="monospace">
+            {typeId === 'energy_meter' ? '4.7kW' : '12m³'}
+          </text>
+          <circle cx={32} cy={54} r={3} fill={accent} opacity="0.6" />
+        </svg>
+      );
 
     case 'gas_backup':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={10} y={14} width={28} height={28} rx={4} fill={dim} stroke={accent} strokeWidth="1.5" />
-          {[20,26,32].map(y => (
-            <line key={y} x1={10} y1={y} x2={38} y2={y} stroke={accent} strokeWidth="0.8" opacity="0.3" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={12} y={16} width={40} height={38} rx={5} fill={dim} stroke={accent} strokeWidth="1.5" />
+          {[24,30,36,42].map(y => (
+            <line key={y} x1={12} y1={y} x2={52} y2={y} stroke={accent} strokeWidth="0.7" opacity="0.25" />
           ))}
-          <path d="M24,28 C20,22 18,18 22,14 C20,18 26,18 24,14 C28,18 26,22 28,26 C26,24 22,24 24,28 Z"
-            fill={accent} opacity="0.85" />
-          <path d="M24,28 C22,25 23,22 24.5,20 C23.5,22 25.5,22 24.5,20 C26,22 25,25 24,28 Z"
-            fill="#fff" opacity="0.5" />
+          <path d="M32,36 C24,26 22,18 28,12 C25,18 34,18 32,12 C38,18 36,26 40,32 C36,28 28,28 32,36 Z"
+            fill={accent} opacity="0.9" />
+          <path d="M32,36 C29,30 30,25 32,21 C31,25 33,25 32,21 C34,25 33,30 32,36 Z"
+            fill="#fff" opacity="0.45" />
         </svg>
       );
 
     case 'electric_heater':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={4} y={12} width={40} height={28} rx={5} fill={dim} stroke={accent} strokeWidth="1.5" />
-          {[20,28,36].map((y, i) => {
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={6} y={14} width={52} height={36} rx={7} fill={dim} stroke={accent} strokeWidth="1.5" />
+          {[24,32,40,48].map((y, i) => {
             const fromL = i % 2 === 0;
             return (
               <g key={y}>
-                <line x1={10} y1={y} x2={38} y2={y} stroke={accent} strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
-                {i < 2 && (
+                <line x1={14} y1={y} x2={50} y2={y} stroke={accent} strokeWidth="3" strokeLinecap="round" opacity="0.85" />
+                {i < 3 && (
                   <path d={fromL
-                    ? `M38,${y} A4,4 0 0,1 38,${y+8}`
-                    : `M10,${y} A4,4 0 0,0 10,${y+8}`}
-                    fill="none" stroke={accent} strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+                    ? `M50,${y} A5,5 0 0,1 50,${y+8}`
+                    : `M14,${y} A5,5 0 0,0 14,${y+8}`}
+                    fill="none" stroke={accent} strokeWidth="3" strokeLinecap="round" opacity="0.85" />
                 )}
               </g>
             );
           })}
-          <text x={24} y={10} textAnchor="middle" fill={accent} fontSize="9">⚡</text>
+          <text x={32} y={11} textAnchor="middle" fill={accent} fontSize="11">⚡</text>
         </svg>
       );
 
     case 'solar_collector':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={4} y={10} width={40} height={30} rx={3} fill={dim} stroke="#fbbf24" strokeWidth="1.5" />
-          {[10,17,24,31,38].map(x => (
-            <rect key={x} x={x} y={12} width={5} height={26} rx={2.5}
-              fill="#fbbf24" opacity="0.5" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={4} y={16} width={56} height={36} rx={4} fill={dim} stroke="#fbbf24" strokeWidth="1.5" />
+          {[12,20,28,36,44,52].map(x => (
+            <rect key={x} x={x} y={19} width={6} height={30} rx={3}
+              fill="#fbbf24" opacity="0.55" />
           ))}
-          <text x={24} y={30} textAnchor="middle" fill="#fbbf24" fontSize="16" opacity="0.85">☀</text>
+          <text x={32} y={40} textAnchor="middle" fill="#fbbf24" fontSize="20" opacity="0.9">☀</text>
         </svg>
       );
 
     case 'plate_heat_exchanger':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={4} y={10} width={40} height={28} rx={5} fill={dim} stroke={accent} strokeWidth="1.5" />
-          {[16,22,28,34].map((x, i) => (
-            <rect key={x} x={x} y={13} width={5} height={22} rx={2}
-              fill={i % 2 === 0 ? '#38bdf8' : '#f97316'} opacity="0.55" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={4} y={12} width={56} height={40} rx={7} fill={dim} stroke={accent} strokeWidth="1.5" />
+          {[18,25,32,39,46].map((x, i) => (
+            <rect key={x} x={x} y={16} width={5} height={32} rx={2.5}
+              fill={i % 2 === 0 ? '#38bdf8' : '#f97316'} opacity="0.6" />
           ))}
-          <path d="M4,20 L14,20 M34,20 L44,20" stroke="#38bdf8" strokeWidth="1.5" opacity="0.7" />
-          <path d="M4,28 L14,28 M34,28 L44,28" stroke="#f97316" strokeWidth="1.5" opacity="0.7" />
+          <path d="M4,24 L16,24 M48,24 L60,24" stroke="#38bdf8" strokeWidth="2" opacity="0.7" />
+          <path d="M4,40 L16,40 M48,40 L60,40" stroke="#f97316" strokeWidth="2" opacity="0.7" />
         </svg>
       );
 
     case 'filter':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={6} y={14} width={36} height={20} rx={4} fill={dim} stroke={accent} strokeWidth="1.5" />
-          {[14,19,24,29,34].map(x => (
-            <line key={x} x1={x} y1={16} x2={x} y2={32} stroke={accent} strokeWidth="1" opacity="0.5" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={8} y={18} width={48} height={28} rx={6} fill={dim} stroke={accent} strokeWidth="1.5" />
+          {[18,24,30,36,42,48].map(x => (
+            <line key={x} x1={x} y1={21} x2={x} y2={43} stroke={accent} strokeWidth="1.2" opacity="0.55" />
           ))}
-          <rect x={0} y={20} width={8} height={8} rx={2} fill={dim} stroke={accent} strokeWidth="1" />
-          <rect x={40} y={20} width={8} height={8} rx={2} fill={dim} stroke={accent} strokeWidth="1" />
+          <rect x={0} y={26} width={12} height={12} rx={3} fill={dim} stroke={accent} strokeWidth="1.2" />
+          <rect x={52} y={26} width={12} height={12} rx={3} fill={dim} stroke={accent} strokeWidth="1.2" />
+          <text x={32} y={57} textAnchor="middle" fill={accent} fontSize="8" fontWeight="700">מסנן</text>
         </svg>
       );
 
     case 'air_separator':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={14} y={12} width={20} height={28} rx={4} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <circle cx={20} cy={28} r={3} fill="none" stroke={accent} strokeWidth="1.2" opacity="0.7" />
-          <circle cx={28} cy={24} r={2} fill="none" stroke={accent} strokeWidth="1.2" opacity="0.5" />
-          <circle cx={23} cy={32} r={1.5} fill="none" stroke={accent} strokeWidth="1" opacity="0.4" />
-          <rect x={22} y={4} width={4} height={10} rx={2} fill={dim} stroke={accent} strokeWidth="1.2" opacity="0.8" />
-          <path d="M24,3 L24,0 M22,2 L24,0 L26,2" stroke={accent} strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <rect x={4} y={20} width={10} height={8} rx={2} fill={dim} stroke={accent} strokeWidth="1" />
-          <rect x={34} y={20} width={10} height={8} rx={2} fill={dim} stroke={accent} strokeWidth="1" />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={20} y={18} width={24} height={36} rx={5} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <circle cx={28} cy={38} r={4} fill="none" stroke={accent} strokeWidth="1.5" opacity="0.7" />
+          <circle cx={36} cy={32} r={2.5} fill="none" stroke={accent} strokeWidth="1.2" opacity="0.5" />
+          <circle cx={30} cy={45} r={1.5} fill="none" stroke={accent} strokeWidth="1" opacity="0.35" />
+          <rect x={29} y={6} width={6} height={14} rx={3} fill={dim} stroke={accent} strokeWidth="1.2" />
+          <path d="M32,4 L32,0 M29,3 L32,0 L35,3" stroke={accent} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <rect x={4} y={27} width={16} height={10} rx={3} fill={dim} stroke={accent} strokeWidth="1.2" />
+          <rect x={44} y={27} width={16} height={10} rx={3} fill={dim} stroke={accent} strokeWidth="1.2" />
         </svg>
       );
 
     case 'distribution_manifold':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={4} y={10} width={40} height={10} rx={4} fill={dim} stroke="#f97316" strokeWidth="1.5" />
-          {[12,24,36].map(x => (
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={4} y={12} width={56} height={14} rx={5} fill={dim} stroke="#f97316" strokeWidth="1.5" />
+          {[16,32,48].map(x => (
             <g key={x}>
-              <line x1={x} y1={20} x2={x} y2={34} stroke="#f97316" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
-              <circle cx={x} cy={34} r={2.5} fill="#f97316" opacity="0.6" />
+              <line x1={x} y1={26} x2={x} y2={44} stroke="#f97316" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
+              <circle cx={x} cy={44} r={3.5} fill="#f97316" opacity="0.7" />
             </g>
           ))}
-          <rect x={4} y={38} width={40} height={8} rx={4} fill={dim} stroke="#38bdf8" strokeWidth="1.5" />
+          <rect x={4} y={50} width={56} height={12} rx={5} fill={dim} stroke="#38bdf8" strokeWidth="1.5" />
+          <text x={32} y={59} textAnchor="middle" fill="#38bdf8" fontSize="7" fontWeight="800">חזרה</text>
         </svg>
       );
 
-    case 'point_of_use':
-    case 'tap':
+    case 'point_of_use': case 'tap':
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <circle cx={24} cy={22} r={18} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <rect x={16} y={12} width={16} height={7} rx={2} fill={dim} stroke={accent} strokeWidth="1.2" opacity="0.9" />
-          {[-8,0,8].map((dx, i) => (
-            <ellipse key={i} cx={24 + dx} cy={33} rx={2} ry={3}
-              fill={accent} opacity="0.7"
-              style={{ animation: `dropFall 1.2s ease-in infinite`, animationDelay: `${i * 0.25}s` }} />
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <circle cx={32} cy={28} r={22} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <rect x={21} y={14} width={22} height={10} rx={3} fill={dim} stroke={accent} strokeWidth="1.3" opacity="0.9" />
+          {[-10,0,10].map((dx, i) => (
+            <ellipse key={i} cx={32 + dx} cy={43}
+              rx={2.5} ry={3.5}
+              fill={accent} opacity="0.75"
+              style={{
+                animation: 'dropFall 1.2s ease-in infinite',
+                animationDelay: `${i * 0.28}s`,
+              }} />
           ))}
+          <text x={32} y={60} textAnchor="middle" fill={accent} fontSize="8" fontWeight="700">
+            {typeId === 'tap' ? 'ברז' : 'מקלחת'}
+          </text>
         </svg>
       );
 
     default:
       return (
-        <svg width={48} height={48} viewBox="0 0 48 48">
-          <rect x={8} y={8} width={32} height={32} rx={6} fill={dim} stroke={accent} strokeWidth="1.5" />
-          <text x={24} y={29} textAnchor="middle" fill={accent} fontSize="16">⬡</text>
+        <svg width={64} height={64} viewBox="0 0 64 64">
+          <rect x={8} y={8} width={48} height={48} rx={10} fill={dim} stroke={accent} strokeWidth="1.5" />
+          <text x={32} y={38} textAnchor="middle" fill={accent} fontSize="22">⬡</text>
         </svg>
       );
   }
@@ -270,67 +360,69 @@ function MiniIcon({ typeId, accent }: { typeId: string; accent: string }) {
 
 interface CardProps {
   typeId:   string;
-  label:    string;
   meta:     CatMeta;
   isActive: boolean;
   onSelect: (typeId: string) => void;
 }
 
-function ComponentCard({ typeId, label, meta, isActive, onSelect }: CardProps) {
-  const [hovered, setHovered] = useState(false);
+function ComponentCard({ typeId, meta, isActive, onSelect }: CardProps) {
+  const [hov, setHov] = useState(false);
+  const heName = HE_NAME[typeId] ?? typeId;
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
     e.dataTransfer.setData('application/zentro-type', typeId);
     e.dataTransfer.effectAllowed = 'copy';
-    // Create a compact drag ghost
-    const ghost = document.createElement('div');
-    ghost.style.cssText = [
-      'position:absolute', 'top:-1000px', 'left:-1000px',
-      `background:${meta.bg}`,
-      `border:2px solid ${meta.accent}`,
-      'border-radius:8px', 'padding:6px 12px',
-      'color:' + meta.accent,
-      'font-size:12px', 'font-weight:700',
-      'white-space:nowrap',
-      'font-family:inherit',
-    ].join(';');
-    ghost.textContent = label;
-    document.body.appendChild(ghost);
-    e.dataTransfer.setDragImage(ghost, ghost.offsetWidth / 2, 20);
-    setTimeout(() => document.body.removeChild(ghost), 0);
-  }, [typeId, label, meta]);
+    // Ghost: branded pill
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position:absolute;top:-999px;
+      background:${meta.cardBg};
+      border:2px solid ${meta.accent};
+      border-radius:10px;padding:8px 14px;
+      color:${meta.accent};font-size:13px;font-weight:800;
+      white-space:nowrap;font-family:inherit;direction:rtl;
+      box-shadow:0 0 20px ${meta.accent}44;
+    `;
+    el.textContent = heName;
+    document.body.appendChild(el);
+    e.dataTransfer.setDragImage(el, el.scrollWidth / 2, 24);
+    setTimeout(() => document.body.removeChild(el), 0);
+  }, [typeId, meta, heName]);
 
-  const ring  = isActive ? meta.accent : hovered ? meta.accent + 'aa' : meta.accent + '22';
-  const glow  = isActive
-    ? `0 0 0 2px ${meta.accent}66, 0 0 20px ${meta.accent}33`
-    : hovered
-    ? `0 0 0 1px ${meta.accent}55, 0 0 14px ${meta.accent}22`
+  const glow = isActive
+    ? `0 0 0 2px ${meta.accent}, 0 0 28px ${meta.accent}44`
+    : hov
+    ? `0 0 0 1px ${meta.accent}88, 0 0 18px ${meta.accent}22`
     : 'none';
-  const bgFill = isActive
-    ? `linear-gradient(145deg, ${meta.bg} 0%, color-mix(in srgb, ${meta.accent} 10%, #0a0e17) 100%)`
-    : `linear-gradient(145deg, ${meta.bg} 0%, #0a0e17 80%)`;
+
+  const border = isActive ? `2px solid ${meta.accent}`
+    : hov    ? `1.5px solid ${meta.accent}88`
+    :           `1.5px solid ${meta.accent}22`;
+
+  const bg = isActive
+    ? `linear-gradient(160deg, ${meta.cardBg} 0%, color-mix(in srgb, ${meta.accent} 14%, #0a0e17) 100%)`
+    : `linear-gradient(160deg, ${meta.cardBg} 0%, #0a0e17 80%)`;
 
   return (
     <div
       draggable
       data-testid={`palette-item-${typeId}`}
       onDragStart={handleDragStart}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       onClick={() => onSelect(typeId)}
       style={{
         display:        'flex',
         flexDirection:  'column',
         alignItems:     'center',
-        justifyContent: 'center',
-        gap:            6,
-        padding:        '12px 6px 10px',
-        background:     bgFill,
-        border:         `1.5px solid ${ring}`,
-        borderRadius:   10,
+        gap:            8,
+        padding:        '16px 6px 12px',
+        background:     bg,
+        border,
+        borderRadius:   12,
         cursor:         'grab',
-        transition:     'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease',
-        transform:      hovered || isActive ? 'translateY(-2px) scale(1.03)' : 'none',
+        transition:     'transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease',
+        transform:      isActive ? 'translateY(-3px) scale(1.04)' : hov ? 'translateY(-2px) scale(1.02)' : 'none',
         boxShadow:      glow,
         userSelect:     'none',
         WebkitUserSelect:'none',
@@ -338,53 +430,49 @@ function ComponentCard({ typeId, label, meta, isActive, onSelect }: CardProps) {
         overflow:       'hidden',
       }}
     >
+      {/* Top color stripe */}
+      <div style={{
+        position:   'absolute', top: 0, left: 0, right: 0, height: 4,
+        background: meta.accent,
+        opacity:    isActive ? 1 : hov ? 0.75 : 0.3,
+        transition: 'opacity 0.14s',
+        borderRadius: '11px 11px 0 0',
+      }} />
+
       {/* Active pip */}
       {isActive && (
         <div style={{
-          position:     'absolute',
-          top:          5,
-          insetInlineStart: 5,
-          width:        6,
-          height:       6,
-          borderRadius: '50%',
-          background:   meta.accent,
-          boxShadow:    `0 0 6px ${meta.accent}`,
+          position:'absolute', top:8, insetInlineEnd:8,
+          width:8, height:8, borderRadius:'50%',
+          background: meta.accent,
+          boxShadow: `0 0 8px ${meta.accent}`,
         }} />
       )}
 
-      {/* Category color stripe at top */}
+      {/* Illustration */}
       <div style={{
-        position:        'absolute',
-        top:             0,
-        left:            0,
-        right:           0,
-        height:          3,
-        background:      meta.accent,
-        opacity:         isActive ? 1 : hovered ? 0.8 : 0.4,
-        borderRadius:    '9px 9px 0 0',
-        transition:      'opacity 0.15s',
-      }} />
-
-      {/* Icon */}
-      <div style={{ lineHeight: 0, opacity: isActive ? 1 : hovered ? 0.95 : 0.8, transition: 'opacity 0.15s' }}>
-        <MiniIcon typeId={typeId} accent={meta.accent} />
+        opacity: isActive ? 1 : hov ? 0.95 : 0.82,
+        transition: 'opacity 0.14s',
+        lineHeight: 0,
+      }}>
+        <ComponentIllustration typeId={typeId} accent={meta.accent} />
       </div>
 
-      {/* Label */}
+      {/* Hebrew name */}
       <div style={{
-        fontSize:     11,
-        fontWeight:   700,
-        color:        isActive ? meta.accent : hovered ? meta.accent : 'var(--text-base)',
+        fontSize:     12,
+        fontWeight:   800,
+        color:        isActive ? meta.accent : hov ? meta.accent : '#c8d4e8',
         textAlign:    'center',
-        lineHeight:   1.25,
-        transition:   'color 0.15s',
+        lineHeight:   1.3,
+        direction:    'rtl',
         maxWidth:     '100%',
         overflow:     'hidden',
         textOverflow: 'ellipsis',
-        whiteSpace:   'nowrap',
-        direction:    'rtl',
+        whiteSpace:   'normal',
+        transition:   'color 0.14s',
       }}>
-        {label}
+        {heName}
       </div>
     </div>
   );
@@ -392,39 +480,38 @@ function ComponentCard({ typeId, label, meta, isActive, onSelect }: CardProps) {
 
 // ── Category tab ──────────────────────────────────────────────────────────────
 
-function CategoryTab({
-  catId, meta, isActive, onClick,
-}: { catId: string; meta: CatMeta; isActive: boolean; onClick: () => void }) {
-  const [hovered, setHovered] = useState(false);
+function CatTab({ id, meta, active, onClick }: { id:string; meta:CatMeta; active:boolean; onClick:()=>void }) {
+  const [hov, setHov] = useState(false);
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      title={meta.heLabel}
       style={{
-        display:        'flex',
-        flexDirection:  'column',
-        alignItems:     'center',
-        gap:            3,
-        padding:        '8px 10px 6px',
-        background:     isActive
-          ? `linear-gradient(180deg, ${meta.bg} 0%, color-mix(in srgb, ${meta.accent} 12%, #0a0e17) 100%)`
-          : hovered ? 'rgba(255,255,255,0.03)' : 'transparent',
-        border:         'none',
-        borderRadius:   8,
-        cursor:         'pointer',
-        color:          isActive ? meta.accent : hovered ? 'var(--text-base)' : 'var(--text-dim)',
-        transition:     'background 0.15s, color 0.15s, transform 0.12s',
-        transform:      isActive ? 'scale(1.05)' : 'none',
-        flexShrink:     0,
-        minWidth:       56,
-        outline:        isActive ? `1px solid ${meta.accent}44` : 'none',
-        outlineOffset:  '-1px',
+        display:       'flex',
+        flexDirection: 'column',
+        alignItems:    'center',
+        gap:           3,
+        padding:       '9px 8px 7px',
+        background:    active
+          ? `linear-gradient(180deg, ${meta.cardBg}, color-mix(in srgb, ${meta.accent} 15%, #0a0e17))`
+          : hov ? 'rgba(255,255,255,0.04)' : 'transparent',
+        border:        'none',
+        borderRadius:  9,
+        cursor:        'pointer',
+        color:         active ? meta.accent : hov ? '#a0b4c8' : '#506070',
+        transition:    'background 0.14s, color 0.14s, transform 0.12s',
+        transform:     active ? 'scale(1.08)' : 'none',
+        flexShrink:    0,
+        minWidth:      54,
+        outline:       active ? `1px solid ${meta.accent}44` : 'none',
+        outlineOffset: '-1px',
       }}
     >
-      <span style={{ fontSize: 18, lineHeight: 1 }}>{meta.icon}</span>
-      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
-        {meta.labelHe}
+      <span style={{ fontSize: 20, lineHeight: 1 }}>{meta.icon}</span>
+      <span style={{ fontSize: 9, fontWeight: 800, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>
+        {meta.heLabel.split(' ')[0]}
       </span>
     </button>
   );
@@ -439,36 +526,31 @@ export interface BuilderPalettePanelProps {
 export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
   const { t } = useLocale();
   const { state, dispatchFsm } = useBuilder();
-  const [activeCat, setActiveCat] = useState<string>(CAT_ORDER[0]!);
+  const [activeCat, setActiveCat]   = useState<string>('source');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery]           = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
 
   const allItems = getPaletteItems(registry);
 
-  // Search filter (category is handled via CSS visibility on each card)
-  const searchItems = useMemo(() => {
-    if (!searchQuery.trim()) return null; // null = show all by category
-    const q = searchQuery.toLowerCase();
-    return new Set(allItems
-      .filter(i => i.label.toLowerCase().includes(q) || i.typeId.toLowerCase().includes(q))
-      .map(i => i.typeId)
-    );
-  }, [allItems, searchQuery]);
+  // Which items match the current view
+  const isVisible = useCallback((typeId: string, category: string): boolean => {
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      const name = (HE_NAME[typeId] ?? '').toLowerCase();
+      return name.includes(q) || typeId.includes(q);
+    }
+    return category === activeCat;
+  }, [query, activeCat]);
 
-  // Whether a given item is visible (used for empty state detection)
-  const isVisible = useCallback((item: { typeId: string; category: string }) => {
-    if (searchItems !== null) return searchItems.has(item.typeId);
-    return item.category === activeCat;
-  }, [searchItems, activeCat]);
+  const visibleCount = useMemo(
+    () => allItems.filter(i => isVisible(i.typeId, i.category)).length,
+    [allItems, isVisible],
+  );
 
-  const visibleCount = useMemo(() => allItems.filter(isVisible).length, [allItems, isVisible]);
-
-  // Available categories that have items
   const availableCats = useMemo(() => {
-    const hasCat = new Set(allItems.map(i => i.category));
-    return CAT_ORDER.filter(c => hasCat.has(c));
+    const set = new Set(allItems.map(i => i.category));
+    return CAT_ORDER.filter(c => set.has(c));
   }, [allItems]);
 
   const isPlacing = state.mode === 'placing';
@@ -482,113 +564,90 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
     }
   }, [isPlacing, placingId, dispatchFsm]);
 
-  const toggleSearch = useCallback(() => {
-    setSearchOpen(v => {
-      if (!v) setTimeout(() => searchRef.current?.focus(), 50);
-      else setSearchQuery('');
-      return !v;
-    });
-  }, []);
-
   return (
     <div
       data-testid="builder-palette"
       style={{
-        display:        'flex',
-        flexDirection:  'column',
-        height:         '100%',
-        overflow:       'hidden',
-        background:     '#060a10',
+        display:       'flex',
+        flexDirection: 'column',
+        height:        '100%',
+        overflow:      'hidden',
+        background:    '#050810',
+        direction:     'rtl',
       }}
     >
-
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────────────────── */}
       <div style={{
-        display:        'flex',
-        alignItems:     'center',
-        gap:            8,
-        padding:        '10px 12px 8px',
-        borderBottom:   '1px solid var(--border)',
-        flexShrink:     0,
-      }}>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize:    14,
-            fontWeight:  800,
-            color:       'var(--text-base)',
-            direction:   'rtl',
-            letterSpacing: '-0.01em',
-          }}>
-            {t('builder.lego_title')}
-          </div>
-          {!isPlacing && (
-            <div style={{
-              fontSize:    10,
-              color:       'var(--text-dim)',
-              marginTop:   1,
-              direction:   'rtl',
-            }}>
-              {t('builder.lego_hint')}
-            </div>
-          )}
-          {isPlacing && (
-            <div style={{
-              fontSize:    10,
-              color:       '#fb923c',
-              fontWeight:  700,
-              marginTop:   1,
-              direction:   'rtl',
-              animation:   'emptyPulse 1.4s ease-in-out infinite',
-            }}>
-              ✦ {t('builder.placing_hint')}
-            </div>
-          )}
-        </div>
-
-        {/* Search toggle */}
-        <button
-          onClick={toggleSearch}
-          aria-label="Search"
-          title="חיפוש"
-          style={{
-            background:   searchOpen ? 'rgba(255,255,255,0.07)' : 'transparent',
-            border:       '1px solid var(--border)',
-            borderRadius: 6,
-            color:        searchOpen ? 'var(--text-base)' : 'var(--text-dim)',
-            cursor:       'pointer',
-            fontSize:     14,
-            padding:      '4px 7px',
-            lineHeight:   1,
-            transition:   'background 0.15s, color 0.15s',
-            flexShrink:   0,
-          }}
-        >
-          🔍
-        </button>
-      </div>
-
-      {/* ── Search bar (collapsible) ────────────────────────────────────── */}
-      <div style={{
-        maxHeight:    searchOpen ? 48 : 0,
-        overflow:     'hidden',
-        transition:   'max-height 0.2s cubic-bezier(0.4,0,0.2,1)',
+        padding:      '12px 14px 8px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
         flexShrink:   0,
       }}>
-        <div style={{ padding: '6px 10px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: '#e2e8f4', letterSpacing: '-0.02em' }}>
+              {t('builder.lego_title')}
+            </div>
+            {!isPlacing && (
+              <div style={{ fontSize: 10, color: '#4a6080', marginTop: 2 }}>
+                {t('builder.lego_hint')}
+              </div>
+            )}
+            {isPlacing && (
+              <div style={{
+                fontSize: 10, fontWeight: 800, color: '#fb923c', marginTop: 2,
+                animation: 'emptyPulse 1.4s ease-in-out infinite',
+              }}>
+                ✦ {t('builder.lego_active_hint')}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setSearchOpen(v => {
+                if (!v) setTimeout(() => searchRef.current?.focus(), 60);
+                else setQuery('');
+                return !v;
+              });
+            }}
+            aria-label="חיפוש"
+            style={{
+              background:   searchOpen ? 'rgba(255,255,255,0.08)' : 'transparent',
+              border:       '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 7,
+              color:        searchOpen ? '#e2e8f4' : '#4a6080',
+              cursor:       'pointer',
+              fontSize:     15,
+              padding:      '4px 8px',
+              lineHeight:   1,
+              transition:   'all 0.14s',
+              flexShrink:   0,
+            }}
+          >🔍</button>
+        </div>
+      </div>
+
+      {/* ── Search (hidden by default) ────────────────────────────────────── */}
+      <div style={{
+        maxHeight:  searchOpen ? 46 : 0,
+        overflow:   'hidden',
+        transition: 'max-height 0.2s ease',
+        flexShrink: 0,
+      }}>
+        <div style={{ padding: '6px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <input
             ref={searchRef}
             type="search"
-            placeholder={t('builder.palette_search')}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.currentTarget.value)}
+            placeholder="חפש רכיבים…"
+            value={query}
+            onChange={e => setQuery(e.currentTarget.value)}
             style={{
               width:        '100%',
               background:   'rgba(255,255,255,0.04)',
-              border:       '1px solid var(--border)',
-              borderRadius: 6,
-              color:        'var(--text-base)',
-              fontSize:     12,
-              padding:      '5px 10px',
+              border:       '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 7,
+              color:        '#e2e8f4',
+              fontSize:     13,
+              padding:      '6px 12px',
               outline:      'none',
               boxSizing:    'border-box',
               direction:    'rtl',
@@ -597,97 +656,84 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
         </div>
       </div>
 
-      {/* ── Category tabs ─────────────────────────────────────────────── */}
-      {!searchQuery && (
-        <div
-          ref={tabsRef}
-          data-testid="palette-category-tabs"
-          style={{
-            display:        'flex',
-            flexDirection:  'row',
-            gap:            2,
-            padding:        '6px 6px 4px',
-            overflowX:      'auto',
-            flexShrink:     0,
-            borderBottom:   '1px solid var(--border)',
-            scrollbarWidth: 'none',
-          }}
-        >
-          {availableCats.map(cat => (
-            <CategoryTab
-              key={cat}
-              catId={cat}
-              meta={CAT_META[cat] ?? CAT_META['air']!}
-              isActive={activeCat === cat}
-              onClick={() => setActiveCat(cat)}
+      {/* ── Category tabs ────────────────────────────────────────────────── */}
+      {!query && (
+        <div style={{
+          display:        'flex',
+          gap:            2,
+          padding:        '6px 6px 4px',
+          overflowX:      'auto',
+          flexShrink:     0,
+          borderBottom:   '1px solid rgba(255,255,255,0.05)',
+          scrollbarWidth: 'none',
+        }}>
+          {availableCats.map(id => (
+            <CatTab
+              key={id}
+              id={id}
+              meta={CAT[id]!}
+              active={activeCat === id}
+              onClick={() => setActiveCat(id)}
             />
           ))}
         </div>
       )}
 
-      {/* ── Placing-mode cancel banner ─────────────────────────────────── */}
+      {/* ── Placing cancel bar ────────────────────────────────────────────── */}
       {isPlacing && (
         <div
           data-testid="builder-placing-banner"
           style={{
-            display:      'flex',
-            alignItems:   'center',
-            justifyContent:'space-between',
-            gap:          8,
-            padding:      '6px 12px',
-            background:   'rgba(251,146,60,0.08)',
-            borderBottom: '1px solid rgba(251,146,60,0.2)',
-            flexShrink:   0,
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'space-between',
+            padding:        '7px 12px',
+            background:     'rgba(251,146,60,0.09)',
+            borderBottom:   '1px solid rgba(251,146,60,0.2)',
+            flexShrink:     0,
           }}
         >
-          <span style={{ fontSize: 10, color: '#fb923c', fontWeight: 600, direction: 'rtl' }}>
-            {t('builder.lego_active_hint')}
+          <span style={{ fontSize: 11, color: '#fb923c', fontWeight: 700 }}>
+            לחץ על הבד להנחה
           </span>
           <button
             data-testid="builder-cancel-placing"
             onClick={() => dispatchFsm({ type: 'CANCEL_PLACING' })}
             style={{
-              background:   'rgba(251,146,60,0.1)',
+              background:   'rgba(251,146,60,0.12)',
               border:       '1px solid rgba(251,146,60,0.3)',
-              borderRadius: 5,
+              borderRadius: 6,
               color:        '#fb923c',
               cursor:       'pointer',
-              fontSize:     10,
-              fontWeight:   700,
-              padding:      '2px 8px',
-              flexShrink:   0,
+              fontSize:     11,
+              fontWeight:   800,
+              padding:      '3px 10px',
             }}
-          >
-            {t('builder.cancel')} ✕
-          </button>
+          >בטל ✕</button>
         </div>
       )}
 
-      {/* ── Card grid ──────────────────────────────────────────────────── */}
+      {/* ── Card grid ────────────────────────────────────────────────────── */}
       <div style={{
-        flex:            1,
-        overflowY:       'auto',
-        overflowX:       'hidden',
-        padding:         '10px 8px 16px',
-        display:         'grid',
+        flex:                1,
+        overflowY:           'auto',
+        padding:             '10px 8px 20px',
+        display:             'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gridAutoRows:    'min-content',
-        gap:             8,
-        alignContent:    'start',
-        scrollbarWidth:  'thin',
-        scrollbarColor:  'rgba(255,255,255,0.06) transparent',
+        gridAutoRows:        'min-content',
+        gap:                 10,
+        alignContent:        'start',
+        scrollbarWidth:      'thin',
+        scrollbarColor:      'rgba(255,255,255,0.05) transparent',
       }}>
         {allItems.map(item => {
-          const meta = CAT_META[item.category] ?? CAT_META['air']!;
-          const show = isVisible(item);
-          // Hidden items stay in DOM (for data-testid accessibility) but invisible
+          const show = isVisible(item.typeId, item.category);
           if (!show) {
             return (
               <div key={item.typeId} style={{ display: 'none' }}>
                 <ComponentCard
                   typeId={item.typeId}
-                  label={item.label}
-                  meta={meta}
+                  meta={CAT[item.category] ?? CAT['air']!}
                   isActive={false}
                   onSelect={handleSelect}
                 />
@@ -698,8 +744,7 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
             <ComponentCard
               key={item.typeId}
               typeId={item.typeId}
-              label={item.label}
-              meta={meta}
+              meta={CAT[item.category] ?? CAT['air']!}
               isActive={isPlacing && placingId === item.typeId}
               onSelect={handleSelect}
             />
@@ -709,27 +754,24 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
         {visibleCount === 0 && (
           <div style={{
             gridColumn: '1 / -1',
-            padding:    '32px 16px',
+            padding:    '40px 16px',
             textAlign:  'center',
-            color:      'var(--text-dim)',
-            fontSize:   12,
-            direction:  'rtl',
+            color:      '#4a6080',
+            fontSize:   13,
           }}>
             {t('builder.palette_no_match')}
           </div>
         )}
       </div>
 
-      {/* ── Footer: drag hint ──────────────────────────────────────────── */}
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
       <div style={{
-        padding:      '6px 12px',
-        borderTop:    '1px solid var(--border)',
+        padding:      '7px 12px',
+        borderTop:    '1px solid rgba(255,255,255,0.04)',
         flexShrink:   0,
         fontSize:     9,
-        color:        'var(--text-dim)',
+        color:        '#2a3a50',
         textAlign:    'center',
-        direction:    'rtl',
-        letterSpacing:'0.02em',
       }}>
         {t('builder.lego_drag_tip')}
       </div>
