@@ -5,6 +5,7 @@ import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } f
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 const TYPE_ICON: Record<string, string> = {
   expansion_vessel:     '⊕',
@@ -23,8 +24,9 @@ export function GenericNode({ data }: NodeProps<ComponentNode>) {
   const statusPres = nodeStatusPresentation(viewModel.operationalStatus);
   const sensorPres = sensorStatePresentation(viewModel.sensorState);
 
-  const temp   = viewModel.liveValues['temperature'] ?? viewModel.liveValues['temp'] ?? null;
-  const tempNum = typeof temp === 'number' ? temp : null;
+  const temp       = viewModel.liveValues['temperature'] ?? viewModel.liveValues['temp'] ?? null;
+  const tempNum    = typeof temp === 'number' ? temp : null;
+  const alarmCount = viewModel.activeAlarms.length;
 
   const healthClass =
     viewModel.health === HealthState.Critical      ? 'zentro-node--critical'     :
@@ -36,6 +38,7 @@ export function GenericNode({ data }: NodeProps<ComponentNode>) {
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ minWidth: 120 }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Left}  />
       <Handle type="source" position={Position.Right} />
 

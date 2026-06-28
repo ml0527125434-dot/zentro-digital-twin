@@ -3,6 +3,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.js';
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState, SensorState } from '../../../domain/types.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 const SENSOR_ICONS: Record<string, string> = {
   temperature_sensor: '🌡',
@@ -54,6 +55,8 @@ export function SensorNode({ data }: NodeProps<ComponentNode>) {
   const hasLeftPort  = ['flow_sensor', 'energy_meter', 'water_meter'].includes(typeId);
   const hasRightPort = ['flow_sensor', 'energy_meter', 'water_meter'].includes(typeId);
 
+  const alarmCount = viewModel.activeAlarms.length;
+
   return (
     <div
       className={`zentro-node ${healthClass}`}
@@ -70,6 +73,7 @@ export function SensorNode({ data }: NodeProps<ComponentNode>) {
         position:     'relative',
       }}
     >
+      <AlarmBadge count={alarmCount} />
       {hasLeftPort  && <Handle type="target" position={Position.Left}  id="in"  style={{ background: 'var(--accent)', width: 7, height: 7 }} />}
       {hasRightPort && <Handle type="source" position={Position.Right} id="out" style={{ background: 'var(--accent)', width: 7, height: 7 }} />}
 

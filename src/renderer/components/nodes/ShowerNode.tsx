@@ -5,6 +5,7 @@ import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } f
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function ShowerNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -25,12 +26,12 @@ export function ShowerNode({ data }: NodeProps<ComponentNode>) {
     viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
-  const dropColor = tempNum !== null
-    ? `var(${statusPres.cssVar})`
-    : 'var(--pipe-cold)';
+  const dropColor  = tempNum !== null ? `var(${statusPres.cssVar})` : 'var(--pipe-cold)';
+  const alarmCount = viewModel.activeAlarms.length;
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 110 }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Left}  id="hot_in"    />
       <Handle type="source" position={Position.Right} id="drain_out" />
 

@@ -5,6 +5,7 @@ import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } f
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function HeatPumpNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -28,12 +29,14 @@ export function HeatPumpNode({ data }: NodeProps<ComponentNode>) {
     viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
-  const runColor = isRunning ? 'var(--status-healthy)' : 'var(--text-sub)';
-  const runLabel = !hasRuntime ? t('pump.no_data') : isRunning ? t('kpi.running') : t('kpi.standby');
-  const isLive   = sensorPres.cssVar === '--sensor-live';
+  const runColor   = isRunning ? 'var(--status-healthy)' : 'var(--text-sub)';
+  const runLabel   = !hasRuntime ? t('pump.no_data') : isRunning ? t('kpi.running') : t('kpi.standby');
+  const isLive     = sensorPres.cssVar === '--sensor-live';
+  const alarmCount = viewModel.activeAlarms.length;
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 130 }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="source" position={Position.Right} id="out" />
       <Handle type="source" position={Position.Right} id="heat_out_2" style={{ top: '70%' }} />
 

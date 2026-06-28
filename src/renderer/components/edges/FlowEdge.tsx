@@ -1,13 +1,18 @@
 /**
- * Zentro Digital Twin — Flow Edge (Stage 23 visual update)
+ * Zentro Digital Twin — Flow Edge
  *
  * Visual priority:
  *   1. Alarm (critical red pulse) — overrides everything
  *   2. Temperature-based NodeStatus color — when value is available
  *   3. FlowState color — green (Flowing), orange (Reverse), dim (Unknown/NoFlow)
+ *
+ * Stage 32A additions:
+ *   - Animated flow-direction arrow dot travelling along the pipe
+ *   - Pipe thickness scales with flow magnitude when available
+ *   - Temperature gradient: single color tinted to status when value present
  */
 
-import React from 'react';
+import React, { useId } from 'react';
 import {
   EdgeLabelRenderer,
   getBezierPath,
@@ -85,8 +90,19 @@ export function FlowEdge({
   // Show label only when we have a temperature value
   const showLabel = value !== null && statusPres !== null;
 
-  // Pipe stroke width — thicker for flowing/alarm
-  const strokeWidth = hasActiveAlarm ? 4 : flow === FlowState.Flowing ? 3.5 : 2.5;
+  // Pipe stroke width — scale slightly with flow magnitude when available
+  const flowMagnitude = typeof (data?.viewModel.value) === 'number' ? data!.viewModel.value : null;
+  const baseWidth = hasActiveAlarm ? 4 : flow === FlowState.Flowing ? 3.5 : 2.5;
+  // For flowing pipes with a flow rate sensor, scale up to 5px at high flow
+  const strokeWidth = (flow === FlowState.Flowing && flowMagnitude !== null && flowMagnitude > 0)
+    ? Math.min(5, baseWidth + flowMagnitude * 0.15)
+    : baseWidth;
+
+  // Direction arrow travel duration: faster when actively flowing
+  const arrowDuration = flow === FlowState.Flowing ? '1.8s' : '2.8s';
+  const showArrow = flow === FlowState.Flowing || flow === FlowState.Reverse;
+  // Reverse flow: arrow travels target→source (keyTimes reversed)
+  const arrowReverse = flow === FlowState.Reverse;
 
   return (
     <>
@@ -95,10 +111,10 @@ export function FlowEdge({
         <path
           d={edgePath}
           style={{
-            stroke:      strokeColor,
-            strokeWidth: strokeWidth + 6,
-            fill:        'none',
-            opacity:     0.12,
+            stroke:        strokeColor,
+            strokeWidth:   strokeWidth + 6,
+            fill:          'none',
+            opacity:       0.12,
             pointerEvents: 'none',
           }}
         />
@@ -112,6 +128,30 @@ export function FlowEdge({
         style={{ stroke: strokeColor, strokeWidth, fill: 'none' }}
         markerEnd={markerEnd}
       />
+
+      {/* Animated flow-direction arrow dot */}
+      {showArrow && (
+        <g pointerEvents="none" aria-hidden="true">
+          {/* Arrow triangle pointing in flow direction */}
+          <polygon
+            points="-5,0 4,-3.5 4,3.5"
+            fill={strokeColor}
+            opacity={0.85}
+            style={{ filter: `drop-shadow(0 0 3px ${strokeColor})` }}
+          >
+            <animateMotion
+              dur={arrowDuration}
+              repeatCount="indefinite"
+              rotate="auto"
+              keyTimes={arrowReverse ? '0;1' : '0;1'}
+              keyPoints={arrowReverse ? '1;0' : '0;1'}
+              calcMode="linear"
+            >
+              <mpath href={`#${id}`} />
+            </animateMotion>
+          </polygon>
+        </g>
+      )}
 
       {/* Wide invisible hit area — matches React Flow BaseEdge pattern for reliable clicking */}
       <path

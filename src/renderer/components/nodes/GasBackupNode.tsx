@@ -5,6 +5,7 @@ import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function GasBackupNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -25,11 +26,13 @@ export function GasBackupNode({ data }: NodeProps<ComponentNode>) {
     viewModel.health === HealthState.Commissioning ? 'zentro-node--commissioning':
     'zentro-node--offline';
 
-  const runColor = isRunning ? 'var(--pipe-hot)' : 'var(--text-sub)';
-  const runLabel = !hasRuntime ? t('pump.no_data') : isRunning ? t('kpi.running') : t('kpi.standby');
+  const runColor   = isRunning ? 'var(--pipe-hot)' : 'var(--text-sub)';
+  const runLabel   = !hasRuntime ? t('pump.no_data') : isRunning ? t('kpi.running') : t('kpi.standby');
+  const alarmCount = viewModel.activeAlarms.length;
 
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 130 }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="source" position={Position.Right} id="out" />
 
       <div className="zentro-node__header">

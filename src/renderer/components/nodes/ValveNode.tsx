@@ -4,6 +4,7 @@ import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.j
 import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function ValveNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -38,6 +39,8 @@ export function ValveNode({ data }: NodeProps<ComponentNode>) {
       ? t('valve.closed')
       : null;
 
+  const alarmCount = viewModel.activeAlarms.length;
+
   const diamondClass =
     viewModel.health === HealthState.Critical      ? 'zentro-valve-diamond--critical'     :
     viewModel.health === HealthState.Warning       ? 'zentro-valve-diamond--warning'      :
@@ -48,6 +51,7 @@ export function ValveNode({ data }: NodeProps<ComponentNode>) {
 
   return (
     <div className="zentro-valve-wrapper" style={{ position: 'relative' }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Left}   id="hot_in"    />
       <Handle type="target" position={Position.Bottom} id="cold_in"   />
       <Handle type="source" position={Position.Right}  id="mixed_out" />
@@ -55,7 +59,23 @@ export function ValveNode({ data }: NodeProps<ComponentNode>) {
       <div className={`zentro-valve-diamond ${diamondClass}`} />
 
       <div className="zentro-valve-inner">
-        <span className="zentro-valve-icon" aria-hidden="true">⬡</span>
+        {/* Gate indicator: green bar = open, red cross = closed */}
+        <span
+          aria-hidden="true"
+          style={{
+            fontSize:   16,
+            lineHeight: 1,
+            color:      isOpen === null ? 'var(--accent)' : stateColor,
+            transition: 'color 0.3s',
+            filter:     isOpen === true
+              ? 'drop-shadow(0 0 4px var(--status-healthy))'
+              : isOpen === false
+                ? 'drop-shadow(0 0 4px var(--status-critical))'
+                : 'none',
+          }}
+        >
+          {isOpen === true ? '◉' : isOpen === false ? '✕' : '⬡'}
+        </span>
         <span className="zentro-valve-name">{name}</span>
         {stateLabel ? (
           <span style={{ fontSize: 7, color: stateColor, marginTop: 1, fontWeight: 700 }}>

@@ -4,6 +4,7 @@ import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.j
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function ElectricHeaterNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -21,6 +22,7 @@ export function ElectricHeaterNode({ data }: NodeProps<ComponentNode>) {
   const sensorPres = sensorStatePresentation(viewModel.sensorState);
   const tempColor  = statusPres ? `var(${statusPres.cssVar})` : 'var(--text-base)';
   const isLive     = sensorPres.cssVar === '--sensor-live';
+  const alarmCount = viewModel.activeAlarms.length;
 
   const healthClass =
     health === HealthState.Critical     ? 'zentro-node--critical'     :
@@ -46,6 +48,7 @@ export function ElectricHeaterNode({ data }: NodeProps<ComponentNode>) {
         position:    'relative',
       }}
     >
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Left}  id="water_in"  style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />
       <Handle type="source" position={Position.Right} id="water_out" style={{ background: 'var(--pipe-hot)',  width: 7, height: 7 }} />
 

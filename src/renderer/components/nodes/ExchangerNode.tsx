@@ -4,6 +4,7 @@ import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.j
 import { nodeStatusPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 const EXCHANGER_ICONS: Record<string, string> = {
   plate_heat_exchanger: '⇄',
@@ -28,9 +29,10 @@ export function ExchangerNode({ data }: NodeProps<ComponentNode>) {
   const valueColor = statusPres ? `var(${statusPres.cssVar})` : 'var(--text-base)';
   const isLive     = sensorPres.cssVar === '--sensor-live';
 
-  const isActive = typeof liveValues?.['runtime'] === 'boolean'
+  const isActive   = typeof liveValues?.['runtime'] === 'boolean'
     ? liveValues.runtime
     : value !== null && value > 30;
+  const alarmCount = viewModel.activeAlarms.length;
 
   const healthClass =
     health === HealthState.Critical     ? 'zentro-node--critical'     :
@@ -55,6 +57,7 @@ export function ExchangerNode({ data }: NodeProps<ComponentNode>) {
         position:     'relative',
       }}
     >
+      <AlarmBadge count={alarmCount} />
       {/* Ports — solar_collector: cold_in=bottom, hot_out=top per definition */}
       {isSolar ? <>
         <Handle type="target" position={Position.Bottom} id="cold_in" style={{ background: 'var(--pipe-cold)', width: 7, height: 7 }} />

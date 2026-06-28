@@ -5,6 +5,7 @@ import { healthPresentation, nodeStatusPresentation, sensorStatePresentation } f
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
 import type { TranslationKey } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 // Temp range for fill indicator: 30°C = empty, 75°C = full
 const TEMP_MIN = 30;
@@ -44,8 +45,11 @@ export function TankNode({ data }: NodeProps<ComponentNode>) {
 
   const isLive = sensorPres.cssVar === '--sensor-live';
 
+  const alarmCount = viewModel.activeAlarms.length;
+
   return (
     <div className={`zentro-node ${healthClass}`} style={{ width: 140 }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Bottom} id="cold_in"    />
       <Handle type="target" position={Position.Left}   id="heat_in_1"  />
       <Handle type="target" position={Position.Left}   id="heat_in_2"  style={{ top: '70%' }} />

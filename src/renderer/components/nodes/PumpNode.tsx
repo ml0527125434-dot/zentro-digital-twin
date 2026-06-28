@@ -4,6 +4,7 @@ import type { ComponentNode, ComponentNodeData } from '../../flow-transformers.j
 import { healthPresentation, sensorStatePresentation } from '../../theme.js';
 import { HealthState } from '../../../domain/types.js';
 import { useLocale } from '../../../i18n/index.js';
+import { AlarmBadge } from './AlarmBadge.js';
 
 export function PumpNode({ data }: NodeProps<ComponentNode>) {
   const { t } = useLocale();
@@ -18,10 +19,11 @@ export function PumpNode({ data }: NodeProps<ComponentNode>) {
   const hasRuntime = runtime !== null && runtime !== undefined;
   const isRunning  = hasRuntime && (typeof runtime === 'number' ? runtime > 0.5 : runtime === true);
 
-  const runColor = isRunning ? 'var(--status-healthy)' : 'var(--text-sub)';
-  const runLabel = !hasRuntime
+  const runColor   = isRunning ? 'var(--status-healthy)' : 'var(--text-sub)';
+  const runLabel   = !hasRuntime
     ? t('pump.no_data')
     : isRunning ? t('pump.running') : t('pump.standby');
+  const alarmCount = viewModel.activeAlarms.length;
 
   const healthClass =
     viewModel.health === HealthState.Critical      ? 'zentro-pump-wrapper--critical'     :
@@ -33,6 +35,7 @@ export function PumpNode({ data }: NodeProps<ComponentNode>) {
 
   return (
     <div className={`zentro-pump-wrapper ${healthClass}`} style={{ position: 'relative' }}>
+      <AlarmBadge count={alarmCount} />
       <Handle type="target" position={Position.Left}  id="in"  />
       <Handle type="source" position={Position.Right} id="out" />
 
