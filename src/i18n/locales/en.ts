@@ -151,6 +151,7 @@ export const EN: Translations = {
   'builder.props_title':   'Properties',
   'builder.name_label':    'Name',
   'builder.rename_btn':    'Rename',
+  'builder.duplicate':     'Duplicate',
   'builder.delete_btn':    'Delete',
   'builder.delete_blocked':'Cannot delete: disconnect first',
   'builder.conn_title':    'Add Connection',

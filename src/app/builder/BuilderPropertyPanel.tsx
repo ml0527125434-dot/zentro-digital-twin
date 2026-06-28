@@ -78,6 +78,7 @@ export function BuilderPropertyPanel({
     dispatchFsm,
     renameComponent,
     deleteComponent,
+    duplicateComponent,
     connectPorts,
     disconnectPorts,
     getComponents,
@@ -141,6 +142,15 @@ export function BuilderPropertyPanel({
       setDeleteError(e instanceof Error ? e.message : t('builder.delete_blocked'));
     }
   }, [selectedId, deleteComponent, dispatchFsm, onMutation, t]);
+
+  const handleDuplicate = useCallback(() => {
+    if (!selectedId) return;
+    try {
+      const copy = duplicateComponent(selectedId);
+      dispatchFsm({ type: 'SELECT_COMPONENT', componentId: copy.id });
+      onMutation();
+    } catch { /* ignore */ }
+  }, [selectedId, duplicateComponent, dispatchFsm, onMutation]);
 
   const handleConnect = useCallback(() => {
     if (!connFromId || !connFromPort || !connToId || !connToPort) return;
@@ -358,6 +368,24 @@ export function BuilderPropertyPanel({
               }}
             >
               {t('builder.rename_btn')}
+            </button>
+            <button
+              data-testid="builder-duplicate-btn"
+              onClick={handleDuplicate}
+              title="Ctrl+D"
+              style={{
+                flex:         1,
+                padding:      '5px 8px',
+                background:   'color-mix(in srgb, var(--accent) 8%, var(--bg-mantle))',
+                border:       '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
+                borderRadius: 4,
+                color:        'var(--accent)',
+                cursor:       'pointer',
+                fontSize:     11,
+                fontWeight:   600,
+              }}
+            >
+              {t('builder.duplicate')}
             </button>
             <button
               data-testid="builder-delete-btn"

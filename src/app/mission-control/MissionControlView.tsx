@@ -20,7 +20,7 @@
  * editor. No layout restructuring needed.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { ComponentViewModel, ConnectionViewModel } from '../../domain/types.js';
 import type { EngineStores } from '../../engine/graph-engine.js';
 import type { ComponentRegistry } from '../../lib/component-registry.js';
@@ -37,6 +37,7 @@ import { EventTimeline } from './EventTimeline.js';
 import { InspectorPanel } from '../workspace/InspectorPanel.js';
 import { BuilderPalettePanel } from '../builder/BuilderPalettePanel.js';
 import { BuilderPropertyPanel } from '../builder/BuilderPropertyPanel.js';
+import { BuilderContextMenu } from '../builder/BuilderContextMenu.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 
 export interface MissionControlViewProps {
@@ -87,6 +88,13 @@ export function MissionControlView({
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [leftCollapsed,  setLeftCollapsed]  = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+
+  // Builder multi-select tracking (from React Flow selection events)
+  const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
+
+  // Context menu state
+  const [ctxMenu, setCtxMenu] = useState<{ componentId: string; x: number; y: number } | null>(null);
+  const closeCtxMenu = useCallback(() => setCtxMenu(null), []);
 
   // Clear monitor selection when switching to build mode
   useEffect(() => {
@@ -140,6 +148,40 @@ export function MissionControlView({
     setSelectedComponentId(null);
   }, []);
 
+  const handleSelectionChange = useCallback((ids: string[]) => {
+    setMultiSelectedIds(ids);
+  }, []);
+
+  const handleNodeContextMenu = useCallback((componentId: string, x: number, y: number) => {
+    if (!buildMode) return;
+    builder.dispatchFsm({ type: 'SELECT_COMPONENT', componentId });
+    setCtxMenu({ componentId, x, y });
+  }, [buildMode, builder]);
+
+  const handleCtxDuplicate = useCallback(() => {
+    if (!ctxMenu) return;
+    try {
+      builder.duplicateComponent(ctxMenu.componentId);
+      onMutation?.();
+    } catch { /* ignore */ }
+  }, [ctxMenu, builder, onMutation]);
+
+  const handleCtxDelete = useCallback(() => {
+    if (!ctxMenu) return;
+    try {
+      builder.deleteComponent(ctxMenu.componentId);
+      builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+      onMutation?.();
+    } catch { /* blocked — has connections */ }
+  }, [ctxMenu, builder, onMutation]);
+
+  const handleCtxRename = useCallback(() => {
+    if (!ctxMenu) return;
+    // Focus the rename input in BuilderPropertyPanel by dispatching a custom event
+    document.dispatchEvent(new CustomEvent('zentro:builder:focusRename', { detail: ctxMenu.componentId }));
+    setRightCollapsed(false);
+  }, [ctxMenu]);
+
   // Signal to ZentroApp whether inspector has content (ESC-key priority)
   useEffect(() => {
     onDrawerOpenChange?.(selectedComponentId !== null);
@@ -184,10 +226,22 @@ export function MissionControlView({
           onMutation?.();
         }
       }
+
+      // Ctrl+D → duplicate selected component
+      if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        const targetIds = builder.state.mode === 'selected-component' && builder.state.selectedComponentId
+          ? [builder.state.selectedComponentId]
+          : multiSelectedIds;
+        for (const id of targetIds) {
+          try { builder.duplicateComponent(id); } catch { /* ignore */ }
+        }
+        if (targetIds.length > 0) onMutation?.();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [buildMode, builder, onMutation]);
+  }, [buildMode, builder, multiSelectedIds, onMutation]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -416,9 +470,25 @@ export function MissionControlView({
               onNodeClick={handleSelectComponent}
               onEdgeClick={buildMode ? handleEdgeClick : undefined}
               onPaneClick={isPlacingMode ? handlePaneClick : undefined}
+              onSelectionChange={buildMode ? handleSelectionChange : undefined}
+              onNodeContextMenu={buildMode ? handleNodeContextMenu : undefined}
               placingMode={isPlacingMode}
+              builderMode={buildMode}
             />
           </div>
+
+          {/* Context menu overlay */}
+          {ctxMenu && (
+            <BuilderContextMenu
+              x={ctxMenu.x}
+              y={ctxMenu.y}
+              componentId={ctxMenu.componentId}
+              onRename={handleCtxRename}
+              onDuplicate={handleCtxDuplicate}
+              onDelete={handleCtxDelete}
+              onClose={closeCtxMenu}
+            />
+          )}
 
           {/* Placing hint banner — shows type name + instructions while in placing mode */}
           {isPlacingMode && builder.state.mode === 'placing' && (() => {

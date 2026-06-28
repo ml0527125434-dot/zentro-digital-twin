@@ -11,11 +11,13 @@ import {
   Controls,
   Background,
   BackgroundVariant,
+  SelectionMode,
   type NodeTypes,
   type EdgeTypes,
   type Node,
   type Edge,
   type NodeChange,
+  type OnSelectionChangeParams,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { TankNode }           from './nodes/TankNode.js';
@@ -76,13 +78,16 @@ const EDGE_TYPES: EdgeTypes = {
 export interface FlowMapProps {
   nodes: ComponentNode[];
   edges: ConnectionEdge[];
-  onNodeClick?:   ((componentId: string) => void) | undefined;
-  onEdgeClick?:   ((connectionId: string) => void) | undefined;
-  onPaneClick?:   (() => void) | undefined;
-  placingMode?:   boolean | undefined;
+  onNodeClick?:          ((componentId: string) => void) | undefined;
+  onEdgeClick?:          ((connectionId: string) => void) | undefined;
+  onPaneClick?:          (() => void) | undefined;
+  onSelectionChange?:    ((ids: string[]) => void) | undefined;
+  onNodeContextMenu?:    ((componentId: string, x: number, y: number) => void) | undefined;
+  placingMode?:          boolean | undefined;
+  builderMode?:          boolean | undefined;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, placingMode }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, placingMode, builderMode }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -119,6 +124,21 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, p
     [onEdgeClick],
   );
 
+  const handleSelectionChange = useCallback(
+    ({ nodes: selNodes }: OnSelectionChangeParams) => {
+      onSelectionChange?.(selNodes.map(n => n.id));
+    },
+    [onSelectionChange],
+  );
+
+  const handleNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      event.preventDefault();
+      onNodeContextMenu?.(node.id, event.clientX, event.clientY);
+    },
+    [onNodeContextMenu],
+  );
+
   return (
     <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
       {/* @ts-expect-error — @xyflow/react optional props conflict with exactOptionalPropertyTypes */}
@@ -136,6 +156,11 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, p
         onNodeClick={onNodeClick ? handleNodeClick : undefined}
         onEdgeClick={onEdgeClick ? handleEdgeClick : undefined}
         onPaneClick={onPaneClick}
+        onSelectionChange={onSelectionChange ? handleSelectionChange : undefined}
+        onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
+        multiSelectionKeyCode={builderMode ? 'Shift' : null}
+        selectionOnDrag={builderMode && !placingMode}
+        selectionMode={SelectionMode.Partial}
       >
         <Background
           variant={BackgroundVariant.Lines}

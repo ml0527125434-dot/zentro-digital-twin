@@ -131,6 +131,7 @@ export type TranslationKey =
   | 'builder.props_title'
   | 'builder.name_label'
   | 'builder.rename_btn'
+  | 'builder.duplicate'
   | 'builder.delete_btn'
   | 'builder.delete_blocked'
   | 'builder.conn_title'

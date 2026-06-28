@@ -77,6 +77,34 @@ export function renameComponent(
 }
 
 /**
+ * Duplicate an existing component: same type, name + " (copy)", position offset by +40.
+ */
+export function duplicateComponent(
+  projectId:   string,
+  componentId: string,
+  stores:      EngineStores,
+  registry:    ComponentRegistry,
+  createdBy:   string,
+): MutationResult<Component> {
+  const source = stores.graph.getComponents(projectId).find(c => c.id === componentId);
+  if (!source) throw new Error(`Component ${componentId} not found.`);
+  const id = `cmp_${crypto.randomUUID().slice(0, 8)}`;
+  const pos = source.position ?? { x: 60, y: 60 };
+  return addComponent(
+    projectId,
+    {
+      id,
+      type:     source.type,
+      name:     `${source.name} (copy)`,
+      position: { x: pos.x + 40, y: pos.y + 40 },
+      bindings: [],
+    },
+    createdBy,
+    stores,
+  );
+}
+
+/**
  * Delete a component from the graph.
  * Engine blocks deletion if any connection still references the component.
  */

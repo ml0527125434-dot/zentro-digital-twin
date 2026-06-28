@@ -33,12 +33,13 @@ import {
 } from './builder-state.js';
 
 import {
-  placeComponent   as corePlace,
-  moveComponent    as coreMove,
-  renameComponent  as coreRename,
-  deleteComponent  as coreDelete,
-  connectPorts     as coreConnect,
-  disconnectPorts  as coreDisconnect,
+  placeComponent      as corePlace,
+  moveComponent       as coreMove,
+  renameComponent     as coreRename,
+  deleteComponent     as coreDelete,
+  duplicateComponent  as coreDuplicate,
+  connectPorts        as coreConnect,
+  disconnectPorts     as coreDisconnect,
 } from './builder-actions.js';
 
 // ---------------------------------------------------------------------------
@@ -82,11 +83,12 @@ export interface BuilderContextValue {
   getConnections: () => Connection[];
 
   // ── Graph mutations (delegate to builder-actions → Graph Engine) ──────────
-  placeComponent:   (typeId: string, name: string, position: { x: number; y: number }) => Component;
-  moveComponent:    (componentId: string, position: { x: number; y: number }) => Component;
-  renameComponent:  (componentId: string, name: string) => Component;
-  deleteComponent:  (componentId: string) => void;
-  connectPorts:     (
+  placeComponent:     (typeId: string, name: string, position: { x: number; y: number }) => Component;
+  moveComponent:      (componentId: string, position: { x: number; y: number }) => Component;
+  renameComponent:    (componentId: string, name: string) => Component;
+  deleteComponent:    (componentId: string) => void;
+  duplicateComponent: (componentId: string) => Component;
+  connectPorts:       (
     from:      { componentId: string; portId: string },
     to:        { componentId: string; portId: string },
     medium:    Connection['medium'],
@@ -154,6 +156,12 @@ export function BuilderProvider({
     [projectId, stores, createdBy],
   );
 
+  const duplicateComponent = useCallback(
+    (componentId: string) =>
+      coreDuplicate(projectId, componentId, stores, registry, createdBy).data,
+    [projectId, stores, registry, createdBy],
+  );
+
   const connectPorts = useCallback(
     (
       from:      { componentId: string; portId: string },
@@ -178,6 +186,7 @@ export function BuilderProvider({
     moveComponent,
     renameComponent,
     deleteComponent,
+    duplicateComponent,
     connectPorts,
     disconnectPorts,
   };

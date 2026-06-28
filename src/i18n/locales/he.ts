@@ -151,6 +151,7 @@ export const HE: Translations = {
   'builder.props_title':   'מאפיינים',
   'builder.name_label':    'שם',
   'builder.rename_btn':    'שנה שם',
+  'builder.duplicate':     'שכפל',
   'builder.delete_btn':    'מחק',
   'builder.delete_blocked':'לא ניתן למחוק: נתק תחילה',
   'builder.conn_title':    'הוסף חיבור',
