@@ -686,3 +686,81 @@ select:focus-visible {
   border-color: var(--accent) !important;
   box-shadow:   0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
 }
+
+/* ── Equipment card hover lift ────────────────────────────────────────────── */
+[data-testid^="dashboard-item-"] {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+[data-testid^="dashboard-item-"]:hover {
+  transform:  translateY(-1px);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35) !important;
+}
+
+/* ── Sidebar panel header sticky ─────────────────────────────────────────── */
+[data-testid="workspace-left"] .zentro-panel-header {
+  position:   sticky;
+  top:        0;
+  z-index:    5;
+  background: var(--bg-crust);
+}
+
+/* ── Input hover + focus improvements ────────────────────────────────────── */
+input[type="search"]:focus,
+input:focus {
+  border-color: var(--border-bright);
+  box-shadow:   0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+  outline:      none;
+}
+input[type="search"]:hover,
+input:hover {
+  border-color: var(--border-bright);
+}
+
+/* ── Toggle button hover ──────────────────────────────────────────────────── */
+button[data-testid$="-toggle"]:hover,
+button[data-testid$="-expand"]:hover {
+  background:   var(--bg-mantle);
+  border-color: var(--border-bright);
+  color:        var(--text-base);
+  transition:   background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+/* ── Builder duplicate + delete button hover ──────────────────────────────── */
+[data-testid="builder-duplicate-btn"]:hover {
+  background:   color-mix(in srgb, var(--accent) 18%, var(--bg-mantle)) !important;
+  border-color: var(--accent) !important;
+}
+[data-testid="builder-delete-btn"]:hover {
+  background:   color-mix(in srgb, var(--status-critical) 18%, var(--bg-mantle)) !important;
+  border-color: var(--status-critical) !important;
+}
+[data-testid="builder-rename-btn"]:hover {
+  background:   var(--bg-mantle) !important;
+  border-color: var(--border-bright) !important;
+  color:        var(--text-base);
+}
+
+/* ── React Flow selection box styling ────────────────────────────────────── */
+.react-flow__selection {
+  background:   color-mix(in srgb, var(--accent) 8%, transparent);
+  border:       1px dashed color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* ── Empty state with subtle pulse animation ──────────────────────────────── */
+@keyframes emptyPulse {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.35; }
+}
+.zentro-empty-icon {
+  animation: emptyPulse 3s ease-in-out infinite;
+}
+
+/* ── Inspector panel section smooth border ────────────────────────────────── */
+[data-testid="inspector-placeholder"] > span:first-child {
+  animation: emptyPulse 3s ease-in-out infinite;
+}
+
+/* ── Alarm badge pulse in EquipmentGrid ───────────────────────────────────── */
+[data-testid^="dashboard-item-"] span[style*="status-critical"] {
+  animation: alarmPulse 1.8s ease-in-out infinite;
+}

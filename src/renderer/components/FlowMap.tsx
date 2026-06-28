@@ -161,6 +161,8 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
         selectionOnDrag={builderMode && !placingMode}
         selectionMode={SelectionMode.Partial}
+        snapToGrid={builderMode}
+        snapGrid={[20, 20]}
       >
         <Background
           variant={BackgroundVariant.Lines}

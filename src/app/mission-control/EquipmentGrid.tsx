@@ -89,8 +89,8 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
       : allComponents;
     // Sort: alarmed components first, then by name
     return [...filtered].sort((a, b) => {
-      const aAlarms = alarmStore.getAlarmsForComponent(a.id).filter(x => x.state === 'active').length;
-      const bAlarms = alarmStore.getAlarmsForComponent(b.id).filter(x => x.state === 'active').length;
+      const aAlarms = alarmStore.getAlarmsForComponent(a.id).filter(x => x.state === 'active' || x.state === 'pending').length;
+      const bAlarms = alarmStore.getAlarmsForComponent(b.id).filter(x => x.state === 'active' || x.state === 'pending').length;
       if (bAlarms !== aAlarms) return bAlarms - aAlarms;
       return a.name.localeCompare(b.name);
     });
@@ -185,7 +185,7 @@ export function EquipmentGrid({ projectId, stores, componentVMs, alarmStore, onS
 
           const activeAlarmCount = alarmStore
             .getAlarmsForComponent(component.id)
-            .filter(a => a.state === 'active').length;
+            .filter(a => a.state === 'active' || a.state === 'pending').length;
 
           const temp     = vm.liveValues['temp'] ?? null;
           const flow     = vm.liveValues['flow'] ?? null;

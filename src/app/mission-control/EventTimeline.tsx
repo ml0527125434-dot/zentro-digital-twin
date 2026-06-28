@@ -140,32 +140,69 @@ export function EventTimeline({ alarmStore, components, nowMs }: EventTimelinePr
             {t('timeline.no_events')}
           </div>
         )}
-        {visible.map(ev => {
+        {visible.map((ev, idx) => {
           const color = ev.severity ? (SEVERITY_COLOR[ev.severity] ?? 'var(--text-sub)') : 'var(--text-sub)';
           const icon  = KIND_ICON[ev.kind];
+          const isLast = idx === visible.length - 1;
 
           return (
             <div key={ev.id} style={{
               display:    'flex',
-              gap:        8,
-              padding:    '5px 12px',
-              borderBottom: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
-              alignItems: 'flex-start',
-            }}>
-              {/* Icon */}
-              <span style={{ fontSize: 10, color, marginTop: 1, flexShrink: 0, width: 12, textAlign: 'center' }}>
-                {icon}
-              </span>
+              gap:        0,
+              alignItems: 'stretch',
+              padding:    '0 12px',
+              transition: 'background 0.15s',
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-mantle)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; }}
+            >
+              {/* Left timeline column: dot + vertical line */}
+              <div style={{
+                display:       'flex',
+                flexDirection: 'column',
+                alignItems:    'center',
+                flexShrink:    0,
+                width:         16,
+                paddingTop:    8,
+              }}>
+                <div style={{
+                  width:        8,
+                  height:       8,
+                  borderRadius: '50%',
+                  background:   color,
+                  flexShrink:   0,
+                  boxShadow:    ev.severity === 'critical' ? `0 0 6px ${color}` : 'none',
+                }} />
+                {!isLast && (
+                  <div style={{
+                    flex:       1,
+                    width:      1,
+                    background: 'var(--border)',
+                    marginTop:  3,
+                  }} />
+                )}
+              </div>
 
-              {/* Body */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color, marginBottom: 1 }}>
-                  {kindLabel(ev.kind)}
-                  {ev.componentName && (
-                    <span style={{ color: 'var(--text-sub)', fontWeight: 400 }}>
-                      {' · '}{ev.componentName}
-                    </span>
-                  )}
+              {/* Content */}
+              <div style={{
+                flex:         1,
+                minWidth:     0,
+                padding:      '6px 0 6px 8px',
+                borderBottom: isLast ? 'none' : '1px solid color-mix(in srgb, var(--border) 40%, transparent)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 4 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color }}>
+                    <span aria-hidden="true" style={{ marginInlineEnd: 4 }}>{icon}</span>
+                    {kindLabel(ev.kind)}
+                    {ev.componentName && (
+                      <span style={{ color: 'var(--text-sub)', fontWeight: 400 }}>
+                        {' · '}{ev.componentName}
+                      </span>
+                    )}
+                  </span>
+                  <span style={{ fontSize: 9, color: 'var(--text-dim)', flexShrink: 0 }}>
+                    {relativeTime(ev.ts)}
+                  </span>
                 </div>
                 {ev.message && (
                   <div style={{
@@ -174,6 +211,7 @@ export function EventTimeline({ alarmStore, components, nowMs }: EventTimelinePr
                     overflow:    'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace:  'nowrap',
+                    marginTop:   2,
                   }}>
                     {ev.message?.startsWith('alarm.rule.')
                       ? t(ev.message as TranslationKey)
@@ -181,11 +219,6 @@ export function EventTimeline({ alarmStore, components, nowMs }: EventTimelinePr
                   </div>
                 )}
               </div>
-
-              {/* Relative time */}
-              <span style={{ fontSize: 9, color: 'var(--text-sub)', flexShrink: 0, marginTop: 1 }}>
-                {relativeTime(ev.ts)}
-              </span>
             </div>
           );
         })}
