@@ -211,6 +211,20 @@ export function MissionControlView({
     }
   }, [buildMode, stores, registry, projectId, builder, onMutation]);
 
+  // Drag-from-palette drop: place a new component at the drop position
+  const handleDropComponent = useCallback((typeId: string, x: number, y: number) => {
+    if (!buildMode) return;
+    const def = registry.get(typeId);
+    const existing = stores.graph.getComponents(projectId);
+    const sameType = existing.filter(c => c.type === typeId).length;
+    const name = `${def?.label ?? typeId} ${sameType + 1}`;
+    try {
+      builder.placeComponent(typeId, name, { x, y });
+      builder.dispatchFsm({ type: 'CANCEL_PLACING' });
+      onMutation?.();
+    } catch { /* ignore */ }
+  }, [buildMode, registry, stores, projectId, builder, onMutation]);
+
   // Node drag-stop: persist new position to graph
   const handleNodeMoved = useCallback((nodeId: string, x: number, y: number) => {
     if (!buildMode) return;
@@ -351,7 +365,7 @@ export function MissionControlView({
         <div
           data-testid="workspace-left"
           style={{
-            width:           showLeft ? 280 : 0,
+            width:           showLeft ? (buildMode ? 300 : 280) : 0,
             flexShrink:      0,
             overflow:        'hidden',
             transition:      'width 0.25s cubic-bezier(0.4,0,0.2,1)',
@@ -551,6 +565,7 @@ export function MissionControlView({
               onConnect={buildMode ? handleConnect : undefined}
               onEdgeDelete={buildMode ? handleEdgeDelete : undefined}
               onNodeMoved={buildMode ? handleNodeMoved : undefined}
+              onDropComponent={buildMode ? handleDropComponent : undefined}
               placingMode={isPlacingMode}
               builderMode={buildMode}
             />

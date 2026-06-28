@@ -182,7 +182,12 @@ export type TranslationKey =
   | 'alarm.rule.tank_risk'
   | 'alarm.rule.tank_warn'
   | 'alarm.rule.shower_scald'
-  | 'alarm.rule.shower_cold';
+  | 'alarm.rule.shower_cold'
+  // ── Stage 34: LEGO builder palette ───────────────────────────────────────
+  | 'builder.lego_title'
+  | 'builder.lego_hint'
+  | 'builder.lego_drag_tip'
+  | 'builder.lego_active_hint';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

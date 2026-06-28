@@ -12,6 +12,7 @@ import {
   Background,
   BackgroundVariant,
   SelectionMode,
+  useReactFlow,
   type NodeTypes,
   type EdgeTypes,
   type Node,
@@ -87,11 +88,47 @@ export interface FlowMapProps {
   onConnect?:            ((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => void) | undefined;
   onEdgeDelete?:         ((edgeId: string) => void) | undefined;
   onNodeMoved?:          ((nodeId: string, x: number, y: number) => void) | undefined;
+  onDropComponent?:      ((typeId: string, x: number, y: number) => void) | undefined;
   placingMode?:          boolean | undefined;
   builderMode?:          boolean | undefined;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, placingMode, builderMode }: FlowMapProps) {
+// Inner component: has access to useReactFlow() which requires being inside <ReactFlow>
+function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: string, x: number, y: number) => void) | undefined }) {
+  const { screenToFlowPosition } = useReactFlow();
+
+  React.useEffect(() => {
+    if (!onDropComponent) return;
+    const container = document.querySelector('[data-flowmap-drop]') as HTMLElement | null;
+    if (!container) return;
+
+    const handleDragOver = (e: DragEvent) => {
+      if (e.dataTransfer?.types.includes('application/zentro-type')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      const typeId = e.dataTransfer?.getData('application/zentro-type');
+      if (!typeId) return;
+      e.preventDefault();
+      const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      onDropComponent(typeId, pos.x, pos.y);
+    };
+
+    container.addEventListener('dragover', handleDragOver);
+    container.addEventListener('drop', handleDrop);
+    return () => {
+      container.removeEventListener('dragover', handleDragOver);
+      container.removeEventListener('drop', handleDrop);
+    };
+  }, [onDropComponent, screenToFlowPosition]);
+
+  return null;
+}
+
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -171,7 +208,10 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
   );
 
   return (
-    <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
+    <div
+      data-flowmap-drop
+      style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}
+    >
       {/* @ts-expect-error — exactOptionalPropertyTypes conflicts with @xyflow/react prop signatures */}
       <ReactFlow
         nodes={stableNodes}
@@ -206,6 +246,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
           color="var(--border)"
         />
         <Controls showInteractive={false} />
+        <DropZoneCapture onDropComponent={onDropComponent} />
       </ReactFlow>
     </div>
   );

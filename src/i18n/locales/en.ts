@@ -171,9 +171,13 @@ export const EN: Translations = {
 
   // Stage 31: Builder / palette
   'builder.canvas_empty_title': 'Start building your system',
-  'builder.canvas_empty_body':  'Pick a component from the palette and click to place it',
+  'builder.canvas_empty_body':  'Drag a component from the library onto the canvas, or click one then click the canvas',
   'builder.palette_search':     'Search components…',
   'builder.palette_no_match':   'No match',
+  'builder.lego_title':         'Component Library',
+  'builder.lego_hint':          'Drag to canvas • Click to arm',
+  'builder.lego_drag_tip':      '⬡ Drag a component directly onto the canvas',
+  'builder.lego_active_hint':   'Click canvas to place — or drag it there',
   'builder.ports_section':      'Ports',
   'category.source':   'Heat Sources',
   'category.storage':  'Storage',

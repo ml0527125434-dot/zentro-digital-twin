@@ -171,9 +171,13 @@ export const HE: Translations = {
 
   // Stage 31: Builder / palette
   'builder.canvas_empty_title': 'התחל לבנות את המערכת',
-  'builder.canvas_empty_body':  'בחר רכיב מהלוח ולחץ למיקום',
+  'builder.canvas_empty_body':  'גרור רכיב מהספרייה אל הבד, או לחץ ואז לחץ על הבד',
   'builder.palette_search':     'חפש רכיבים…',
   'builder.palette_no_match':   'אין תוצאות',
+  'builder.lego_title':         'ספריית רכיבים',
+  'builder.lego_hint':          'גרור לבד • לחץ לבחירה',
+  'builder.lego_drag_tip':      '⬡ גרור רכיב ישירות אל הבד',
+  'builder.lego_active_hint':   'לחץ על הבד להנחה — או גרור לשם',
   'builder.ports_section':      'פורטים',
   'category.source':   'מקורות חום',
   'category.storage':  'אגירה',
