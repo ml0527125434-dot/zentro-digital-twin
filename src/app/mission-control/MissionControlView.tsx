@@ -211,6 +211,14 @@ export function MissionControlView({
     }
   }, [buildMode, stores, registry, projectId, builder, onMutation]);
 
+  // Node drag-stop: persist new position to graph
+  const handleNodeMoved = useCallback((nodeId: string, x: number, y: number) => {
+    if (!buildMode) return;
+    try {
+      builder.moveComponent(nodeId, { x, y });
+    } catch { /* ignore */ }
+  }, [buildMode, builder]);
+
   // Edge deletion via Delete key on selected edge (from RF onEdgesDelete)
   const handleEdgeDelete = useCallback((edgeId: string) => {
     if (!buildMode) return;
@@ -542,6 +550,7 @@ export function MissionControlView({
               onNodeContextMenu={buildMode ? handleNodeContextMenu : undefined}
               onConnect={buildMode ? handleConnect : undefined}
               onEdgeDelete={buildMode ? handleEdgeDelete : undefined}
+              onNodeMoved={buildMode ? handleNodeMoved : undefined}
               placingMode={isPlacingMode}
               builderMode={buildMode}
             />

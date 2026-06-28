@@ -86,11 +86,12 @@ export interface FlowMapProps {
   onNodeContextMenu?:    ((componentId: string, x: number, y: number) => void) | undefined;
   onConnect?:            ((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => void) | undefined;
   onEdgeDelete?:         ((edgeId: string) => void) | undefined;
+  onNodeMoved?:          ((nodeId: string, x: number, y: number) => void) | undefined;
   placingMode?:          boolean | undefined;
   builderMode?:          boolean | undefined;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, placingMode, builderMode }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, placingMode, builderMode }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -162,6 +163,13 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
     [onEdgeDelete],
   );
 
+  const handleNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      onNodeMoved?.(node.id, node.position.x, node.position.y);
+    },
+    [onNodeMoved],
+  );
+
   return (
     <div style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}>
       {/* @ts-expect-error — @xyflow/react optional props conflict with exactOptionalPropertyTypes */}
@@ -183,6 +191,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
         onConnect={onConnect ? handleConnect : undefined}
         onEdgesDelete={onEdgeDelete ? handleEdgesDelete : undefined}
+        onNodeDragStop={onNodeMoved ? handleNodeDragStop : undefined}
         deleteKeyCode={builderMode ? 'Delete' : null}
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
         selectionOnDrag={builderMode && !placingMode}
