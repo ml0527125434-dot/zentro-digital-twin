@@ -78,6 +78,7 @@
   --accent:     #4f9cf9;    /* engineering blue — single interaction accent (locked; never data) */
   --accent-dim: #0369a1;    /* sky-800 — dimmed accent                   */
   --accent-glow: rgba(79, 156, 249, 0.2);
+  --guide-line:  #22d3ee;   /* alignment guides — thin cyan dashed (pid-spec §3.4)  */
 
   /* ── Shadows & glows ─────────────────────────────────────────────────── */
   --shadow-card:  0 2px 8px rgba(0, 0, 0, 0.5), 0 0 1px rgba(30, 41, 56, 0.8);

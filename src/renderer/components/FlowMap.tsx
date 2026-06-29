@@ -5,13 +5,14 @@
  * Grid background for plant-room schematic feel.
  */
 
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import {
   ReactFlow,
   Controls,
   Background,
   BackgroundVariant,
   SelectionMode,
+  ViewportPortal,
   useReactFlow,
   type NodeTypes,
   type EdgeTypes,
@@ -23,6 +24,7 @@ import {
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
 import { BuildModeContext }   from '../build-mode-context.js';
+import { computeAlignment, type NodeBox, type VGuide, type HGuide } from '../alignment-guides.js';
 import { TankNode }           from './nodes/TankNode.js';
 import { PumpNode }           from './nodes/PumpNode.js';
 import { ValveNode }          from './nodes/ValveNode.js';
@@ -243,12 +245,36 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
     [onNodesDelete],
   );
 
+  // ── Stage E (§3.4) — smart alignment guides ─────────────────────────────────
+  const [guides, setGuides] = useState<{ v: VGuide[]; h: HGuide[] }>({ v: [], h: [] });
+
+  const boxOf = useCallback((n: Node): NodeBox => {
+    const m = measuredRef.current.get(n.id);
+    const width  = m?.width  ?? (n.measured?.width  as number | undefined) ?? (n.width  as number | undefined) ?? 100;
+    const height = m?.height ?? (n.measured?.height as number | undefined) ?? (n.height as number | undefined) ?? 80;
+    return { id: n.id, x: n.position.x, y: n.position.y, width, height };
+  }, []);
+
+  const handleNodeDrag = useCallback((_e: React.MouseEvent, node: Node) => {
+    const others = nodes.filter(n => n.id !== node.id).map(boxOf);
+    const a = computeAlignment(boxOf(node), others);
+    setGuides({ v: a.v, h: a.h });
+  }, [nodes, boxOf]);
+
   const handleNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node, draggedNodes?: Node[]) => {
       const list = draggedNodes && draggedNodes.length > 0 ? draggedNodes : [node];
-      for (const n of list) onNodeMoved?.(n.id, n.position.x, n.position.y);
+      if (list.length === 1) {
+        // Single drag — soft-snap the final position to the nearest alignment (§3.4).
+        const others = nodes.filter(n => n.id !== node.id).map(boxOf);
+        const a = computeAlignment(boxOf(node), others);
+        onNodeMoved?.(node.id, a.x ?? node.position.x, a.y ?? node.position.y);
+      } else {
+        for (const n of list) onNodeMoved?.(n.id, n.position.x, n.position.y);
+      }
+      setGuides({ v: [], h: [] });
     },
-    [onNodeMoved],
+    [onNodeMoved, nodes, boxOf],
   );
 
   return (
@@ -278,6 +304,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         onConnect={onConnect ? handleConnect : undefined}
         onEdgesDelete={onEdgeDelete ? handleEdgesDelete : undefined}
         onNodesDelete={onNodesDelete ? handleNodesDelete : undefined}
+        onNodeDrag={(onNodeMoved && builderMode ? handleNodeDrag : undefined) as never}
         onNodeDragStop={onNodeMoved ? handleNodeDragStop as never : undefined}
         deleteKeyCode={builderMode ? ['Delete', 'Backspace'] : null}
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
@@ -310,6 +337,25 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
           </>
         )}
         <Controls showInteractive={false} />
+
+        {/* Stage E (§3.4) — thin cyan dashed alignment guides, in flow coordinates */}
+        {(guides.v.length > 0 || guides.h.length > 0) && (
+          <ViewportPortal>
+            {guides.v.map((g, i) => (
+              <div key={`v${i}`} style={{
+                position: 'absolute', left: g.x, top: g.y1 - 8, width: 0, height: (g.y2 - g.y1) + 16,
+                borderLeft: '1px dashed var(--guide-line)', pointerEvents: 'none', zIndex: 4,
+              }} />
+            ))}
+            {guides.h.map((g, i) => (
+              <div key={`h${i}`} style={{
+                position: 'absolute', left: g.x1 - 8, top: g.y, width: (g.x2 - g.x1) + 16, height: 0,
+                borderTop: '1px dashed var(--guide-line)', pointerEvents: 'none', zIndex: 4,
+              }} />
+            ))}
+          </ViewportPortal>
+        )}
+
         <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} onViewportReady={onViewportReady} />
       </ReactFlow>
       </BuildModeContext.Provider>
