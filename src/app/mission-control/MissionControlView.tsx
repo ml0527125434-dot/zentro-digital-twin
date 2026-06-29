@@ -42,6 +42,7 @@ import { useBuilder } from '../../builder/useBuilder.js';
 import { createGraphHistory, captureGraph, restoreGraph } from '../../builder/graph-history.js';
 import { copySelection, planPaste, type ClipboardData } from '../../builder/clipboard.js';
 import { validateConnectionDraft } from '../../builder/port-validator.js';
+import { heComponentName } from '../../lib/component-he-names.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -149,7 +150,7 @@ export function MissionControlView({
     // Auto-generate name: "Heat Pump 2" etc.
     const def = registry.get(typeId);
     const sameType = existing.filter(c => c.type === typeId).length;
-    const name = `${def?.label ?? typeId} ${sameType + 1}`;
+    const name = `${heComponentName(typeId, def?.label ?? typeId)} ${sameType + 1}`;
 
     try {
       builder.placeComponent(typeId, name, position);
@@ -254,7 +255,7 @@ export function MissionControlView({
     const def = registry.get(typeId);
     const existing = stores.graph.getComponents(projectId);
     const sameType = existing.filter(c => c.type === typeId).length;
-    const name = `${def?.label ?? typeId} ${sameType + 1}`;
+    const name = `${heComponentName(typeId, def?.label ?? typeId)} ${sameType + 1}`;
     try {
       builder.placeComponent(typeId, name, { x, y });
       builder.dispatchFsm({ type: 'CANCEL_PLACING' });
