@@ -882,35 +882,68 @@ body {
    during a connection drag. Scoped to [data-flowmap-build] so Monitor is unchanged.
    ─────────────────────────────────────────────────────────────────────────── */
 
+/* Stage D (pid-spec §2) — attached SQUARE port glyphs, not floating neon circles.
+   Colours are set through React Flow's own handle CSS variables (so RF's base
+   rule resolves them cleanly — no specificity/!important war). Quiet at rest
+   (60%); revealed on equipment hover/selection; grow + accent on port hover.
+   The functional valid/invalid/connecting highlights are preserved. */
 [data-flowmap-build] .react-flow__handle {
-  width: 11px;
-  height: 11px;
-  background: var(--accent);
-  border: 2px solid var(--bg-crust);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  --xy-handle-background-color: var(--bg-mantle);
+  --xy-handle-border-color:     var(--border-bright);
+  width: 9px;                              /* PORT_SIZE (§0) */
+  height: 9px;
+  border-width: 1.5px;
+  border-radius: 2px;                      /* square anchor glyph, not a circle (§2.2) */
+  opacity: 0.6;                            /* visible but quiet at rest in Build (§2.2) */
+  transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 
+/* 6px stub continuing the pipe direction, so the glyph reads as attached (§2.2/§2.6) */
+[data-flowmap-build] .react-flow__handle::before {
+  content: ''; position: absolute; background: var(--border-bright);
+}
+[data-flowmap-build] .react-flow__handle-left::before   { width: 6px; height: 1.5px; top: 50%; right: 100%;  transform: translateY(-50%); }
+[data-flowmap-build] .react-flow__handle-right::before  { width: 6px; height: 1.5px; top: 50%; left: 100%;   transform: translateY(-50%); }
+[data-flowmap-build] .react-flow__handle-top::before    { width: 1.5px; height: 6px; left: 50%; bottom: 100%; transform: translateX(-50%); }
+[data-flowmap-build] .react-flow__handle-bottom::before { width: 1.5px; height: 6px; left: 50%; top: 100%;    transform: translateX(-50%); }
+
+/* Reveal all ports at full opacity when hovering or selecting the equipment (§2.3) */
+[data-flowmap-build] .react-flow__node:hover .react-flow__handle,
+[data-flowmap-build] .react-flow__node.selected .react-flow__handle {
+  opacity: 1;
+}
+
+/* Port hover — grow, full opacity, accent, crosshair (§2.3) */
 [data-flowmap-build] .react-flow__handle:hover {
-  transform: scale(1.45);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+  --xy-handle-background-color: var(--accent);
+  --xy-handle-border-color:     var(--accent);
+  opacity: 1;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
   cursor: crosshair;
 }
 
-/* Valid drop target during a connection drag */
+/* Valid drop target during a connection drag (§2.4) */
 [data-flowmap-build] .react-flow__handle.valid,
 [data-flowmap-build] .react-flow__handle.connectingto.valid {
-  background: var(--status-healthy) !important;
+  --xy-handle-background-color: var(--status-healthy);
+  --xy-handle-border-color:     var(--status-healthy);
+  opacity: 1;
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-healthy) 35%, transparent);
 }
 
-/* Invalid drop target during a connection drag */
+/* Invalid drop target during a connection drag (§2.4) */
 [data-flowmap-build] .react-flow__handle.connectingto:not(.valid) {
-  background: var(--status-critical) !important;
+  --xy-handle-background-color: var(--status-critical);
+  --xy-handle-border-color:     var(--status-critical);
+  opacity: 1;
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--status-critical) 30%, transparent);
 }
 
-/* The component currently sourcing a connection */
+/* The component currently sourcing a connection (§2.4) */
 [data-flowmap-build] .react-flow__handle.connectingfrom {
-  background: var(--accent) !important;
+  --xy-handle-background-color: var(--accent);
+  --xy-handle-border-color:     var(--accent);
+  opacity: 1;
   box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 35%, transparent);
 }
