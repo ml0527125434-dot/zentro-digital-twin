@@ -228,4 +228,12 @@ export const HE: Translations = {
   'builder.copied':               'הועתק',
   'builder.shortcuts_hint':       'גרור מפורט לפורט כדי לחבר · גרירה על הבד = בחירה · Delete מחיקה · Ctrl+Z ביטול · Ctrl+D שכפול · Ctrl+A בחר הכל',
   'builder.shortcuts_dismiss':    'הבנתי',
+
+  // Stage 2A: Workspace status / validation bar
+  'status.ready':           'מוכן',
+  'status.no_components':   'אין ציוד',
+  'status.design_warnings': ({ count }) => count === 1 ? 'אזהרת תכן אחת' : `${count} אזהרות תכן`,
+  'status.selected':        ({ count }) => `${count} נבחרו`,
+  'status.components':      ({ count }) => count === 1 ? 'רכיב אחד' : `${count} רכיבים`,
+  'status.connections':     ({ count }) => count === 1 ? 'צינור אחד' : `${count} צינורות`,
 };

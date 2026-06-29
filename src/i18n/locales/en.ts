@@ -228,4 +228,12 @@ export const EN: Translations = {
   'builder.copied':               'Copied',
   'builder.shortcuts_hint':       'Drag port→port to connect · drag canvas = select · Delete · Ctrl+Z undo · Ctrl+D duplicate · Ctrl+A select all',
   'builder.shortcuts_dismiss':    'Got it',
+
+  // Stage 2A: Workspace status / validation bar
+  'status.ready':           'Ready',
+  'status.no_components':   'No equipment',
+  'status.design_warnings': ({ count }) => count === 1 ? '1 design warning' : `${count} design warnings`,
+  'status.selected':        ({ count }) => `${count} selected`,
+  'status.components':      ({ count }) => count === 1 ? '1 component' : `${count} components`,
+  'status.connections':     ({ count }) => count === 1 ? '1 pipe' : `${count} pipes`,
 };

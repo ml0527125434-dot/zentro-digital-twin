@@ -31,6 +31,7 @@ import { FlowMap } from '../../renderer/components/FlowMap.js';
 import { useLocale } from '../../i18n/index.js';
 import { SystemStatusBar } from './SystemStatusBar.js';
 import { KpiBar } from './KpiBar.js';
+import { WorkspaceStatusBar } from './WorkspaceStatusBar.js';
 import { AlarmBanner } from './AlarmBanner.js';
 import { EquipmentGrid } from './EquipmentGrid.js';
 import { EventTimeline } from './EventTimeline.js';
@@ -960,6 +961,20 @@ export function MissionControlView({
         </div>
 
       </div>{/* end three-column workspace */}
+
+      {/* ── Bottom status / validation bar (pid-spec §9.5) — collapses in presentation ── */}
+      <div style={{
+        maxHeight:  presentationMode ? 0 : 28,
+        overflow:   'hidden',
+        flexShrink: 0,
+        transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+      }}>
+        <WorkspaceStatusBar
+          components={components}
+          connections={connections}
+          selectedCount={buildMode ? selectedIds.length : (selectedComponentId ? 1 : 0)}
+        />
+      </div>
     </div>
   );
 }

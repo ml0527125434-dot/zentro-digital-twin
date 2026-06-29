@@ -201,7 +201,14 @@ export type TranslationKey =
   | 'builder.history_redone'
   | 'builder.copied'
   | 'builder.shortcuts_hint'
-  | 'builder.shortcuts_dismiss';
+  | 'builder.shortcuts_dismiss'
+  // Stage 2A: Workspace status / validation bar
+  | 'status.ready'
+  | 'status.no_components'
+  | 'status.design_warnings'
+  | 'status.selected'
+  | 'status.components'
+  | 'status.connections';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);
