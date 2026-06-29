@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" translate="no">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zentro Builder — Engineering Mockups</title>
+<style>
+  :root{
+    --bg-base:#0b0f14; --bg-crust:#0e131a; --bg-panel:#121821; --bg-elevated:#161d27;
+    --border:#1e2a38; --border-strong:#2b3a4d;
+    --text-base:#e6edf6; --text-sub:#9fb0c3; --text-dim:#5c7086;
+    --accent:#4f9cf9; --accent-soft:rgba(79,156,249,.14);
+    --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --info:#38bdf8;
+    --hot:#f97316; --cold:#38bdf8; --recirc:#2dd4bf; --gas:#fbbf24;
+    --r-sm:4px; --r-md:6px; --r-lg:8px;
+    --font-ui:"Heebo","Assistant",system-ui,Segoe UI,Arial,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#05080c;color:var(--text-base);font-family:var(--font-ui);padding:24px;line-height:1.5}
+  h1{font-size:20px;font-weight:800;margin:0 0 4px}
+  h2{font-size:14px;font-weight:800;color:var(--text-sub);letter-spacing:.04em;margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}
+  .sub{color:var(--text-dim);font-size:12px;margin:0 0 18px}
+  .frame{border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:var(--bg-base);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .tag{display:inline-block;font-size:10px;color:var(--text-dim);border:1px solid var(--border);border-radius:999px;padding:1px 8px;margin-inline-start:6px}
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{display:flex;align-items:center;gap:6px;height:44px;background:var(--bg-crust);border-bottom:1px solid var(--border);padding:0 10px;font-size:12px}
+  .tgroup{display:flex;align-items:center;gap:2px}
+  .sep{width:1px;height:22px;background:var(--border);margin:0 6px}
+  .tbtn{display:flex;align-items:center;gap:6px;height:30px;padding:0 9px;border-radius:var(--r-md);color:var(--text-sub);border:1px solid transparent;cursor:pointer;white-space:nowrap}
+  .tbtn:hover{background:var(--bg-elevated);color:var(--text-base)}
+  .tbtn.active{color:var(--accent);background:var(--accent-soft);border-color:rgba(79,156,249,.35)}
+  .tbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .brand{font-weight:800;color:var(--text-base);margin-inline-start:auto;letter-spacing:.03em}
+  .seg{display:flex;border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+  .seg .tbtn{border-radius:0;height:28px}
+  .grow{flex:1}
+
+  /* ---------- BODY GRID ---------- */
+  .body{display:grid;grid-template-columns:260px 1fr 300px;height:560px}
+  .panel{background:var(--bg-panel);display:flex;flex-direction:column;min-height:0}
+  .panel.left{border-inline-end:1px solid var(--border)}
+  .panel.right{border-inline-start:1px solid var(--border)}
+  .phead{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid var(--border);font-size:10px;font-weight:800;color:var(--text-sub);letter-spacing:.1em}
+  .pbody{flex:1;overflow:auto;padding:10px}
+
+  /* library */
+  .search{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:var(--r-md);padding:6px 9px;color:var(--text-dim);font-size:12px;margin-bottom:10px}
+  .cats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+  .cat{font-size:10px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--text-sub);cursor:pointer}
+  .cat.active{background:var(--accent-soft);color:var(--accent);border-color:rgba(79,156,249,.35)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:grab}
+  .card:hover{border-color:var(--border-strong)}
+  .card .sym{width:46px;height:40px;display:flex;align-items:center;justify-content:center}
+  .card .nm{font-size:11px;color:var(--text-base);font-weight:600}
+
+  /* canvas */
+  .canvas{position:relative;background:var(--bg-base);overflow:hidden}
+  .zoomctl{position:absolute;inset-inline-start:12px;bottom:12px;display:flex;flex-direction:column;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden}
+  .zoomctl button{width:30px;height:28px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-sub);cursor:pointer;font-size:14px}
+  .zoomctl button:last-child{border-bottom:none}
+
+  /* inspector */
+  .hero{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 12px;border-bottom:1px solid var(--border)}
+  .hero .symbox{background:var(--accent-soft);border:1px solid rgba(79,156,249,.3);border-radius:var(--r-lg);padding:8px}
+  .nameedit{width:100%;text-align:center;background:transparent;border:1px solid transparent;border-radius:var(--r-md);color:var(--text-base);font-size:17px;font-weight:800;padding:3px}
+  .nameedit:hover{border-color:var(--border)}
+  .heactions{display:flex;gap:8px;width:100%}
+  .btn{flex:1;height:32px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-base);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn.accent{color:var(--accent);background:var(--accent-soft);border-color:rgba(79,156,249,.35)}
+  .btn.danger{color:var(--err);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)}
+  .sect{padding:12px;border-bottom:1px solid var(--border)}
+  .sect h4{margin:0 0 8px;font-size:10px;font-weight:800;color:var(--text-dim);letter-spacing:.08em}
+  .port-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:4px;font-size:11px}
+  .dot{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+  .pill{margin-inline-start:auto;font-size:9px;font-weight:800;border-radius:var(--r-sm);padding:2px 6px}
+
+  /* status bar */
+  .status{height:28px;background:var(--bg-crust);border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:11px;color:var(--text-sub)}
+  .status .mono{font-family:var(--font-mono)}
+  .status .right{margin-inline-start:auto;display:flex;gap:16px}
+  .led{width:8px;height:8px;border-radius:50%;display:inline-block;margin-inline-end:5px;vertical-align:middle}
+
+  /* gallery */
+  .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:8px}
+  .gcard{border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-base);overflow:hidden}
+  .gcard .gh{font-size:11px;font-weight:800;color:var(--text-sub);padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg-crust)}
+  .gbody{padding:14px;display:flex;justify-content:center;align-items:center;min-height:140px;background:var(--bg-panel)}
+
+  /* context menu */
+  .ctx{width:210px;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:0 8px 24px rgba(0,0,0,.5);padding:4px}
+  .ctx .row{display:flex;align-items:center;gap:10px;height:28px;padding:0 8px;border-radius:var(--r-sm);font-size:12px;color:var(--text-base);cursor:pointer}
+  .ctx .row:hover{background:var(--accent-soft);color:var(--accent)}
+  .ctx .row .sc{margin-inline-start:auto;color:var(--text-dim);font-size:10px;font-family:var(--font-mono)}
+  .ctx .row.danger{color:var(--err)}
+  .ctx .div{height:1px;background:var(--border);margin:4px 6px}
+
+  /* dialog */
+  .dialog{width:420px;background:var(--bg-elevated);border:1px solid var(--border-strong);border-radius:var(--r-lg);box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden}
+  .dialog .dh{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);font-weight:800}
+  .dialog .db{padding:16px;color:var(--text-sub);font-size:13px}
+  .dialog .df{display:flex;gap:8px;justify-content:flex-start;padding:12px 16px;border-top:1px solid var(--border)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-sub);margin:6px 0 16px}
+  .legend b{display:inline-block;width:18px;height:4px;border-radius:2px;margin-inline-end:6px;vertical-align:middle}
+  .note{font-size:11px;color:var(--text-dim);padding:8px 0}
+</style>
+</head>
+<body>
+<h1>זנטרו · Builder — מוקאפים הנדסיים <span class="tag">P&ID / Revit-lite · לאישור לפני קוד</span></h1>
+<p class="sub">מטרה ויזואלית מחייבת. כל הצבעים/מרווחים לפי ה‑Design System (חלק 13). לא אינטראקטיבי.</p>
+
+<div class="legend">
+  צבע לפי מדיום:
+  <span><b style="background:var(--hot)"></b>מים חמים</span>
+  <span><b style="background:var(--cold)"></b>מים קרים</span>
+  <span><b style="background:var(--recirc)"></b>סירקולציה</span>
+  <span><b style="background:var(--gas)"></b>גז</span>
+  <span><b style="background:var(--accent)"></b>הדגשת UI (בחירה/פוקוס)</span>
+</div>
+
+<!-- =================== FULL WORKSPACE =================== -->
+<h2>1. Full-page Workspace</h2>
+<div class="frame">
+  <!-- toolbar -->
+  <div class="toolbar">
+    <div class="seg">
+      <div class="tbtn active">בנייה</div>
+      <div class="tbtn">ניטור</div>
+    </div>
+    <div class="sep"></div>
+    <div class="tgroup">
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>חדש</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h7"/></svg>שמור</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 21h14"/></svg>ייצוא</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 21h14"/></svg>ייבוא</div>
+    </div>
+    <div class="sep"></div>
+    <div class="tgroup">
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 015 5v0"/></svg>בטל</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M15 7l5 5-5 5M20 12H9a5 5 0 00-5 5v0"/></svg>חזור</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V5h10"/></svg>שכפל</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>מחק</div>
+    </div>
+    <div class="sep"></div>
+    <div class="tgroup">
+      <div class="tbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><path d="M10 7h4M7 10v4"/></svg>סדר אוטומטית</div>
+      <div class="tbtn"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>התאם</div>
+      <div class="tbtn">100%</div>
+      <div class="tbtn active"><svg viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>רשת</div>
+    </div>
+    <div class="brand">זנטרו · תאום דיגיטלי</div>
+  </div>
+
+  <!-- body -->
+  <div class="body">
+    <!-- LEFT LIBRARY -->
+    <div class="panel left">
+      <div class="phead"><span>ספריית רכיבים</span><span>‹</span></div>
+      <div class="pbody">
+        <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>חפש רכיב…</div>
+        <div class="cats">
+          <span class="cat active">מקורות חום</span><span class="cat">אגירה</span>
+          <span class="cat">משאבות</span><span class="cat">שסתומים</span><span class="cat">צריכה</span>
+        </div>
+        <div class="cards">
+          <div class="card"><div class="sym"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="3" y="4" width="34" height="26" rx="3" fill="none" stroke="var(--hot)" stroke-width="1.5"/><circle cx="20" cy="17" r="7" fill="none" stroke="var(--hot)" stroke-width="1.5"/><path d="M20 12v10M15 17h10" stroke="var(--hot)" stroke-width="1.2"/></svg></div><div class="nm">משאבת חום</div></div>
+          <div class="card"><div class="sym"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="4" y="5" width="32" height="24" rx="3" fill="none" stroke="var(--gas)" stroke-width="1.5"/><path d="M20 22c4 0 6-3 4-7-1 3-3 2-3-1-3 2-4 8 -1 8z" fill="var(--gas)" opacity=".8"/></svg></div><div class="nm">תנור גז</div></div>
+          <div class="card"><div class="sym"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="6" y="6" width="28" height="22" rx="2" fill="none" stroke="var(--hot)" stroke-width="1.5"/><path d="M10 11h20M10 17h20M10 23h20" stroke="var(--hot)" stroke-width="1.2"/></svg></div><div class="nm">מחמם חשמלי</div></div>
+          <div class="card"><div class="sym"><svg width="40" height="34" viewBox="0 0 40 34"><rect x="8" y="4" width="24" height="26" rx="3" fill="none" stroke="var(--recirc)" stroke-width="1.5"/><path d="M12 10h16M12 16h16" stroke="var(--recirc)" stroke-width="1.2"/></svg></div><div class="nm">מחליף חום</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas">
+      <svg width="100%" height="100%" viewBox="0 0 760 560" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="minor" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M20 0H0V20" fill="none" stroke="#16202c" stroke-width="1"/>
+          </pattern>
+          <pattern id="major" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#minor)"/>
+            <path d="M100 0H0V100" fill="none" stroke="#22303f" stroke-width="1.2"/>
+          </pattern>
+          <marker id="ah-hot" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--hot)"/></marker>
+          <marker id="ah-cold" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--cold)"/></marker>
+          <marker id="ah-recirc" markerWidth="9" markerHeight="9" refX="5" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--recirc)"/></marker>
+        </defs>
+        <rect width="760" height="560" fill="url(#major)"/>
+
+        <!-- PIPES: orthogonal, 90deg, small elbows, midpoint arrow via marker on a mid vertex -->
+        <!-- heat pump out(right) -> tank heat_in(left), hot -->
+        <polyline points="210,250 260,250 260,250" fill="none"/>
+        <polyline points="210,250 250,250 250,300 320,300" fill="none" stroke="var(--hot)" stroke-width="5" stroke-linejoin="round" marker-mid="url(#ah-hot)"/>
+        <!-- tank hot_out(top) -> mixing valve(left), hot -->
+        <polyline points="380,210 380,150 520,150 520,250" fill="none" stroke="var(--hot)" stroke-width="5" stroke-linejoin="round" marker-mid="url(#ah-hot)"/>
+        <!-- mixing valve out(right) -> shower(left), hot -->
+        <polyline points="560,270 610,270 610,320" fill="none" stroke="var(--hot)" stroke-width="5" stroke-linejoin="round" marker-mid="url(#ah-hot)"/>
+        <!-- cold into tank bottom -->
+        <polyline points="350,470 350,400 350,400" fill="none"/>
+        <polyline points="300,470 350,470 350,400" fill="none" stroke="var(--cold)" stroke-width="4.5" stroke-linejoin="round" marker-mid="url(#ah-cold)"/>
+        <!-- recirc pump -> tank right -->
+        <polyline points="470,430 430,430 430,360 420,360" fill="none" stroke="var(--recirc)" stroke-width="4.5" stroke-linejoin="round" marker-mid="url(#ah-recirc)"/>
+
+        <!-- EQUIPMENT (schematic, on grid) -->
+        <!-- Heat pump -->
+        <g>
+          <rect x="120" y="210" width="90" height="80" rx="4" fill="#0f1722" stroke="#3a5573" stroke-width="1.5"/>
+          <circle cx="165" cy="250" r="20" fill="none" stroke="#5b7da0" stroke-width="1.5"/>
+          <path d="M165 234c8 6 8 22 0 28M165 234c-8 6-8 22 0 28" stroke="#5b7da0" stroke-width="1.4" fill="none"/>
+          <rect x="206" y="246" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>  <!-- port out -->
+          <text x="165" y="305" text-anchor="middle" fill="#9fb0c3" font-size="11" font-family="sans-serif">משאבת חום 1</text>
+        </g>
+        <!-- Storage tank (cylinder) -->
+        <g>
+          <rect x="320" y="210" width="60" height="120" rx="6" fill="#0f1722" stroke="#3a82b8" stroke-width="1.5"/>
+          <ellipse cx="350" cy="210" rx="30" ry="8" fill="#13202c" stroke="#3a82b8" stroke-width="1.5"/>
+          <rect x="320" y="290" width="60" height="40" fill="var(--hot)" opacity=".25"/>
+          <rect x="316" y="296" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>   <!-- heat_in left -->
+          <rect x="346" y="206" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>   <!-- hot_out top -->
+          <rect x="346" y="326" width="8" height="8" fill="var(--cold)" stroke="#0b0f14"/>  <!-- cold_in bottom -->
+          <rect x="376" y="356" width="8" height="8" fill="var(--recirc)" stroke="#0b0f14"/>
+          <rect x="416" y="356" width="8" height="8" fill="var(--recirc)" stroke="#0b0f14"/>
+          <text x="350" y="350" text-anchor="middle" fill="#9fb0c3" font-size="11" font-family="sans-serif">מיכל אחסון 1</text>
+        </g>
+        <!-- Mixing valve (bowtie) -->
+        <g>
+          <path d="M500 250 L540 270 L500 290 Z M560 250 L520 270 L560 290 Z" fill="#0f1722" stroke="#9d7fd6" stroke-width="1.5"/>
+          <rect x="516" y="246" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>
+          <rect x="556" y="266" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>
+          <text x="530" y="306" text-anchor="middle" fill="#9fb0c3" font-size="11" font-family="sans-serif">שסתום ערבוב</text>
+        </g>
+        <!-- Shower -->
+        <g>
+          <rect x="590" y="320" width="44" height="44" rx="6" fill="#0f1722" stroke="#2dd4bf" stroke-width="1.5"/>
+          <path d="M612 330v8M606 344h12M609 350h6" stroke="#2dd4bf" stroke-width="1.4"/>
+          <rect x="586" y="316" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>
+          <text x="612" y="378" text-anchor="middle" fill="#9fb0c3" font-size="11" font-family="sans-serif">מקלחת</text>
+        </g>
+        <!-- Recirc pump (circle on line) -->
+        <g>
+          <circle cx="490" cy="430" r="22" fill="#0f1722" stroke="#2dd4bf" stroke-width="1.5"/>
+          <path d="M490 414c9 7 9 25 0 32M490 414c-9 7-9 25 0 32" stroke="#2dd4bf" stroke-width="1.4" fill="none"/>
+          <rect x="466" y="426" width="8" height="8" fill="var(--recirc)" stroke="#0b0f14"/>
+          <text x="490" y="470" text-anchor="middle" fill="#9fb0c3" font-size="11" font-family="sans-serif">משאבת סירקולציה</text>
+        </g>
+
+        <!-- selected component outline example (tank) -->
+        <rect x="313" y="203" width="74" height="134" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="1 0"/>
+      </svg>
+      <div class="zoomctl"><button>+</button><button>‹›</button><button>−</button></div>
+    </div>
+
+    <!-- RIGHT INSPECTOR (single selected) -->
+    <div class="panel right">
+      <div class="phead"><span>מאפיינים</span><span>›</span></div>
+      <div class="pbody" style="padding:0">
+        <div class="hero">
+          <div class="symbox"><svg width="40" height="48" viewBox="0 0 40 48"><ellipse cx="20" cy="8" rx="15" ry="5" fill="none" stroke="var(--cold)" stroke-width="1.5"/><rect x="5" y="8" width="30" height="32" fill="none" stroke="var(--cold)" stroke-width="1.5"/><rect x="5" y="26" width="30" height="14" fill="var(--hot)" opacity=".25"/></svg></div>
+          <input class="nameedit" value="מיכל אחסון 1" />
+          <div style="font-size:11px;color:var(--accent);font-weight:700">מיכל אחסון</div>
+          <div class="heactions">
+            <button class="btn accent">⧉ שכפל</button>
+            <button class="btn danger">🗑 מחק</button>
+          </div>
+        </div>
+        <div class="sect">
+          <h4>חיבורים</h4>
+          <div class="port-row"><span class="dot" style="background:var(--hot)"></span>יציאה חמה<span class="pill" style="background:rgba(249,115,22,.15);color:var(--hot)">מים חמים</span></div>
+          <div class="port-row"><span class="dot" style="background:var(--hot)"></span>כניסה חמה<span class="pill" style="background:rgba(249,115,22,.15);color:var(--hot)">מים חמים</span></div>
+          <div class="port-row"><span class="dot" style="background:var(--cold)"></span>כניסה קרה<span class="pill" style="background:rgba(56,189,248,.15);color:var(--cold)">מים קרים</span></div>
+        </div>
+        <div class="sect" style="border:none">
+          <h4>פרטים נוספים ▾</h4>
+          <div class="note">הוסף חיבור ידני · פרופיל תפעולי</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status">
+    <span><span class="led" style="background:var(--warn)"></span>מוכנות: 2 אזהרות תכן</span>
+    <span>נבחרו: 1</span>
+    <span class="right">
+      <span class="mono">זום 100%</span>
+      <span class="mono">X:340 Y:210</span>
+      <span><span class="led" style="background:var(--ok)"></span>נשמר</span>
+    </span>
+  </div>
+</div>
+
+<!-- =================== STATES GALLERY =================== -->
+<h2>2–8. רכיבים ומצבים</h2>
+<div class="gallery">
+
+  <div class="gcard"><div class="gh">צינורות — ניתוב אורתוגונלי, פינות, חיצי כיוון</div>
+    <div class="gbody"><svg width="320" height="120">
+      <polyline points="20,90 90,90 90,30 200,30" fill="none" stroke="var(--hot)" stroke-width="5" marker-mid="url(#ah-hot)"/>
+      <polyline points="20,90 90,90 90,30 200,30" fill="none"/>
+      <polyline points="120,100 120,60 300,60" fill="none" stroke="var(--cold)" stroke-width="4.5"/>
+      <rect x="16" y="86" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>
+      <rect x="196" y="26" width="8" height="8" fill="var(--hot)" stroke="#0b0f14"/>
+      <text x="160" y="112" fill="#5c7086" font-size="10" text-anchor="middle">90° בלבד · elbow 3px · ראש חץ במרכז</text>
+    </svg></div>
+  </div>
+
+  <div class="gcard"><div class="gh">פורטים — צמודים, מצבי Hover / Valid / Invalid</div>
+    <div class="gbody"><svg width="320" height="120">
+      <rect x="40" y="40" width="60" height="44" rx="4" fill="#0f1722" stroke="#3a5573"/>
+      <rect x="96" y="58" width="9" height="9" fill="var(--hot)" stroke="#0b0f14"/>
+      <text x="70" y="100" fill="#5c7086" font-size="9" text-anchor="middle">rest</text>
+      <rect x="150" y="58" width="11" height="11" fill="var(--ok)" stroke="#0b0f14"/>
+      <circle cx="155.5" cy="63.5" r="11" fill="none" stroke="var(--ok)" stroke-width="2" opacity=".6"/>
+      <text x="155" y="100" fill="var(--ok)" font-size="9" text-anchor="middle">valid</text>
+      <rect x="220" y="58" width="11" height="11" fill="var(--err)" stroke="#0b0f14"/>
+      <circle cx="225.5" cy="63.5" r="11" fill="none" stroke="var(--err)" stroke-width="2" opacity=".6"/>
+      <text x="225" y="100" fill="var(--err)" font-size="9" text-anchor="middle">invalid</text>
+    </svg></div>
+  </div>
+
+  <div class="gcard"><div class="gh">אינספקטור — מצב ריק</div>
+    <div class="gbody"><div style="text-align:center;color:var(--text-dim)"><div style="font-size:30px;opacity:.4">✦</div><div style="font-size:12px;margin-top:6px">בחר רכיב לעריכה</div></div></div>
+  </div>
+
+  <div class="gcard"><div class="gh">אינספקטור — בחירה מרובה</div>
+    <div class="gbody"><div style="width:80%">
+      <div style="font-size:14px;font-weight:800;text-align:center;margin-bottom:10px">2 רכיבים נבחרו</div>
+      <div class="heactions"><button class="btn accent">⧉ שכפל הכל</button><button class="btn danger">🗑 מחק הכל</button></div>
+      <div class="note" style="text-align:center">משאבת חום 1 · מיכל אחסון 1</div>
+    </div></div>
+  </div>
+
+  <div class="gcard"><div class="gh">תפריט הקשר — רכיב</div>
+    <div class="gbody"><div class="ctx">
+      <div class="row">שנה שם<span class="sc">F2</span></div>
+      <div class="row">שכפל<span class="sc">Ctrl+D</span></div>
+      <div class="row">העתק<span class="sc">Ctrl+C</span></div>
+      <div class="div"></div>
+      <div class="row danger">מחק (כולל צינורות)<span class="sc">Del</span></div>
+    </div></div>
+  </div>
+
+  <div class="gcard"><div class="gh">תפריט הקשר — בד / צינור</div>
+    <div class="gbody" style="gap:16px">
+      <div class="ctx" style="width:170px"><div class="row">הדבק<span class="sc">Ctrl+V</span></div><div class="row">בחר הכל<span class="sc">Ctrl+A</span></div><div class="row">סדר אוטומטית</div></div>
+      <div class="ctx" style="width:170px"><div class="row">הפוך כיוון</div><div class="div"></div><div class="row danger">מחק צינור<span class="sc">Del</span></div></div>
+    </div>
+  </div>
+
+  <div class="gcard"><div class="gh">דיאלוג — אישור מחיקה</div>
+    <div class="gbody"><div class="dialog">
+      <div class="dh">מחיקת רכיב <span style="color:var(--text-dim);cursor:pointer">✕</span></div>
+      <div class="db">למחוק את "מיכל אחסון 1" ואת 3 הצינורות המחוברים אליו? אפשר לבטל עם Ctrl+Z.</div>
+      <div class="df"><button class="btn danger" style="flex:0 0 auto;padding:0 16px">מחק</button><button class="btn" style="flex:0 0 auto;padding:0 16px">ביטול</button></div>
+    </div></div>
+  </div>
+
+  <div class="gcard"><div class="gh">דיאלוג — שגיאת ייבוא</div>
+    <div class="gbody"><div class="dialog">
+      <div class="dh" style="color:var(--err)">שגיאת ייבוא <span style="color:var(--text-dim);cursor:pointer">✕</span></div>
+      <div class="db">הקובץ אינו מסמך זנטרו תקין (kind חסר או שגוי). בחר קובץ <span class="mono" style="color:var(--text-sub)">.zentro.json</span> שיוצא מהמערכת.</div>
+      <div class="df"><button class="btn accent" style="flex:0 0 auto;padding:0 16px">הבנתי</button></div>
+    </div></div>
+  </div>
+
+</div>
+
+<p class="note" style="margin-top:18px">מסמך אב: <b>docs/zentro-builder-pid-spec.md</b> (חלקים 0–17). מוקאפים אלה = יעד ויזואלי מחייב לפני Phase 1.</p>
+</body>
+</html>
