@@ -134,7 +134,7 @@ export function MissionControlView({
     }
   }, [buildMode, builder]);
 
-  const handlePaneClick = useCallback(() => {
+  const handlePaneClick = useCallback((pos?: { x: number; y: number }) => {
     if (!buildMode) return;
     if (builder.state.mode !== 'placing') return;
     const typeId = builder.state.pendingTypeId;
@@ -143,7 +143,8 @@ export function MissionControlView({
     // Place at a staggered position; ELK will relayout automatically
     const existing = stores.graph.getComponents(projectId);
     const n = existing.length;
-    const position = { x: 60 + (n % 4) * 160, y: 60 + Math.floor(n / 4) * 140 };
+    // Place where the user clicked; fall back to a staggered slot.
+    const position = pos ?? { x: 60 + (n % 4) * 160, y: 60 + Math.floor(n / 4) * 140 };
 
     // Auto-generate name: "Heat Pump 2" etc.
     const def = registry.get(typeId);

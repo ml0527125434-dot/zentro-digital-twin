@@ -82,7 +82,7 @@ export interface FlowMapProps {
   edges: ConnectionEdge[];
   onNodeClick?:          ((componentId: string) => void) | undefined;
   onEdgeClick?:          ((connectionId: string) => void) | undefined;
-  onPaneClick?:          (() => void) | undefined;
+  onPaneClick?:          ((pos?: { x: number; y: number }) => void) | undefined;
   onSelectionChange?:    ((ids: string[]) => void) | undefined;
   onNodeContextMenu?:    ((componentId: string, x: number, y: number) => void) | undefined;
   onConnect?:            ((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => void) | undefined;
@@ -97,8 +97,10 @@ export interface FlowMapProps {
 }
 
 // Inner component: has access to useReactFlow() which requires being inside <ReactFlow>
-function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: string, x: number, y: number) => void) | undefined }) {
+function DropZoneCapture({ onDropComponent, onReady }: { onDropComponent?: ((typeId: string, x: number, y: number) => void) | undefined; onReady?: (fn: (p: { x: number; y: number }) => { x: number; y: number }) => void }) {
   const { screenToFlowPosition } = useReactFlow();
+
+  React.useEffect(() => { onReady?.(screenToFlowPosition); }, [onReady, screenToFlowPosition]);
 
   React.useEffect(() => {
     if (!onDropComponent) return;
@@ -148,6 +150,14 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
   // keeping nodes permanently visibility:hidden and edges unrendered.
   const measuredRef = useRef<Map<string, { width: number; height: number }>>(new Map());
+  const screenToFlowRef = useRef<((p: { x: number; y: number }) => { x: number; y: number }) | null>(null);
+  const handlePaneClick = useCallback((e: React.MouseEvent) => {
+    if (!onPaneClick) return;
+    const pos = screenToFlowRef.current
+      ? screenToFlowRef.current({ x: e.clientX, y: e.clientY })
+      : undefined;
+    onPaneClick(pos);
+  }, [onPaneClick]);
 
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
     for (const change of changes) {
@@ -251,7 +261,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         maxZoom={2}
         onNodeClick={onNodeClick ? handleNodeClick : undefined}
         onEdgeClick={onEdgeClick ? handleEdgeClick : undefined}
-        onPaneClick={onPaneClick}
+        onPaneClick={onPaneClick ? handlePaneClick : undefined}
         onSelectionChange={onSelectionChange ? handleSelectionChange : undefined}
         onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
         onConnect={onConnect ? handleConnect : undefined}
@@ -276,7 +286,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
           color="var(--border)"
         />
         <Controls showInteractive={false} />
-        <DropZoneCapture onDropComponent={onDropComponent} />
+        <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} />
       </ReactFlow>
     </div>
   );
