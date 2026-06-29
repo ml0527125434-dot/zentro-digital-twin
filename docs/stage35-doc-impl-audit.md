@@ -44,3 +44,27 @@ Source of current keyboard handling: `src/app/mission-control/MissionControlView
 - Items marked "Implement" are in Stage 35 scope (P0/P1).
 - "Zone navigation" is explicitly out of Stage 35 scope (no new modules) → the doc claim
   will be softened/removed rather than implemented.
+
+---
+
+## Stage 35 progress update (Builder Completion)
+
+The following previously-missing capabilities are now IMPLEMENTED and covered by
+tests + a clean production build:
+
+- **Save / load / autosave / export / import** — `src/persistence/*`, Build-mode
+  toolbar (שמור / ייצוא / ייבוא). Behind a `ProjectRepository` port; documents
+  carry `kind: 'zentro.digital-twin.document'`; alarm rules persisted.
+- **Undo / redo** — `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z`, bounded 50-step history
+  (`src/builder/graph-history.ts`), with a 3s toast. Unit + end-to-end tests.
+- **Copy / paste** — `Ctrl+C` / `Ctrl+V` with cascading offset and internal-edge
+  recreation (`src/builder/clipboard.ts`).
+- **Build-mode direct positioning** — stored `component.position` is honoured
+  (no ELK reshuffle); Monitor still auto-layouts.
+- **Connection valid/invalid highlighting** — `isValidConnection` (port validator)
+  prevents invalid drops; green/red handle glow + larger hit radius for easier
+  connecting.
+
+Still pending (tracked separately, NOT claimed as done in-product):
+- Arrow-key nudge, `Shift+Arrow` fine nudge, `F2` rename shortcut, `Ctrl+0`
+  fitView, `Ctrl+A` select-all, zone/floor navigation.
