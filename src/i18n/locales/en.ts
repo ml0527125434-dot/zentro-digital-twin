@@ -225,4 +225,5 @@ export const EN: Translations = {
   'builder.persist_import_error': 'Import error',
   'builder.history_undone':       'Undone',
   'builder.history_redone':       'Redone',
+  'builder.copied':               'Copied',
 };

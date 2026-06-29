@@ -40,6 +40,7 @@ import { BuilderPropertyPanel } from '../builder/BuilderPropertyPanel.js';
 import { BuilderContextMenu } from '../builder/BuilderContextMenu.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 import { createGraphHistory, captureGraph, restoreGraph } from '../../builder/graph-history.js';
+import { copySelection, planPaste, type ClipboardData } from '../../builder/clipboard.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -96,8 +97,11 @@ export function MissionControlView({
   // Undo/redo history for the CONFIG graph (build mode)
   const historyRef = useRef(createGraphHistory(50));
   const lastVersionRef = useRef<number>(-1);
-  const [undoToast, setUndoToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; hint: boolean } | null>(null);
   const undoToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Copy/paste clipboard (build mode)
+  const clipboardRef = useRef<ClipboardData | null>(null);
+  const pasteCountRef = useRef(0);
 
   // Connection validation toast
   const [connectError, setConnectError] = useState<string | null>(null);
@@ -288,11 +292,12 @@ export function MissionControlView({
     }
   });
 
-  const showUndoToast = useCallback((msg: string) => {
-    setUndoToast(msg);
+  const showToast = useCallback((text: string, hint: boolean) => {
+    setToast({ text, hint });
     if (undoToastTimer.current) clearTimeout(undoToastTimer.current);
-    undoToastTimer.current = setTimeout(() => setUndoToast(null), 3000);
+    undoToastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
+  const showUndoToast = useCallback((msg: string) => showToast(msg, true), [showToast]);
 
   const doUndo = useCallback(() => {
     const snap = historyRef.current.undo();
@@ -311,6 +316,50 @@ export function MissionControlView({
     onMutation?.();
     showUndoToast(t('builder.history_redone'));
   }, [stores, projectId, builder, onMutation, showUndoToast, t]);
+
+  const doCopy = useCallback(() => {
+    const ids = multiSelectedIds.length > 0
+      ? multiSelectedIds
+      : (builder.state.mode === 'selected-component' && builder.state.selectedComponentId
+          ? [builder.state.selectedComponentId] : []);
+    const cb = copySelection(
+      stores.graph.getComponents(projectId),
+      stores.graph.getConnections(projectId),
+      ids,
+    );
+    if (!cb) return;
+    clipboardRef.current = cb;
+    pasteCountRef.current = 0;
+    showToast(t('builder.copied'), false);
+  }, [multiSelectedIds, builder, stores, projectId, showToast, t]);
+
+  const doPaste = useCallback(() => {
+    const cb = clipboardRef.current;
+    if (!cb) return;
+    const offset = 40 * (pasteCountRef.current + 1);
+    pasteCountRef.current += 1;
+    const plan = planPaste(cb, offset);
+    const idMap = new Map<string, string>();
+    for (const pc of plan.components) {
+      try {
+        const created = builder.placeComponent(pc.type, pc.name, pc.position);
+        idMap.set(pc.sourceId, created.id);
+      } catch { /* skip on failure */ }
+    }
+    for (const pn of plan.connections) {
+      const from = idMap.get(pn.fromSourceId);
+      const to = idMap.get(pn.toSourceId);
+      if (!from || !to) continue;
+      try {
+        builder.connectPorts(
+          { componentId: from, portId: pn.fromPortId },
+          { componentId: to, portId: pn.toPortId },
+          pn.medium, pn.direction,
+        );
+      } catch { /* skip invalid */ }
+    }
+    onMutation?.();
+  }, [builder, onMutation]);
 
   // Build mode keyboard shortcuts: Delete → delete selected; Escape → cancel placing
   useEffect(() => {
@@ -341,6 +390,14 @@ export function MissionControlView({
         }
       }
 
+      // Ctrl+C → copy selection ; Ctrl+V → paste
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault(); doCopy(); return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+        e.preventDefault(); doPaste(); return;
+      }
+
       // Ctrl+Z → undo ; Ctrl+Shift+Z or Ctrl+Y → redo
       if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
         e.preventDefault();
@@ -367,7 +424,7 @@ export function MissionControlView({
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [buildMode, builder, multiSelectedIds, onMutation, doUndo, doRedo]);
+  }, [buildMode, builder, multiSelectedIds, onMutation, doUndo, doRedo, doCopy, doPaste]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -642,7 +699,7 @@ export function MissionControlView({
             </div>
           )}
 
-          {undoToast && (
+          {toast && (
             <div data-testid="undo-toast" style={{
               position: 'absolute', bottom: 16, insetInlineStart: '50%', transform: 'translateX(-50%)',
               zIndex: 30, background: 'var(--bg-crust)', border: '1px solid var(--border)',
@@ -650,8 +707,8 @@ export function MissionControlView({
               color: 'var(--text-base)', display: 'flex', gap: 10, alignItems: 'center',
               pointerEvents: 'none', boxShadow: 'var(--shadow, 0 2px 8px rgba(0,0,0,0.3))',
             }}>
-              <span>{undoToast}</span>
-              <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Ctrl+Z / Ctrl+Y</span>
+              <span>{toast.text}</span>
+              {toast.hint && <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Ctrl+Z / Ctrl+Y</span>}
             </div>
           )}
 

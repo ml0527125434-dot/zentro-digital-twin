@@ -225,4 +225,5 @@ export const HE: Translations = {
   'builder.persist_import_error': 'שגיאת ייבוא',
   'builder.history_undone':       'בוטל',
   'builder.history_redone':       'שוחזר',
+  'builder.copied':               'הועתק',
 };

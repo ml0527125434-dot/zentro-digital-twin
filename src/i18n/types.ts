@@ -198,7 +198,8 @@ export type TranslationKey =
   | 'builder.persist_import_error'
   // Stage 35: Undo/redo toast
   | 'builder.history_undone'
-  | 'builder.history_redone';
+  | 'builder.history_redone'
+  | 'builder.copied';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);
