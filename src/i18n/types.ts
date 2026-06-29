@@ -199,7 +199,9 @@ export type TranslationKey =
   // Stage 35: Undo/redo toast
   | 'builder.history_undone'
   | 'builder.history_redone'
-  | 'builder.copied';
+  | 'builder.copied'
+  | 'builder.shortcuts_hint'
+  | 'builder.shortcuts_dismiss';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

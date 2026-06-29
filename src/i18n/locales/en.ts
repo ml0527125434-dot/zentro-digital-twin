@@ -226,4 +226,6 @@ export const EN: Translations = {
   'builder.history_undone':       'Undone',
   'builder.history_redone':       'Redone',
   'builder.copied':               'Copied',
+  'builder.shortcuts_hint':       'Drag port→port to connect · drag canvas = select · Delete · Ctrl+Z undo · Ctrl+D duplicate · Ctrl+A select all',
+  'builder.shortcuts_dismiss':    'Got it',
 };

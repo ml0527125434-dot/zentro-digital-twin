@@ -82,6 +82,7 @@ const ALL_KEYS: TranslationKey[] = [
   'builder.persist_save', 'builder.persist_export', 'builder.persist_import',
   'builder.persist_saved', 'builder.persist_exported', 'builder.persist_imported', 'builder.persist_import_error',
   'builder.history_undone', 'builder.history_redone', 'builder.copied',
+  'builder.shortcuts_hint', 'builder.shortcuts_dismiss',
 ];
 
 describe('Hebrew locale', () => {

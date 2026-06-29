@@ -226,4 +226,6 @@ export const HE: Translations = {
   'builder.history_undone':       'בוטל',
   'builder.history_redone':       'שוחזר',
   'builder.copied':               'הועתק',
+  'builder.shortcuts_hint':       'גרור מפורט לפורט כדי לחבר · גרירה על הבד = בחירה · Delete מחיקה · Ctrl+Z ביטול · Ctrl+D שכפול · Ctrl+A בחר הכל',
+  'builder.shortcuts_dismiss':    'הבנתי',
 };

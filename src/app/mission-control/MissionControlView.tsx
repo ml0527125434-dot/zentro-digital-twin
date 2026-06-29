@@ -95,6 +95,7 @@ export function MissionControlView({
 
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
+  const [showShortcuts, setShowShortcuts] = useState(true);
 
   // Undo/redo history for the CONFIG graph (build mode)
   const historyRef = useRef(createGraphHistory(50));
@@ -415,6 +416,14 @@ export function MissionControlView({
         }
       }
 
+      // Ctrl+A → select all components
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        setMultiSelectedIds(stores.graph.getComponents(projectId).map(c => c.id));
+        builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+        return;
+      }
+
       // Ctrl+C → copy selection ; Ctrl+V → paste
       if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault(); doCopy(); return;
@@ -449,7 +458,7 @@ export function MissionControlView({
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [buildMode, builder, multiSelectedIds, onMutation, doUndo, doRedo, doCopy, doPaste]);
+  }, [buildMode, builder, multiSelectedIds, onMutation, doUndo, doRedo, doCopy, doPaste, stores, projectId]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -730,6 +739,24 @@ export function MissionControlView({
               textOverflow: 'ellipsis',
             }}>
               ⚠ {connectError}
+            </div>
+          )}
+
+          {buildMode && showShortcuts && (
+            <div data-testid="builder-shortcuts-hint" style={{
+              position: 'absolute', top: 12, insetInlineStart: '50%', transform: 'translateX(-50%)',
+              zIndex: 25, display: 'flex', alignItems: 'center', gap: 10, maxWidth: '92%',
+              background: 'var(--bg-crust)', border: '1px solid var(--border)', borderRadius: 8,
+              padding: '6px 12px', fontSize: 11, color: 'var(--text-sub)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('builder.shortcuts_hint')}</span>
+              <button
+                data-testid="builder-shortcuts-dismiss"
+                onClick={() => setShowShortcuts(false)}
+                style={{ background: 'var(--bg-mantle)', border: '1px solid var(--border)', borderRadius: 4,
+                  color: 'var(--text-base)', cursor: 'pointer', fontSize: 10, fontWeight: 700, padding: '2px 8px', flexShrink: 0 }}
+              >{t('builder.shortcuts_dismiss')}</button>
             </div>
           )}
 
