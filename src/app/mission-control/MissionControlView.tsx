@@ -185,7 +185,7 @@ export function MissionControlView({
   const handleCtxDelete = useCallback(() => {
     if (!ctxMenu) return;
     try {
-      builder.deleteComponent(ctxMenu.componentId);
+      builder.deleteComponentCascade(ctxMenu.componentId);
       builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
       onMutation?.();
     } catch { /* blocked — has connections */ }
@@ -402,12 +402,16 @@ export function MissionControlView({
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (builder.state.mode === 'selected-component' && builder.state.selectedComponentId) {
-          try {
-            builder.deleteComponent(builder.state.selectedComponentId);
-            builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
-            onMutation?.();
-          } catch { /* blocked — has connections */ }
+        const ids = multiSelectedIds.length > 0
+          ? multiSelectedIds
+          : (builder.state.mode === 'selected-component' && builder.state.selectedComponentId
+              ? [builder.state.selectedComponentId] : []);
+        if (ids.length > 0) {
+          for (const id of ids) {
+            try { builder.deleteComponentCascade(id); } catch { /* skip */ }
+          }
+          builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+          onMutation?.();
         } else if (builder.state.mode === 'selected-connection' && builder.state.selectedConnectionId) {
           builder.disconnectPorts(builder.state.selectedConnectionId);
           builder.dispatchFsm({ type: 'CLEAR_SELECTION' });

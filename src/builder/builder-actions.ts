@@ -117,6 +117,30 @@ export function deleteComponent(
   return removeComponent(projectId, componentId, createdBy, stores);
 }
 
+/**
+ * Delete a component together with every connection attached to it.
+ * The engine blocks deleting a component that still has pipes; this removes the
+ * pipes first so a Delete in the Builder always succeeds (LEGO-style).
+ * Returns the removed component id and the ids of the connections removed with it.
+ */
+export function deleteComponentWithConnections(
+  projectId:   string,
+  componentId: string,
+  stores:      EngineStores,
+  createdBy:   string,
+): { componentId: string; removedConnectionIds: string[] } {
+  const attached = stores.graph.getConnections(projectId).filter(
+    cn => cn.fromComponentId === componentId || cn.toComponentId === componentId,
+  );
+  const removedConnectionIds: string[] = [];
+  for (const cn of attached) {
+    removeConnection(projectId, cn.id, createdBy, stores);
+    removedConnectionIds.push(cn.id);
+  }
+  removeComponent(projectId, componentId, createdBy, stores);
+  return { componentId, removedConnectionIds };
+}
+
 // ---------------------------------------------------------------------------
 // Connection actions
 // ---------------------------------------------------------------------------

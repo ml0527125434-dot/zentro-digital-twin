@@ -37,6 +37,7 @@ import {
   moveComponent       as coreMove,
   renameComponent     as coreRename,
   deleteComponent     as coreDelete,
+  deleteComponentWithConnections as coreDeleteCascade,
   duplicateComponent  as coreDuplicate,
   connectPorts        as coreConnect,
   disconnectPorts     as coreDisconnect,
@@ -87,6 +88,7 @@ export interface BuilderContextValue {
   moveComponent:      (componentId: string, position: { x: number; y: number }) => Component;
   renameComponent:    (componentId: string, name: string) => Component;
   deleteComponent:    (componentId: string) => void;
+  deleteComponentCascade: (componentId: string) => void;
   duplicateComponent: (componentId: string) => Component;
   connectPorts:       (
     from:      { componentId: string; portId: string },
@@ -156,6 +158,11 @@ export function BuilderProvider({
     [projectId, stores, createdBy],
   );
 
+  const deleteComponentCascade = useCallback(
+    (componentId: string) => { coreDeleteCascade(projectId, componentId, stores, createdBy); },
+    [projectId, stores, createdBy],
+  );
+
   const duplicateComponent = useCallback(
     (componentId: string) =>
       coreDuplicate(projectId, componentId, stores, registry, createdBy).data,
@@ -186,6 +193,7 @@ export function BuilderProvider({
     moveComponent,
     renameComponent,
     deleteComponent,
+    deleteComponentCascade,
     duplicateComponent,
     connectPorts,
     disconnectPorts,
