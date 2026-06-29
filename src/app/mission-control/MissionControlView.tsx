@@ -109,7 +109,7 @@ export function MissionControlView({
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [gridVisible,    setGridVisible]    = useState(true);
   const viewportRef = useRef<{ fitView: () => void } | null>(null);
-  const wasNarrowRef = useRef(false);
+  const [narrow, setNarrow] = useState(false);
 
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
@@ -510,23 +510,21 @@ export function MissionControlView({
   const handleFit    = useCallback(() => { viewportRef.current?.fitView(); }, []);
   const handleSearch = useCallback(() => { document.dispatchEvent(new CustomEvent('zentro:builder:focusSearch')); }, []);
 
-  // §9.6 — auto-collapse both side panels when the viewport gets narrow (only on the
-  // transition into narrow, so we never fight the user). The centre canvas itself
-  // never collapses — its column keeps a hard minimum width (the 0-width bug guard).
+  // §9.6 — track a "narrow viewport" flag and let it *derive* panel visibility
+  // (see showLeft/showRight). Below the threshold both side panels hide; above it
+  // they reopen unless the user collapsed them manually — so widening always
+  // restores them and we never overwrite the user's manual collapse state. The
+  // centre canvas itself never collapses — its column keeps a hard minimum width.
   useEffect(() => {
-    const onResize = () => {
-      const narrow = window.innerWidth < 900;
-      if (narrow && !wasNarrowRef.current) { setLeftCollapsed(true); setRightCollapsed(true); }
-      wasNarrowRef.current = narrow;
-    };
+    const onResize = () => setNarrow(window.innerWidth < 900);
     onResize();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
   // Presentation mode collapses both sidebars; manual toggles respected otherwise
-  const showLeft  = !presentationMode && !leftCollapsed;
-  const showRight = !presentationMode && !rightCollapsed;
+  const showLeft  = !presentationMode && !leftCollapsed  && !narrow;
+  const showRight = !presentationMode && !rightCollapsed && !narrow;
 
   return (
     <div
