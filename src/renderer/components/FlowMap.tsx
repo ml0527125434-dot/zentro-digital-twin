@@ -87,11 +87,13 @@ export interface FlowMapProps {
   onNodeContextMenu?:    ((componentId: string, x: number, y: number) => void) | undefined;
   onConnect?:            ((sourceId: string, sourceHandle: string, targetId: string, targetHandle: string) => void) | undefined;
   onEdgeDelete?:         ((edgeId: string) => void) | undefined;
+  onNodesDelete?:        ((ids: string[]) => void) | undefined;
   onNodeMoved?:          ((nodeId: string, x: number, y: number) => void) | undefined;
   onDropComponent?:      ((typeId: string, x: number, y: number) => void) | undefined;
   placingMode?:          boolean | undefined;
   builderMode?:          boolean | undefined;
   isValidConnection?:    ((conn: RFConnection | Edge) => boolean) | undefined;
+  selectedIds?:          string[] | undefined;
 }
 
 // Inner component: has access to useReactFlow() which requires being inside <ReactFlow>
@@ -140,7 +142,7 @@ function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: stri
   return null;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode, isValidConnection }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode, isValidConnection, selectedIds, onNodesDelete }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -155,12 +157,14 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
     }
   }, []);
 
+  const selSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
   const stableNodes = useMemo(() =>
     nodes.map(node => {
       const measured = measuredRef.current.get(node.id);
-      return measured ? { ...node, measured } : node;
+      const selected = selSet.has(node.id);
+      return { ...node, ...(measured ? { measured } : {}), selected };
     }),
-    [nodes],
+    [nodes, selSet],
   );
 
   const handleNodeClick = useCallback(
@@ -212,9 +216,17 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
     [onEdgeDelete],
   );
 
+  const handleNodesDelete = useCallback(
+    (deletedNodes: Node[]) => {
+      onNodesDelete?.(deletedNodes.map(n => n.id));
+    },
+    [onNodesDelete],
+  );
+
   const handleNodeDragStop = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      onNodeMoved?.(node.id, node.position.x, node.position.y);
+    (_event: React.MouseEvent, node: Node, draggedNodes?: Node[]) => {
+      const list = draggedNodes && draggedNodes.length > 0 ? draggedNodes : [node];
+      for (const n of list) onNodeMoved?.(n.id, n.position.x, n.position.y);
     },
     [onNodeMoved],
   );
@@ -244,10 +256,12 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         onNodeContextMenu={onNodeContextMenu ? handleNodeContextMenu : undefined}
         onConnect={onConnect ? handleConnect : undefined}
         onEdgesDelete={onEdgeDelete ? handleEdgesDelete : undefined}
+        onNodesDelete={onNodesDelete ? handleNodesDelete : undefined}
         onNodeDragStop={onNodeMoved ? handleNodeDragStop as never : undefined}
-        deleteKeyCode={builderMode ? 'Delete' : null}
+        deleteKeyCode={builderMode ? ['Delete', 'Backspace'] : null}
         multiSelectionKeyCode={builderMode ? 'Shift' : null}
         selectionOnDrag={builderMode && !placingMode}
+        panOnDrag={builderMode ? [1, 2] : undefined}
         selectionMode={SelectionMode.Partial}
         snapToGrid={builderMode}
         snapGrid={[20, 20]}

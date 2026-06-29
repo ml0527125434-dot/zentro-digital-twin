@@ -20,7 +20,7 @@
  * editor. No layout restructuring needed.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { ComponentViewModel, ConnectionViewModel } from '../../domain/types.js';
 import type { EngineStores } from '../../engine/graph-engine.js';
 import type { ComponentRegistry } from '../../lib/component-registry.js';
@@ -279,6 +279,18 @@ export function MissionControlView({
     } catch { /* ignore */ }
   }, [buildMode, builder, onMutation]);
 
+  // Node deletion via React Flow (Delete/Backspace on single or multi selection).
+  // Cascade-removes each component with its pipes; the single authority for delete.
+  const handleNodesDelete = useCallback((ids: string[]) => {
+    if (!buildMode) return;
+    for (const id of ids) {
+      try { builder.deleteComponentCascade(id); } catch { /* skip */ }
+    }
+    builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+    setMultiSelectedIds([]);
+    onMutation?.();
+  }, [buildMode, builder, onMutation]);
+
   // Cleanup connect error timer on unmount
   useEffect(() => () => {
     if (connectErrorTimer.current) clearTimeout(connectErrorTimer.current);
@@ -401,24 +413,6 @@ export function MissionControlView({
         }
       }
 
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        const ids = multiSelectedIds.length > 0
-          ? multiSelectedIds
-          : (builder.state.mode === 'selected-component' && builder.state.selectedComponentId
-              ? [builder.state.selectedComponentId] : []);
-        if (ids.length > 0) {
-          for (const id of ids) {
-            try { builder.deleteComponentCascade(id); } catch { /* skip */ }
-          }
-          builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
-          onMutation?.();
-        } else if (builder.state.mode === 'selected-connection' && builder.state.selectedConnectionId) {
-          builder.disconnectPorts(builder.state.selectedConnectionId);
-          builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
-          onMutation?.();
-        }
-      }
-
       // Ctrl+C → copy selection ; Ctrl+V → paste
       if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault(); doCopy(); return;
@@ -462,6 +456,15 @@ export function MissionControlView({
   const { layoutNodes, isReady } = useElkLayout(nodes, edges);
 
   const isPlacingMode = buildMode && builder.state.mode === 'placing';
+
+  // Unified selection set: RF multi-selection + the FSM single selection.
+  const selectedIds = useMemo(() => {
+    const ids = new Set(multiSelectedIds);
+    if (builder.state.mode === 'selected-component' && builder.state.selectedComponentId) {
+      ids.add(builder.state.selectedComponentId);
+    }
+    return [...ids];
+  }, [multiSelectedIds, builder.state.mode, builder.state.selectedComponentId]);
 
   // Presentation mode collapses both sidebars; manual toggles respected otherwise
   const showLeft  = !presentationMode && !leftCollapsed;
@@ -753,10 +756,12 @@ export function MissionControlView({
               onNodeContextMenu={buildMode ? handleNodeContextMenu : undefined}
               onConnect={buildMode ? handleConnect : undefined}
               onEdgeDelete={buildMode ? handleEdgeDelete : undefined}
+              onNodesDelete={buildMode ? handleNodesDelete : undefined}
               onNodeMoved={buildMode ? handleNodeMoved : undefined}
               onDropComponent={buildMode ? handleDropComponent : undefined}
               placingMode={isPlacingMode}
               isValidConnection={buildMode ? isValidConnection : undefined}
+              selectedIds={buildMode ? selectedIds : undefined}
               builderMode={buildMode}
             />
           </div>
