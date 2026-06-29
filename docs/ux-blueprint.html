@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Zentro Digital Twin — UX Blueprint</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1220;--bg3:#080c14;--bg4:#050810;
+  --border:#1a2540;--border2:#263550;
+  --text:#dde4f0;--text2:#8899aa;--text3:#4a6080;
+  --orange:#fb923c;--blue:#60a5fa;--green:#4ade80;--purple:#c084fc;
+  --red:#ef4444;--yellow:#fbbf24;--cyan:#38bdf8;--hot:#f97316;--cold:#38bdf8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;display:flex;min-height:100vh}
+
+/* NAV */
+#nav{width:220px;flex-shrink:0;background:var(--bg3);border-left:1px solid var(--border);position:fixed;top:0;right:0;height:100vh;overflow-y:auto;padding:20px 0;z-index:100}
+#nav h1{font-size:11px;font-weight:900;color:var(--orange);letter-spacing:.12em;text-transform:uppercase;padding:0 16px 12px;border-bottom:1px solid var(--border);margin-bottom:8px}
+#nav a{display:block;padding:5px 16px;font-size:10px;color:var(--text3);text-decoration:none;transition:color .15s}
+#nav a:hover{color:var(--text)}
+#nav a.active{color:var(--orange);background:rgba(251,146,60,.07);border-right:2px solid var(--orange)}
+#nav .nav-group{font-size:8px;font-weight:900;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:10px 16px 4px}
+
+/* MAIN */
+#main{margin-right:220px;flex:1;padding:40px 48px;max-width:1100px}
+
+/* SECTIONS */
+.section{margin-bottom:64px;padding-top:8px}
+.section-title{font-size:10px;font-weight:900;color:var(--purple);letter-spacing:.14em;text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid rgba(192,132,252,.18);margin-bottom:24px}
+.doc-title{font-size:28px;font-weight:900;color:#fff;margin-bottom:4px}
+.doc-sub{font-size:12px;color:var(--text3);margin-bottom:32px}
+
+/* PRINCIPLE GRID */
+.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.p-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.p-num{font-size:32px;font-weight:900;color:rgba(251,146,60,.12);line-height:1;margin-bottom:4px}
+.p-title{font-size:12px;font-weight:900;color:var(--text);margin-bottom:6px}
+.p-body{font-size:10px;color:var(--text2);line-height:1.7}
+
+/* SCREEN WIREFRAMES */
+.wf-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:8px}
+.wf-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:8px}
+.wf-wrap{display:flex;flex-direction:column;gap:6px}
+.wf-label{font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:2px 0}
+.frame{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg4)}
+.chrome{background:var(--bg2);height:26px;display:flex;align-items:center;padding:0 10px;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.c-logo{font-size:9px;font-weight:900;color:var(--text)}
+.c-badge{font-size:7px;font-weight:800;padding:2px 6px;border-radius:2px}
+.cb-m{background:rgba(56,189,248,.15);color:var(--cyan)}
+.cb-b{background:rgba(251,146,60,.18);color:var(--orange)}
+.c-tabs{display:flex;gap:3px;margin-left:auto}
+.ctab{font-size:8px;font-weight:700;padding:3px 9px;border-radius:2px;cursor:default}
+.ct-on{color:var(--orange);background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.3)}
+.ct-off{color:var(--text3);border:1px solid var(--border)}
+.ct-m{color:var(--cyan);background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25)}
+.frame-body{display:flex;overflow:hidden}
+
+/* palette */
+.pal{background:var(--bg3);border-left:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column}
+.pal-hdr{padding:4px 8px;border-bottom:1px solid var(--border);font-size:7px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.cats{display:flex;gap:2px;padding:3px 5px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.cat{font-size:12px;padding:2px 3px;border-radius:3px;cursor:default;line-height:1}
+.cat.on{background:rgba(251,146,60,.15)}
+.cds{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:4px}
+.cd{background:var(--bg2);border:1px solid #1e3a5f;border-radius:3px;display:flex;flex-direction:column;align-items:center;padding:4px 3px;gap:1px;position:relative;cursor:default}
+.cd-s{position:absolute;top:0;left:0;right:0;height:2px;border-radius:3px 3px 0 0}
+.cd-i{font-size:13px;line-height:1;margin-top:2px}
+.cd-n{font-size:6px;font-weight:800;color:#c8d4e8;text-align:center}
+.cd.armed{border-color:rgba(251,146,60,.6);background:rgba(251,146,60,.07)}
+.cd.dimmed{opacity:.3}
+
+/* canvas */
+.cnv{flex:1;background:var(--bg4);position:relative;overflow:hidden}
+.grid-bg{position:absolute;inset:0;background-image:repeating-linear-gradient(#0e1628 0 1px,transparent 1px 32px),repeating-linear-gradient(90deg,#0e1628 0 1px,transparent 1px 32px);opacity:.6}
+
+/* empty state */
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:1}
+.e-ring{width:44px;height:44px;border-radius:50%;border:2px dashed rgba(251,146,60,.35);display:flex;align-items:center;justify-content:center;font-size:18px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.04)}}
+.e-txt{font-size:8px;color:rgba(251,146,60,.45);font-weight:800}
+.e-sub{font-size:7px;color:rgba(255,255,255,.15)}
+
+/* nodes */
+.node{position:absolute;background:var(--bg2);border:1.5px solid #1e3a5f;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:5px 10px;gap:2px;transform:translate(-50%,-50%);cursor:default}
+.ni{font-size:14px;line-height:1}
+.nl{font-size:6.5px;color:var(--text3);font-weight:700}
+.node.sel{border-color:var(--blue);box-shadow:0 0 0 2px rgba(96,165,250,.2)}
+.node.conn-src{border-color:var(--hot)}
+.node.conn-tgt{border-color:var(--hot);background:rgba(249,115,22,.06)}
+.node.err{border-color:var(--red)}
+.node.multi{border-color:var(--blue);background:rgba(96,165,250,.05)}
+.node.ghost{opacity:.22;border-style:dashed}
+.node.live{border-color:var(--hot);background:rgba(249,115,22,.04)}
+.n-temp{font-size:9px;font-weight:900;color:var(--hot)}
+
+/* ports */
+.port{position:absolute;width:7px;height:7px;border-radius:50%;border:1.5px solid}
+.ph{background:rgba(249,115,22,.3);border-color:var(--hot)}
+.pc{background:rgba(56,189,248,.3);border-color:var(--cold)}
+.port.show{opacity:1}
+
+/* ghost pill */
+.ghost-pill{position:absolute;background:rgba(251,146,60,.12);border:1.5px solid rgba(251,146,60,.5);border-radius:12px;padding:3px 10px;font-size:8px;font-weight:800;color:var(--orange);white-space:nowrap;display:flex;align-items:center;gap:4px;z-index:5}
+
+/* canvas states */
+.cnv-pulse{box-shadow:inset 0 0 0 2px rgba(251,146,60,.7)!important}
+.sel-box{position:absolute;border:1.5px dashed var(--blue);background:rgba(96,165,250,.04);border-radius:2px}
+
+/* error badge */
+.err-badge{position:absolute;top:-5px;right:-5px;background:var(--red);border-radius:50%;width:12px;height:12px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#fff}
+
+/* toast */
+.toast{position:absolute;bottom:8px;left:8px;background:#0f1520;border:1px solid #1e3a5f;border-radius:5px;padding:4px 10px;font-size:8px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px;z-index:5}
+.toast kbd{background:#1a2540;border:1px solid var(--border2);border-radius:3px;padding:1px 4px;font-size:7.5px;color:var(--blue);font-family:monospace}
+
+/* placing center */
+.place-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;z-index:1}
+
+/* right panel */
+.rp{background:var(--bg3);border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column}
+.rp-hdr{padding:5px 8px;border-bottom:1px solid var(--border);font-size:7px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.rp-idle{flex:1;display:flex;align-items:center;justify-content:center;opacity:.12;font-size:22px}
+.rp-body{padding:8px;display:flex;flex-direction:column;gap:5px}
+.rp-illus{width:36px;height:36px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto}
+.rp-name{font-size:10px;font-weight:900;color:var(--text);text-align:center}
+.rp-type{font-size:8px;color:var(--cyan);text-align:center}
+.rp-btns{display:flex;gap:4px;margin-top:2px}
+.rp-btn{flex:1;padding:4px;border-radius:4px;border:1px solid;font-size:8px;font-weight:800;text-align:center;cursor:default}
+.rb-dup{background:rgba(96,165,250,.07);border-color:rgba(96,165,250,.25);color:var(--blue)}
+.rb-del{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2);color:var(--red)}
+.rp-ports{border-top:1px solid var(--border);padding-top:5px;margin-top:3px;display:flex;flex-direction:column;gap:3px}
+.rp-pr{display:flex;align-items:center;gap:4px;font-size:7.5px;color:var(--text3)}
+.rp-pd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rp-err{padding:6px;background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:4px;font-size:8px;color:var(--red);line-height:1.5;margin-top:4px}
+.rp-conn{padding:8px;display:flex;flex-direction:column;gap:2px}
+.rp-cf{font-size:9px;font-weight:800;color:var(--text)}
+.rp-ct{font-size:7px;color:var(--text3)}
+.rp-cl{width:2px;height:20px;background:linear-gradient(to bottom,var(--hot),rgba(249,115,22,.3));margin:3px auto;position:relative}
+.rp-cm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg4);border:1px solid var(--hot);border-radius:5px;padding:1px 4px;font-size:7px;font-weight:800;color:var(--hot);white-space:nowrap}
+.rp-multi{padding:8px}
+.rp-mc{font-size:11px;font-weight:900;color:var(--blue)}
+.kpi{padding:5px 8px;border-bottom:1px solid #0d1628}
+.kpi-l{font-size:7px;color:var(--text3);font-weight:700}
+.kpi-v{font-size:13px;font-weight:900;color:var(--hot)}
+.nav-item{padding:5px 10px;font-size:8px;display:flex;align-items:center;gap:5px;color:var(--text3);cursor:default}
+.nav-item.active{background:rgba(56,189,248,.08);color:var(--cyan);border-right:2px solid var(--cyan)}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* STATE MACHINE */
+.sm-wrap{overflow-x:auto}
+
+/* WORKFLOW */
+.wf-flow{display:flex;align-items:flex-start;gap:0;margin-bottom:20px;overflow-x:auto}
+.wf-step{flex-shrink:0;width:170px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:10px 12px}
+.wf-step.ok{border-color:var(--green)}
+.wf-step.warn{border-color:var(--red)}
+.wf-step.transient{border-color:var(--orange)}
+.wf-sn{font-size:8px;font-weight:900;color:var(--orange);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.wf-sn.b{color:var(--blue)}
+.wf-sn.g{color:var(--green)}
+.wf-sn.r{color:var(--red)}
+.wf-st{font-size:10px;font-weight:900;color:var(--text);margin-bottom:4px}
+.wf-sb{font-size:8.5px;color:var(--text2);line-height:1.6}
+.wf-arrow{display:flex;align-items:center;padding:0 8px;flex-shrink:0;align-self:center;color:var(--text3);font-size:18px;margin-top:-10px}
+.wf-fork{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.wf-fork-branch{display:flex;align-items:flex-start;gap:0}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px}
+thead tr{background:var(--bg2)}
+th{padding:8px 12px;text-align:right;font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:#c8d4e8;vertical-align:top;line-height:1.5;text-align:right}
+tr:hover td{background:rgba(255,255,255,.02)}
+tr.grp td{background:var(--bg2);padding:6px 12px}
+.grp-lbl{font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.badge{display:inline-block;font-size:7.5px;font-weight:800;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.bd{background:rgba(251,146,60,.15);color:var(--orange)}
+.bc{background:rgba(96,165,250,.12);color:var(--blue)}
+.bk{background:rgba(192,132,252,.12);color:var(--purple)}
+.bh{background:rgba(74,222,128,.1);color:var(--green)}
+.bp{background:rgba(45,212,191,.1);color:#2dd4bf}
+.key{background:#1a2540;border:1px solid var(--border2);border-radius:3px;padding:1px 6px;font-family:monospace;font-size:9px;color:var(--blue);white-space:nowrap;display:inline-block}
+.yes{color:var(--green);font-weight:800}
+.no{color:var(--red);font-weight:800}
+.hl-o{color:var(--orange);font-weight:700}
+.hl-g{color:var(--green);font-weight:700}
+.hl-b{color:var(--blue);font-weight:700}
+
+/* KB */
+.kb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kb-g{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.kb-t{font-size:8.5px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.kb-r{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.kb-r:last-child{border-bottom:none}
+.kb-a{font-size:9px;color:var(--text2);text-align:right;flex:1;padding-right:8px}
+.kb-n{font-size:7.5px;color:var(--text3);display:block;margin-top:1px}
+
+/* DIVIDER */
+hr{border:none;border-top:1px solid var(--border);margin:32px 0}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR NAV ═══ -->
+<nav id="nav">
+  <h1>UX Blueprint</h1>
+  <div class="nav-group">Overview</div>
+  <a href="#principles">Design Principles</a>
+  <a href="#screen-anatomy">Screen Anatomy</a>
+  <div class="nav-group">Builder States</div>
+  <a href="#wf-idle">IDLE — Empty Canvas</a>
+  <a href="#wf-placing">PLACING</a>
+  <a href="#wf-drag">DRAG_FROM_LIBRARY</a>
+  <a href="#wf-selected">SELECTED_COMPONENT</a>
+  <a href="#wf-connecting">CONNECTING</a>
+  <a href="#wf-conn-sel">SELECTED_CONNECTION</a>
+  <a href="#wf-dragging">DRAGGING_COMPONENT</a>
+  <a href="#wf-box">BOX_SELECTING</a>
+  <a href="#wf-multi">SELECTED_MULTI</a>
+  <a href="#wf-error">VALIDATION ERROR</a>
+  <a href="#wf-undo">UNDO TOAST</a>
+  <div class="nav-group">Monitor States</div>
+  <a href="#mon-idle">MONITOR / IDLE</a>
+  <a href="#mon-sel">MONITOR / NODE_SELECTED</a>
+  <div class="nav-group">Diagrams</div>
+  <a href="#state-machine">State Machine</a>
+  <a href="#wflow-dnd">Drag & Drop</a>
+  <a href="#wflow-conn">Connection</a>
+  <a href="#wflow-undo">Undo/Redo</a>
+  <a href="#wflow-onboard">Onboarding</a>
+  <div class="nav-group">Reference</div>
+  <a href="#interactions">Interaction Table</a>
+  <a href="#validation">Validation Rules</a>
+  <a href="#keyboard">Keyboard Shortcuts</a>
+  <div class="nav-group" style="color:var(--orange)">★ Review Package</div>
+  <a href="#journeys">User Journeys</a>
+  <div class="nav-group" style="color:var(--red)">Current Critique</div>
+  <a href="#crit-ux">UX Weaknesses ×20</a>
+  <a href="#crit-visual">Visual Weaknesses ×20</a>
+  <a href="#crit-workflow">Workflow Weaknesses ×20</a>
+  <a href="#crit-premium">Premium-BOS ×20</a>
+  <div class="nav-group" style="color:var(--green)">Vision</div>
+  <a href="#from-zero">If We Started From Zero</a>
+  <a href="#benchmark">Product Benchmark</a>
+  <a href="#roadmap">Implementation Roadmap</a>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main id="main">
+<div class="doc-title">Zentro Digital Twin</div>
+<div class="doc-sub" style="direction:ltr">Product Design Review Package · UX Architecture + Honest Critique + Redesign Vision · Submitted before implementation approval</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PRINCIPLES                             -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="principles">
+<div class="section-title">Design Principles</div>
+<div class="p-grid">
+  <div class="p-card"><div class="p-num">01</div><div class="p-title">Hebrew-first, RTL always</div><div class="p-body">כל טקסט, כפתור, ותווית — עברית. ממשק ה-RTL אינו תרגום. הוא ברירת המחדל. אנגלית רק לערכים טכניים (°C, bar, kW/h).</div></div>
+  <div class="p-card"><div class="p-num">02</div><div class="p-title">Drag is the primary verb</div><div class="p-body">גרירה היא הפעולה הראשית. לחיצה היא קיצור דרך. אין טפסים לפני שרכיב נמצא על הבד. הבנייה מתחילה בגרירה.</div></div>
+  <div class="p-card"><div class="p-num">03</div><div class="p-title">Never block the canvas</div><div class="p-body">שגיאות לא חוסמות. לא מופיעים דיאלוגים מודאליים. כל שגיאה מוצגת בפאנל הימני בלבד. הבד תמיד זמין.</div></div>
+  <div class="p-card"><div class="p-num">04</div><div class="p-title">Color = medium</div><div class="p-body">כתום = מים חמים. כחול = מים קרים. ירוק-כחול = סירקולציה. הצבע הוא שפת הצינורות — כל נקודת חיבור, כל קו.</div></div>
+  <div class="p-card"><div class="p-num">05</div><div class="p-title">One mode at a time</div><div class="p-body">ניטור ובנייה לא מעורבבים. המעבר הוא מפורש — לחיצה על הכרטיסייה. כל מצב מאפס בחירה.</div></div>
+  <div class="p-card"><div class="p-num">06</div><div class="p-title">Every action is undoable</div><div class="p-body">כל מוטציה בגרף — הנחה, מחיקה, חיבור, שינוי שם, העברה — ניתנת לביטול. מחסנית 50 פעולות. Ctrl+Z תמיד.</div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN ANATOMY                         -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="screen-anatomy">
+<div class="section-title">Screen Anatomy — Three Zones</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;border-top:3px solid var(--orange)">
+    <div style="font-size:9px;font-weight:900;color:var(--orange);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Zone A — Library Panel (right in RTL)</div>
+    <div style="font-size:9px;color:var(--text2);line-height:1.7">24 רכיבים ב-9 קטגוריות. חיפוש בזמן אמת. כרטיסיות קטגוריה עם אמוג'י. כל כרטיס תמיד ב-DOM, display:none כשמוסתר. גרירה עם ghost מותאם. רוחב 300px.</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;border-top:3px solid var(--blue)">
+    <div style="font-size:9px;font-weight:900;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Zone B — Canvas (center)</div>
+    <div style="font-size:9px;color:var(--text2);line-height:1.7">רשת קווים 32px. Snap ל-20px בגרירה. Zoom: Ctrl+גלגלת, min 0.3× max 2×. Pan: גרירה על רקע. fitView: Ctrl+0. תמיד רוחב חיובי — לא קורס.</div>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;border-top:3px solid var(--purple)">
+    <div style="font-size:9px;font-weight:900;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Zone C — Properties Panel (left in RTL)</div>
+    <div style="font-size:9px;color:var(--text2);line-height:1.7">3 מצבים: ריק (✦), רכיב נבחר (hero+פורטים+כפתורים), צינור נבחר (From→Medium→To). רוחב 280px. לא חוסם בשגיאות.</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- MONITOR MODE STATES                    -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="mon-idle">
+<div class="section-title">Monitor Mode — States</div>
+<div class="wf-grid">
+
+<!-- MON IDLE -->
+<div class="wf-wrap">
+  <div class="wf-label" style="color:var(--cyan)">MONITOR / IDLE — No Selection</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-m">ניטור</div><div class="c-tabs"><div class="ctab ct-m">ניטור ●</div><div class="ctab ct-off">בנייה</div></div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:110px">
+        <div class="pal-hdr">מערכות</div>
+        <div class="nav-item active"><div class="nav-dot"></div>קומה 1</div>
+        <div class="nav-item"><div class="nav-dot" style="background:#2a3a4a"></div>קומה 2</div>
+        <div class="nav-item"><div class="nav-dot" style="background:#2a3a4a"></div>גג</div>
+      </div>
+      <div class="cnv" style="position:relative">
+        <div class="grid-bg"></div>
+        <div class="node" style="top:35%;left:18%"><div class="ni">🔥</div><div class="nl">משאבת חום</div><div class="n-temp">58°C</div></div>
+        <div class="node" style="top:35%;left:48%"><div class="ni">🛢</div><div class="nl">מיכל ראשי</div><div class="n-temp">54°C</div></div>
+        <div class="node" style="top:35%;left:76%"><div class="ni">⚙</div><div class="nl">משאבה</div><div class="n-temp" style="color:var(--cyan)">ON</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="21%" y1="35%" x2="43%" y2="35%" stroke="#f97316" stroke-width="2.5" opacity=".7"/>
+          <line x1="53%" y1="35%" x2="71%" y2="35%" stroke="#f97316" stroke-width="2.5" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:90px">
+        <div class="rp-hdr">נתונים</div>
+        <div class="kpi"><div class="kpi-l">טמפ׳</div><div class="kpi-v">58°C</div></div>
+        <div class="kpi"><div class="kpi-l">לחץ</div><div class="kpi-v">2.1 bar</div></div>
+        <div class="kpi"><div class="kpi-l">זרימה</div><div class="kpi-v">1.8 ל/ד</div></div>
+        <div class="kpi"><div class="kpi-l">COP</div><div class="kpi-v" style="font-size:11px">3.4</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">ניטור חי. KPIs בפאנל שמאל. לחיצה על רכיב → NODE_SELECTED.</div>
+</div>
+
+<!-- MON NODE SELECTED -->
+<div class="wf-wrap" id="mon-sel">
+  <div class="wf-label" style="color:var(--cyan)">MONITOR / NODE_SELECTED — Live Readings</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-m">ניטור</div><div class="c-tabs"><div class="ctab ct-m">ניטור ●</div><div class="ctab ct-off">בנייה</div></div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:110px">
+        <div class="pal-hdr">מערכות</div>
+        <div class="nav-item active"><div class="nav-dot"></div>קומה 1</div>
+      </div>
+      <div class="cnv" style="position:relative">
+        <div class="grid-bg"></div>
+        <div class="node" style="top:35%;left:18%"><div class="ni">🔥</div><div class="nl">משאבת חום</div><div class="n-temp">58°C</div></div>
+        <div class="node live" style="top:35%;left:50%"><div class="ni">🛢</div><div class="nl">מיכל ראשי</div><div class="n-temp">54°C</div></div>
+        <div class="node" style="top:35%;left:80%"><div class="ni">⚙</div><div class="nl">משאבה</div><div class="n-temp" style="color:var(--cyan)">ON</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="21%" y1="35%" x2="44%" y2="35%" stroke="#f97316" stroke-width="2.5" opacity=".7"/>
+          <line x1="56%" y1="35%" x2="74%" y2="35%" stroke="#f97316" stroke-width="2.5" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:100px">
+        <div class="rp-hdr">מיכל ראשי</div>
+        <div class="kpi"><div class="kpi-l">טמפ׳ כניסה</div><div class="kpi-v">58°C</div></div>
+        <div class="kpi"><div class="kpi-l">טמפ׳ יציאה</div><div class="kpi-v">51°C</div></div>
+        <div class="kpi"><div class="kpi-l">נפח</div><div class="kpi-v" style="font-size:11px">200 L</div></div>
+        <div class="kpi" style="border-bottom:none"><div class="kpi-l">סטטוס</div><div class="kpi-v" style="color:var(--green);font-size:11px">תקין ✓</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">רכיב נבחר מוארנ בגבול כתום. פאנל שמאל מציג קריאות חיות.</div>
+</div>
+
+</div><!-- wf-grid -->
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- BUILD MODE WIREFRAMES                  -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="wf-idle">
+<div class="section-title">Builder Wireframes — All States</div>
+
+<!-- IDLE -->
+<div class="wf-wrap" style="margin-bottom:24px">
+  <div class="wf-label" style="color:var(--blue)">STATE: IDLE — Empty Canvas</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div><div class="c-tabs"><div class="ctab ct-off">ניטור</div><div class="ctab ct-on">בנייה ●</div></div></div>
+    <div class="frame-body" style="height:280px">
+      <div class="pal" style="width:150px">
+        <div class="pal-hdr">ספריית רכיבים</div>
+        <div style="padding:5px 8px;border-bottom:1px solid var(--border)"><div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:4px 8px;font-size:8px;color:var(--text3)">🔍 חיפוש…</div></div>
+        <div class="cats"><div class="cat on">♨</div><div class="cat">🛢</div><div class="cat">⚙</div><div class="cat">⊛</div><div class="cat">📡</div></div>
+        <div class="cds">
+          <div class="cd"><div class="cd-s" style="background:var(--orange)"></div><div class="cd-i">🔥</div><div class="cd-n">משאבת חום</div></div>
+          <div class="cd"><div class="cd-s" style="background:var(--orange)"></div><div class="cd-i">🔥</div><div class="cd-n">תנור גז</div></div>
+          <div class="cd"><div class="cd-s" style="background:var(--yellow)"></div><div class="cd-i">☀</div><div class="cd-n">קולט שמש</div></div>
+          <div class="cd"><div class="cd-s" style="background:var(--hot)"></div><div class="cd-i">⚡</div><div class="cd-n">מחמם חשמלי</div></div>
+        </div>
+      </div>
+      <div class="cnv"><div class="grid-bg"></div><div class="empty"><div class="e-ring">⬡</div><div class="e-txt">גרור רכיב לכאן</div><div class="e-sub">בחר מהרשימה מימין</div></div></div>
+      <div class="rp" style="width:120px"><div class="rp-hdr">מאפיינים</div><div class="rp-idle">✦</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PLACING -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-placing">
+  <div class="wf-label" style="color:var(--orange)">STATE: PLACING — Card Armed, Cursor = Crosshair</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div><div class="c-tabs"><div class="ctab ct-off">ניטור</div><div class="ctab ct-on">בנייה ●</div></div></div>
+    <div class="frame-body" style="height:280px">
+      <div class="pal" style="width:150px">
+        <div class="pal-hdr" style="color:var(--orange)">✦ לחץ על הבד להנחה</div>
+        <div class="cats"><div class="cat on">♨</div><div class="cat">🛢</div></div>
+        <div class="cds">
+          <div class="cd armed"><div class="cd-s" style="background:var(--orange)"></div><div style="position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 5px var(--orange)"></div><div class="cd-i">🔥</div><div class="cd-n" style="color:var(--orange)">משאבת חום</div></div>
+          <div class="cd dimmed"><div class="cd-s" style="background:var(--yellow)"></div><div class="cd-i">☀</div><div class="cd-n">קולט שמש</div></div>
+          <div class="cd dimmed"><div class="cd-s" style="background:var(--hot)"></div><div class="cd-i">⚡</div><div class="cd-n">מחמם</div></div>
+          <div class="cd dimmed"><div class="cd-s" style="background:var(--orange)"></div><div class="cd-i">🔥</div><div class="cd-n">תנור גז</div></div>
+        </div>
+      </div>
+      <div class="cnv" style="cursor:crosshair"><div class="grid-bg"></div>
+        <div class="place-center">
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(251,146,60,.7);display:flex;align-items:center;justify-content:center;font-size:20px">🔥</div>
+          <div style="font-size:9px;color:rgba(251,146,60,.7);font-weight:800">לחץ להנחה</div>
+          <div style="font-size:8px;color:rgba(255,255,255,.2)">Esc לביטול</div>
+        </div>
+      </div>
+      <div class="rp" style="width:120px"><div class="rp-hdr">מאפיינים</div><div class="rp-idle">✦</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAG FROM LIBRARY -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-drag">
+  <div class="wf-label" style="color:var(--orange)">STATE: DRAG_FROM_LIBRARY — Ghost on Canvas, Border Pulses</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:280px">
+      <div class="pal" style="width:150px">
+        <div class="pal-hdr">ספרייה</div>
+        <div class="cds">
+          <div class="cd dimmed"><div class="cd-s" style="background:var(--blue)"></div><div class="cd-i">🛢</div><div class="cd-n">מיכל אחסון</div></div>
+          <div class="cd"><div class="cd-s" style="background:var(--orange)"></div><div class="cd-i">🔥</div><div class="cd-n">משאבת חום</div></div>
+        </div>
+      </div>
+      <div class="cnv cnv-pulse"><div class="grid-bg"></div>
+        <div class="ghost-pill" style="top:42%;right:30%">🛢 &nbsp;מיכל אחסון</div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.18;z-index:0"><div class="e-ring">⬡</div></div>
+      </div>
+      <div class="rp" style="width:120px"><div class="rp-hdr">מאפיינים</div><div class="rp-idle">✦</div></div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">כרטיס מקור מעומעם (template נשאר). Ghost: emoji + שם. גבול בד פועם כתום.</div>
+</div>
+
+<!-- SELECTED COMPONENT -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-selected">
+  <div class="wf-label" style="color:var(--green)">STATE: SELECTED_COMPONENT — Properties Panel Open</div>
+  <div class="frame" style="max-width:800px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:300px">
+      <div class="pal" style="width:150px">
+        <div class="pal-hdr">ספרייה</div>
+        <div class="cats"><div class="cat">♨</div><div class="cat on">🛢</div></div>
+        <div class="cds">
+          <div class="cd"><div class="cd-s" style="background:var(--blue)"></div><div class="cd-i">🛢</div><div class="cd-n">מיכל אחסון</div></div>
+          <div class="cd"><div class="cd-s" style="background:var(--blue)"></div><div class="cd-i">🛢</div><div class="cd-n">מיכל חיץ</div></div>
+        </div>
+      </div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="node" style="top:45%;left:25%">
+          <div class="ni">🔥</div><div class="nl">משאבת חום</div>
+          <div class="port ph show" style="left:-4px;top:50%;transform:translateY(-50%)"></div>
+          <div class="port ph show" style="right:-4px;top:50%;transform:translateY(-50%)"></div>
+        </div>
+        <div class="node sel" style="top:45%;left:65%">
+          <div class="ni">🛢</div><div class="nl">מיכל ראשי</div>
+          <div class="port ph show" style="top:-4px;left:50%;transform:translateX(-50%)"></div>
+          <div class="port pc show" style="bottom:-4px;left:50%;transform:translateX(-50%)"></div>
+          <div class="port ph show" style="right:-4px;top:50%;transform:translateY(-50%)"></div>
+        </div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="28%" y1="45%" x2="59%" y2="45%" stroke="#f97316" stroke-width="2.5" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:140px">
+        <div class="rp-hdr">מאפיינים</div>
+        <div class="rp-body">
+          <div class="rp-illus">🛢</div>
+          <div class="rp-name">מיכל ראשי</div>
+          <div class="rp-type">מיכל אחסון</div>
+          <div class="rp-btns"><div class="rp-btn rb-dup">⧉ שכפל</div><div class="rp-btn rb-del">🗑 מחק</div></div>
+          <div class="rp-ports">
+            <div style="font-size:7px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">חיבורים</div>
+            <div class="rp-pr"><div class="rp-pd" style="background:var(--hot)"></div>כניסה חמה ✓</div>
+            <div class="rp-pr"><div class="rp-pd" style="background:transparent;border:1px solid #2a3a4a"></div><span style="color:var(--red)">יציאה חמה ✗</span></div>
+            <div class="rp-pr"><div class="rp-pd" style="background:var(--cold)"></div>כניסה קרה</div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:5px;margin-top:3px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:8px;color:var(--text3)">פרטים נוספים <span>▾</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">גבול כחול + glow. נקודות חיבור גלויות. פאנל: hero illustration + פורטים + כפתורים.</div>
+</div>
+
+<!-- CONNECTING -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-connecting">
+  <div class="wf-label" style="color:var(--orange)">STATE: CONNECTING — Dashed Preview Pipe, Valid Targets Glow</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:260px">
+      <div class="pal" style="width:130px"><div class="pal-hdr" style="color:var(--hot)">↗ מחבר…</div><div style="padding:8px;font-size:8px;color:var(--text3)">גרור לנקודת יעד תואמת.<br>Esc לביטול.</div></div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="node conn-src" style="top:38%;left:20%">
+          <div class="ni">🔥</div><div class="nl">משאבת חום</div>
+          <div class="port ph show" style="right:-4px;top:50%;transform:translateY(-50%);width:9px;height:9px"></div>
+        </div>
+        <div class="node conn-tgt" style="top:38%;left:65%">
+          <div class="ni">🛢</div><div class="nl">מיכל ראשי</div>
+          <div class="port ph show" style="left:-4px;top:50%;transform:translateY(-50%);width:9px;height:9px;box-shadow:0 0 6px var(--hot)"></div>
+        </div>
+        <div class="node" style="top:68%;left:40%;opacity:.25"><div class="ni">⚙</div><div class="nl">משאבה</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="24%" y1="38%" x2="61%" y2="38%" stroke="#f97316" stroke-width="2" stroke-dasharray="6 4" opacity=".9"/>
+          <circle cx="61%" cy="38%" r="4" fill="rgba(249,115,22,.3)" stroke="#f97316" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:120px"><div class="rp-hdr">חיבור…</div><div style="padding:8px;font-size:8px;color:var(--text3)">גרור לנקודת יציאה תואמת על הרכיב היעד.</div></div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">קו מקווקו כתום. יעד תקין מואר. רכיבים לא-תואמים מעומעמים.</div>
+</div>
+
+<!-- SELECTED CONNECTION -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-conn-sel">
+  <div class="wf-label" style="color:var(--green)">STATE: SELECTED_CONNECTION — Pipe Diagram in Panel</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:260px">
+      <div class="pal" style="width:130px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="node" style="top:38%;left:20%"><div class="ni">🔥</div><div class="nl">משאבת חום</div></div>
+        <div class="node" style="top:38%;left:68%"><div class="ni">🛢</div><div class="nl">מיכל ראשי</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="23%" y1="38%" x2="63%" y2="38%" stroke="#f97316" stroke-width="3.5" opacity=".95"/>
+          <circle cx="43%" cy="38%" r="5" fill="#f97316" opacity=".95"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:130px">
+        <div class="rp-hdr">צינור נבחר</div>
+        <div class="rp-conn">
+          <div class="rp-cf">משאבת חום</div><div class="rp-ct">מקור חום</div>
+          <div class="rp-cl"><div class="rp-cm">מים חמים</div></div>
+          <div class="rp-cf">מיכל ראשי</div><div class="rp-ct">אחסון</div>
+        </div>
+        <div style="padding:0 8px"><div class="rp-btn rb-del" style="width:100%;text-align:center;padding:5px;margin-top:4px">🗑 מחק צינור</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">קו מלא עם נקודה אמצע. פאנל: From → Medium → To + Delete.</div>
+</div>
+
+<!-- DRAGGING COMPONENT -->
+<div class="wf-wrap" style="margin-bottom:24px" id="wf-dragging">
+  <div class="wf-label" style="color:var(--orange)">STATE: DRAGGING_COMPONENT — Node Moves, Pipes Follow</div>
+  <div class="frame" style="max-width:700px">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:260px">
+      <div class="pal" style="width:130px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv" style="position:relative">
+        <div class="grid-bg"></div>
+        <div class="node" style="top:32%;left:18%"><div class="ni">🔥</div><div class="nl">משאבה</div></div>
+        <div class="node ghost" style="top:32%;left:58%"><div class="ni">🛢</div><div class="nl">מיכל</div></div>
+        <div class="node sel" style="top:55%;left:70%;cursor:grabbing"><div class="ni">🛢</div><div class="nl">מיכל</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="21%" y1="32%" x2="65%" y2="55%" stroke="#f97316" stroke-width="2" opacity=".5" stroke-dasharray="5 3"/>
+        </svg>
+        <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#0f1520;border:1px solid rgba(251,146,60,.3);border-radius:4px;padding:4px 10px;font-size:8px;font-weight:700;color:var(--orange)">snap 20px על שחרור</div>
+      </div>
+      <div class="rp" style="width:130px"><div class="rp-hdr">מאפיינים</div><div class="rp-body"><div class="rp-illus">🛢</div><div class="rp-name">מיכל ראשי</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOX SELECTING + SELECTED MULTI -->
+<div class="wf-grid" style="margin-bottom:24px">
+<div class="wf-wrap" id="wf-box">
+  <div class="wf-label" style="color:var(--purple)">STATE: BOX_SELECTING — Blue Dashed Rect</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:100px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="sel-box" style="top:22%;right:14%;width:58%;height:46%"></div>
+        <div class="node" style="top:40%;left:35%"><div class="ni">🔥</div><div class="nl">משאבה</div></div>
+        <div class="node" style="top:56%;left:65%"><div class="ni">🛢</div><div class="nl">מיכל</div></div>
+        <div class="node" style="top:74%;left:35%;opacity:.4"><div class="ni">⚙</div><div class="nl">משאבה</div></div>
+      </div>
+      <div class="rp" style="width:100px"><div class="rp-hdr">מאפיינים</div><div class="rp-idle">✦</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="wf-wrap" id="wf-multi">
+  <div class="wf-label" style="color:var(--green)">STATE: SELECTED_MULTI — Group Actions</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:100px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="node multi" style="top:40%;left:35%"><div class="ni">🔥</div><div class="nl">משאבה</div></div>
+        <div class="node multi" style="top:56%;left:65%"><div class="ni">🛢</div><div class="nl">מיכל</div></div>
+        <div class="node" style="top:74%;left:35%;opacity:.4"><div class="ni">⚙</div><div class="nl">משאבה</div></div>
+      </div>
+      <div class="rp" style="width:110px">
+        <div class="rp-hdr">2 נבחרו</div>
+        <div class="rp-multi">
+          <div class="rp-mc">2 רכיבים</div>
+          <div style="font-size:8.5px;color:var(--text2);margin-top:5px;line-height:1.8">✓ משאבה<br>✓ מיכל ראשי</div>
+          <div class="rp-btns" style="margin-top:8px"><div class="rp-btn rb-dup">⧉ הכל</div><div class="rp-btn rb-del">🗑 הכל</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- wf-grid -->
+
+<!-- VALIDATION ERROR + UNDO -->
+<div class="wf-grid" style="margin-bottom:8px">
+<div class="wf-wrap" id="wf-error">
+  <div class="wf-label" style="color:var(--red)">STATE: VALIDATION ERROR — Non-blocking</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:100px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv">
+        <div class="grid-bg"></div>
+        <div class="node err" style="top:42%;left:38%;position:absolute;transform:translate(-50%,-50%)">
+          <div class="ni">⚙</div><div class="nl">משאבה</div>
+          <div class="err-badge">!</div>
+        </div>
+        <div class="node" style="top:42%;left:70%"><div class="ni">🛢</div><div class="nl">מיכל</div></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <line x1="42%" y1="42%" x2="65%" y2="42%" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="rp" style="width:120px">
+        <div class="rp-hdr" style="color:var(--red)">שגיאת חיבור</div>
+        <div style="padding:8px">
+          <div style="font-size:11px;margin-bottom:5px">⚠</div>
+          <div class="rp-err">אי אפשר לחבר שתי יציאות</div>
+          <div style="font-size:8px;color:var(--text3);margin-top:6px">הגרף נשאר תקין. תקן את החיבור להמשיך.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">! על הרכיב. קו שגוי מקווקו אדום. פאנל מסביר. הבד נשאר זמין.</div>
+</div>
+
+<div class="wf-wrap" id="wf-undo">
+  <div class="wf-label" style="color:var(--green)">AFTER Ctrl+Z — Undo Toast (3 seconds)</div>
+  <div class="frame">
+    <div class="chrome"><div class="c-logo">זנטרו ◆</div><div class="c-badge cb-b">בנייה</div></div>
+    <div class="frame-body" style="height:240px">
+      <div class="pal" style="width:100px"><div class="pal-hdr">ספרייה</div></div>
+      <div class="cnv" style="position:relative">
+        <div class="grid-bg"></div>
+        <div class="node ghost" style="top:45%;left:50%"><div class="ni">🛢</div><div class="nl">מיכל ראשי</div></div>
+        <div class="toast"><span>מיכל ראשי הוסר</span><kbd>Ctrl+Y</kbd><span style="color:var(--green);font-size:8px">לחזרה</span></div>
+      </div>
+      <div class="rp" style="width:110px"><div class="rp-hdr">מאפיינים</div><div class="rp-idle">✦</div></div>
+    </div>
+  </div>
+  <div style="font-size:8px;color:var(--text3);text-align:center">רכיב ghosted → נעלם. Toast: שם הפעולה + Ctrl+Y hint. נעלם אחרי 3 שניות.</div>
+</div>
+</div><!-- wf-grid -->
+</div><!-- section wireframes -->
+
+<!-- ═══════════════════════════════════════ -->
+<!-- STATE MACHINE SVG                      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="state-machine">
+<div class="section-title">State Machine — All 9 Builder States</div>
+<div class="sm-wrap">
+<svg viewBox="0 0 1000 580" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:8px">
+<defs>
+  <marker id="a0" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#4a6080"/></marker>
+  <marker id="ao" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#fb923c"/></marker>
+  <marker id="ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#4ade80"/></marker>
+  <marker id="ab" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#60a5fa"/></marker>
+  <marker id="ap" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#c084fc"/></marker>
+</defs>
+<!-- legend -->
+<rect x="10" y="8" width="10" height="10" rx="2" fill="rgba(251,146,60,.2)" stroke="#fb923c" stroke-width="1"/><text x="24" y="17" fill="#8899aa" font-size="8.5" font-family="'Segoe UI',system-ui,sans-serif">transient</text>
+<rect x="90" y="8" width="10" height="10" rx="2" fill="rgba(74,222,128,.12)" stroke="#4ade80" stroke-width="1"/><text x="104" y="17" fill="#8899aa" font-size="8.5" font-family="'Segoe UI',system-ui,sans-serif">stable</text>
+<rect x="160" y="8" width="10" height="10" rx="2" fill="rgba(96,165,250,.12)" stroke="#60a5fa" stroke-width="1.5"/><text x="174" y="17" fill="#8899aa" font-size="8.5" font-family="'Segoe UI',system-ui,sans-serif">default</text>
+
+<!-- IDLE -->
+<rect x="410" y="30" width="115" height="46" rx="7" fill="rgba(96,165,250,.08)" stroke="#60a5fa" stroke-width="1.5"/>
+<text x="467" y="49" fill="#60a5fa" font-size="10" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">IDLE</text>
+<text x="467" y="63" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">no selection · panel = ✦</text>
+
+<!-- PLACING -->
+<rect x="80" y="30" width="115" height="46" rx="7" fill="rgba(251,146,60,.08)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="137" y="49" fill="#fb923c" font-size="10" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">PLACING</text>
+<text x="137" y="63" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">card armed · crosshair</text>
+
+<!-- DRAG_FROM_LIBRARY -->
+<rect x="80" y="170" width="115" height="46" rx="7" fill="rgba(251,146,60,.08)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="137" y="189" fill="#fb923c" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">DRAG_FROM</text>
+<text x="137" y="201" fill="#fb923c" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">_LIBRARY</text>
+<text x="137" y="213" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">ghost + canvas pulse</text>
+
+<!-- SELECTED_COMPONENT -->
+<rect x="360" y="185" width="155" height="46" rx="7" fill="rgba(74,222,128,.07)" stroke="#4ade80" stroke-width="1.5"/>
+<text x="437" y="204" fill="#4ade80" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">SELECTED_COMPONENT</text>
+<text x="437" y="220" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">blue border · panel open</text>
+
+<!-- CONNECTING -->
+<rect x="660" y="185" width="120" height="46" rx="7" fill="rgba(251,146,60,.08)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="720" y="204" fill="#fb923c" font-size="10" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">CONNECTING</text>
+<text x="720" y="218" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">dashed preview pipe</text>
+
+<!-- DRAGGING_COMPONENT -->
+<rect x="660" y="340" width="120" height="46" rx="7" fill="rgba(251,146,60,.08)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="720" y="359" fill="#fb923c" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">DRAGGING</text>
+<text x="720" y="371" fill="#fb923c" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">_COMPONENT</text>
+<text x="720" y="383" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">node follows cursor</text>
+
+<!-- BOX_SELECTING -->
+<rect x="80" y="340" width="115" height="46" rx="7" fill="rgba(251,146,60,.08)" stroke="#fb923c" stroke-width="1.5"/>
+<text x="137" y="359" fill="#fb923c" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">BOX_SELECTING</text>
+<text x="137" y="375" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">dashed blue rect</text>
+
+<!-- SELECTED_MULTI -->
+<rect x="360" y="370" width="155" height="46" rx="7" fill="rgba(74,222,128,.07)" stroke="#4ade80" stroke-width="1.5"/>
+<text x="437" y="389" fill="#4ade80" font-size="9.5" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">SELECTED_MULTI</text>
+<text x="437" y="405" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">group count + actions</text>
+
+<!-- SELECTED_CONNECTION -->
+<rect x="740" y="30" width="155" height="46" rx="7" fill="rgba(74,222,128,.07)" stroke="#4ade80" stroke-width="1.5"/>
+<text x="817" y="49" fill="#4ade80" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">SELECTED_CONNECTION</text>
+<text x="817" y="63" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">From→Medium→To panel</text>
+
+<!-- TRANSITIONS -->
+<!-- IDLE→PLACING -->
+<path d="M410 53 L197 53" stroke="#fb923c" stroke-width="1.2" fill="none" marker-end="url(#ao)"/>
+<rect x="254" y="44" width="100" height="13" rx="3" fill="#07090f"/><text x="304" y="54" fill="#fb923c" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">click card</text>
+
+<!-- PLACING→IDLE Escape -->
+<path d="M137 30 L137 18 L467 18 L467 30" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="4 2"/>
+<rect x="254" y="9" width="126" height="12" rx="3" fill="#07090f"/><text x="317" y="18" fill="#4a6080" font-size="7" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">Escape / re-click card</text>
+
+<!-- IDLE→DRAG_FROM_LIBRARY -->
+<path d="M410 65 L310 65 L310 150 L197 185" stroke="#fb923c" stroke-width="1.2" fill="none" marker-end="url(#ao)"/>
+<rect x="242" y="118" width="68" height="12" rx="3" fill="#07090f"/><text x="276" y="127" fill="#fb923c" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drag card</text>
+
+<!-- PLACING→SELECTED_COMPONENT click/drag -->
+<path d="M195 53 L350 53 L350 185" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="240" y="96" width="86" height="22" rx="3" fill="#07090f"/>
+<text x="283" y="107" fill="#4ade80" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">click canvas</text>
+<text x="283" y="117" fill="#4ade80" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">or drag to canvas</text>
+
+<!-- DFL→SELECTED_COMPONENT drop on canvas -->
+<path d="M195 200 L358 210" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="210" y="198" width="80" height="12" rx="3" fill="#07090f"/><text x="250" y="207" fill="#4ade80" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drop on canvas</text>
+
+<!-- DFL→IDLE drop outside -->
+<path d="M80 200 L40 200 L40 53 L408 53" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="3 2"/>
+<rect x="25" y="118" width="62" height="12" rx="3" fill="#07090f"/><text x="56" y="127" fill="#4a6080" font-size="7" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drop outside</text>
+
+<!-- SELECTED_COMPONENT→IDLE -->
+<path d="M437 185 L437 76" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="4 2"/>
+<rect x="442" y="122" width="96" height="22" rx="3" fill="#07090f"/>
+<text x="490" y="133" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">click empty / Escape</text>
+<text x="490" y="143" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">/ Delete key</text>
+
+<!-- SELECTED_COMPONENT→CONNECTING drag port -->
+<path d="M515 208 L658 208" stroke="#fb923c" stroke-width="1.2" fill="none" marker-end="url(#ao)"/>
+<rect x="546" y="199" width="66" height="12" rx="3" fill="#07090f"/><text x="579" y="208" fill="#fb923c" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drag port</text>
+
+<!-- CONNECTING→SELECTED_CONNECTION valid -->
+<path d="M720 185 L817 78" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="736" y="122" width="90" height="22" rx="3" fill="#07090f"/>
+<text x="781" y="133" fill="#4ade80" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">release valid port</text>
+<text x="781" y="143" fill="#4ade80" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">→ pipe created</text>
+
+<!-- CONNECTING→SELECTED_COMPONENT invalid/Escape -->
+<path d="M660 215 L517 215" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="4 2"/>
+<rect x="546" y="219" width="92" height="12" rx="3" fill="#07090f"/><text x="592" y="228" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">invalid / Escape</text>
+
+<!-- SELECTED_COMPONENT→DRAGGING drag body -->
+<path d="M515 220 L658 355" stroke="#fb923c" stroke-width="1.2" fill="none" marker-end="url(#ao)"/>
+<rect x="548" y="285" width="66" height="22" rx="3" fill="#07090f"/>
+<text x="581" y="296" fill="#fb923c" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drag node</text>
+<text x="581" y="306" fill="#fb923c" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">body</text>
+
+<!-- DRAGGING→SELECTED_COMPONENT release -->
+<path d="M660 363 L517 228" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="548" y="332" width="58" height="12" rx="3" fill="#07090f"/><text x="577" y="341" fill="#4ade80" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">release</text>
+
+<!-- SELECTED_COMPONENT→BOX_SELECTING -->
+<path d="M360 215 L260 215 L260 330 L197 355" stroke="#fb923c" stroke-width="1.2" fill="none" marker-end="url(#ao)"/>
+<rect x="218" y="282" width="80" height="22" rx="3" fill="#07090f"/>
+<text x="258" y="293" fill="#fb923c" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">drag canvas</text>
+<text x="258" y="303" fill="#fb923c" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">background</text>
+
+<!-- BOX_SELECTING→SELECTED_MULTI ≥2 -->
+<path d="M195 370 L358 393" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="204" y="374" width="90" height="12" rx="3" fill="#07090f"/><text x="249" y="383" fill="#4ade80" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">≥2 nodes inside</text>
+
+<!-- BOX_SELECTING→SELECTED_COMPONENT 1 -->
+<path d="M195 355 L358 230" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="204" y="290" width="70" height="12" rx="3" fill="#07090f"/><text x="239" y="299" fill="#4ade80" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">1 inside</text>
+
+<!-- BOX_SELECTING→IDLE 0 -->
+<path d="M80 363 L40 363 L40 53 L408 53" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="3 2"/>
+
+<!-- SELECTED_MULTI→IDLE -->
+<path d="M437 370 L437 280 L500 280 L500 76" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="4 2"/>
+<rect x="504" y="218" width="96" height="22" rx="3" fill="#07090f"/>
+<text x="552" y="229" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">click empty /</text>
+<text x="552" y="239" fill="#4a6080" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">Escape / Delete</text>
+
+<!-- SELECTED_COMPONENT→SELECTED_MULTI Shift+click -->
+<path d="M437 231 L437 368" stroke="#c084fc" stroke-width="1.2" fill="none" marker-end="url(#ap)"/>
+<rect x="442" y="296" width="76" height="12" rx="3" fill="#07090f"/><text x="480" y="305" fill="#c084fc" font-size="7.5" font-weight="800" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">Shift+click</text>
+
+<!-- SELECTED_COMPONENT→SELECTED_CONNECTION click pipe -->
+<path d="M515 198 L738 60" stroke="#4ade80" stroke-width="1.2" fill="none" marker-end="url(#ag)"/>
+<rect x="586" y="120" width="60" height="12" rx="3" fill="#07090f"/><text x="616" y="129" fill="#4ade80" font-size="7.5" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">click pipe</text>
+
+<!-- SELECTED_CONNECTION→IDLE -->
+<path d="M817 30 L817 18 L467 18 L467 30" stroke="#4a6080" stroke-width="1" fill="none" marker-end="url(#a0)" stroke-dasharray="4 2"/>
+
+<!-- ANY: Ctrl+Z / Ctrl+Y -->
+<rect x="340" y="490" width="270" height="36" rx="6" fill="rgba(10,14,24,.9)" stroke="#1a2540" stroke-width="1"/>
+<text x="475" y="505" fill="#c084fc" font-size="9" font-weight="900" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">ANY STATE</text>
+<text x="475" y="518" fill="#8899aa" font-size="8" text-anchor="middle" font-family="'Segoe UI',system-ui,sans-serif">Ctrl+Z → undo · Ctrl+Y → redo · Stack: 50 entries</text>
+</svg>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- WORKFLOW: DND                          -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="wflow-dnd">
+<div class="section-title">Workflow: Drag & Drop — Place Component</div>
+<div class="wf-flow">
+  <div class="wf-step transient"><div class="wf-sn">1</div><div class="wf-st">mousedown on card</div><div class="wf-sb">dragstart fires. Original card stays in library (template, never consumed). Card dims to 40% opacity.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step transient"><div class="wf-sn">2</div><div class="wf-st">Ghost pill appears</div><div class="wf-sb">Custom ghost: emoji + Hebrew name. Follows cursor exactly.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step transient"><div class="wf-sn">3</div><div class="wf-st">Ghost enters canvas</div><div class="wf-sb">dragover on [data-flowmap-drop]. canvasDragPulse animation starts. Border pulses orange.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step ok"><div class="wf-sn g">4a</div><div class="wf-st">Drop on canvas</div><div class="wf-sb">Screen coords → graph coords. Component placed. Ghost disappears. Pop: scale 0.6→1.0 / 200ms. Auto-named. → SELECTED_COMPONENT.</div></div>
+</div>
+<div class="wf-flow">
+  <div class="wf-step warn" style="width:200px"><div class="wf-sn r">4b</div><div class="wf-st">Drop outside canvas</div><div class="wf-sb">→ IDLE. No component placed. No error. dragend cleans up. Card restores to full opacity.</div></div>
+</div>
+</div>
+
+<!-- WORKFLOW: CONNECTION -->
+<div class="section" id="wflow-conn">
+<div class="section-title">Workflow: Connection — Wire Two Components</div>
+<div class="wf-flow">
+  <div class="wf-step"><div class="wf-sn b">1</div><div class="wf-st">Hover node</div><div class="wf-sb">Port dots appear, fade-in 150ms. 🔴 hot 🔵 cold 🟢 recirc. Node gets elevation shadow.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step"><div class="wf-sn b">2</div><div class="wf-st">Hover port dot</div><div class="wf-sb">8px → 12px. cursor = crosshair. Tooltip: medium name in Hebrew. State unchanged.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step transient"><div class="wf-sn">3</div><div class="wf-st">Drag from port</div><div class="wf-sb">→ CONNECTING. Dashed preview in medium color. Valid targets glow same color. Others → 30% opacity.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-fork">
+    <div class="wf-fork-branch">
+      <div class="wf-step ok" style="width:160px"><div class="wf-sn g">4a ✓</div><div class="wf-st">Release valid port</div><div class="wf-sb">Solid pipe in medium color. Flow animation. → SELECTED_CONNECTION. Panel updates.</div></div>
+    </div>
+    <div class="wf-fork-branch">
+      <div class="wf-step warn" style="width:160px"><div class="wf-sn r">4b ✗</div><div class="wf-st">Release invalid</div><div class="wf-sb">Cursor red flash 200ms. Error in right panel. → SELECTED_COMPONENT. No pipe created.</div></div>
+    </div>
+    <div class="wf-fork-branch">
+      <div class="wf-step" style="width:160px;border-color:var(--text3)"><div class="wf-sn" style="color:var(--text3)">4c ∅</div><div class="wf-st">Escape / empty area</div><div class="wf-sb">Preview disappears. → SELECTED_COMPONENT. No error.</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- WORKFLOW: UNDO/REDO -->
+<div class="section" id="wflow-undo">
+<div class="section-title">Workflow: Undo / Redo</div>
+<div class="wf-flow">
+  <div class="wf-step ok"><div class="wf-sn g">1</div><div class="wf-st">Any mutation</div><div class="wf-sb">Place, delete, connect, disconnect, rename, move. 1 entry added to stack. Zoom/pan NOT recorded.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step ok"><div class="wf-sn g">2</div><div class="wf-st">Stack: 50 entries</div><div class="wf-sb">Oldest dropped when full. Mode switch (Monitor↔Build) does NOT clear stack. Per-session only.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step ok"><div class="wf-sn g">3</div><div class="wf-st">Ctrl+Z</div><div class="wf-sb">Graph reverts. Toast 3s: "[action] הוסר" + Ctrl+Y hint. Redo stack available.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step ok"><div class="wf-sn g">4</div><div class="wf-st">Ctrl+Y</div><div class="wf-sb">Re-applies undone action. Redo stack cleared on any new mutation.</div></div>
+</div>
+</div>
+
+<!-- WORKFLOW: ONBOARDING -->
+<div class="section" id="wflow-onboard">
+<div class="section-title">Workflow: First-Time Onboarding</div>
+<div class="wf-flow">
+  <div class="wf-step"><div class="wf-sn" style="color:var(--yellow)">1</div><div class="wf-st">App opens</div><div class="wf-sb">Monitor Mode. Empty FlowMap. KPIs = "—". Callout: "אין מערכת — לחץ 'בנייה' להתחיל".</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step"><div class="wf-sn" style="color:var(--yellow)">2</div><div class="wf-st">Click "בנייה"</div><div class="wf-sb">Build Mode, empty canvas. Animated ring pulse. Library open on first category. No tutorial popups.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step"><div class="wf-sn" style="color:var(--yellow)">3</div><div class="wf-st">First component placed</div><div class="wf-sb">Empty animation fades out permanently. Canvas fitView. One-time hint: "גרור מהנקודות לחיבור".</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step"><div class="wf-sn" style="color:var(--yellow)">4</div><div class="wf-st">First connection made</div><div class="wf-sb">Hint disappears forever. No more hints. User works freely.</div></div>
+  <div class="wf-arrow">→</div>
+  <div class="wf-step ok"><div class="wf-sn g">5 ✓</div><div class="wf-st">Return to Monitor</div><div class="wf-sb">System renders live. All nodes visible with data. Onboarding complete — never shown again.</div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- INTERACTION TABLE                       -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="interactions">
+<div class="section-title">Interaction Table — Every Mouse &amp; Touch Input</div>
+<table>
+<thead><tr><th>Input</th><th>Type</th><th>State Required</th><th>Result</th><th>Visual Feedback</th><th>Right Panel</th></tr></thead>
+<tbody>
+<tr class="grp"><td colspan="6"><span class="grp-lbl" style="color:var(--orange)">Library Panel</span></td></tr>
+<tr><td>Click card</td><td><span class="badge bd">click</span></td><td>Any</td><td><span class="hl-o">→ PLACING</span>. Card armed.</td><td>Card glows neon. Others 30% opacity. Cursor → crosshair on canvas.</td><td>Unchanged ✦</td></tr>
+<tr><td>Click armed card (same)</td><td><span class="badge bc">click</span></td><td>PLACING</td><td><span class="hl-b">→ IDLE</span>. Disarm.</td><td>Card restores. Cursor → default.</td><td>Unchanged</td></tr>
+<tr><td>Hover card</td><td><span class="badge bh">hover</span></td><td>Any</td><td>Card elevates.</td><td>translateY(−1px) 120ms. Border +40% brightness.</td><td>—</td></tr>
+<tr><td>Drag card → canvas</td><td><span class="badge bd">drag</span></td><td>Any</td><td><span class="hl-o">→ DRAG_FROM_LIBRARY</span></td><td>Card 40% opacity. Ghost pill: emoji + name. Canvas border pulses orange.</td><td>Unchanged</td></tr>
+<tr><td>Release card outside canvas</td><td><span class="badge bp">release</span></td><td>DRAG_FROM_LIBRARY</td><td><span class="hl-b">→ IDLE</span>. Nothing placed.</td><td>Ghost disappears. Pulse stops. Card restores.</td><td>—</td></tr>
+<tr class="grp"><td colspan="6"><span class="grp-lbl" style="color:var(--blue)">Canvas — Background</span></td></tr>
+<tr><td>Click empty canvas</td><td><span class="badge bc">click</span></td><td>PLACING</td><td>Component placed at cursor. <span class="hl-g">→ SELECTED_COMPONENT</span></td><td>Pop: scale 0.6→1.0, 200ms ease-out. Auto-named.</td><td>→ properties</td></tr>
+<tr><td>Click empty canvas</td><td><span class="badge bc">click</span></td><td>SELECTED_*</td><td><span class="hl-b">→ IDLE</span>. Deselect all.</td><td>Blue/green borders off.</td><td>→ ✦</td></tr>
+<tr><td>Click+drag canvas background</td><td><span class="badge bd">drag</span></td><td>IDLE / SELECTED_*</td><td><span class="hl-o">→ BOX_SELECTING</span></td><td>Dashed blue rectangle grows in real time.</td><td>—</td></tr>
+<tr><td>Scroll wheel</td><td><span class="badge bc">scroll</span></td><td>Any Build</td><td>Zoom in/out around cursor.</td><td>Canvas scales. min 0.3× max 2×.</td><td>—</td></tr>
+<tr><td>Middle-click + drag</td><td><span class="badge bd">pan</span></td><td>Any Build</td><td>Pan canvas.</td><td>Cursor → grab hand.</td><td>—</td></tr>
+<tr class="grp"><td colspan="6"><span class="grp-lbl" style="color:var(--green)">Canvas — Nodes</span></td></tr>
+<tr><td>Click node</td><td><span class="badge bc">click</span></td><td>Any</td><td><span class="hl-g">→ SELECTED_COMPONENT</span>. Previous cleared.</td><td>Blue border + glow.</td><td>→ properties, ports, actions</td></tr>
+<tr><td>Shift+click node</td><td><span class="badge bc">click</span></td><td>SELECTED_COMPONENT</td><td>Add to selection. <span class="hl-g">→ SELECTED_MULTI</span></td><td>Additional node gets blue border.</td><td>→ count + group actions</td></tr>
+<tr><td>Right-click node</td><td><span class="badge bc">right-click</span></td><td>Any Build</td><td>Context menu: Rename / Duplicate / Delete.</td><td>Small menu at cursor position.</td><td>—</td></tr>
+<tr><td>Hover node</td><td><span class="badge bh">hover</span></td><td>Any Build</td><td>Port dots appear.</td><td>4–6 colored dots fade-in 150ms. Elevation shadow.</td><td>—</td></tr>
+<tr><td>Drag node body</td><td><span class="badge bd">drag</span></td><td>SELECTED_COMPONENT</td><td><span class="hl-o">→ DRAGGING_COMPONENT</span></td><td>Node follows cursor. Attached pipes update real-time.</td><td>Unchanged</td></tr>
+<tr><td>Release node drag</td><td><span class="badge bp">release</span></td><td>DRAGGING_COMPONENT</td><td><span class="hl-g">→ SELECTED_COMPONENT</span>. Snap 20px.</td><td>Node settles to nearest grid intersection.</td><td>Unchanged</td></tr>
+<tr><td>Release box select</td><td><span class="badge bp">release</span></td><td>BOX_SELECTING</td><td>≥2 → SELECTED_MULTI. 1 → SELECTED_COMPONENT. 0 → IDLE.</td><td>Captured nodes get blue border.</td><td>→ count or properties or ✦</td></tr>
+<tr class="grp"><td colspan="6"><span class="grp-lbl" style="color:var(--hot)">Canvas — Ports</span></td></tr>
+<tr><td>Hover port dot</td><td><span class="badge bh">hover</span></td><td>Any Build</td><td>Port scales 8px → 12px.</td><td>Dot enlarges. cursor = crosshair. Tooltip: medium name.</td><td>—</td></tr>
+<tr><td>Drag from port dot</td><td><span class="badge bd">drag</span></td><td>SELECTED_COMPONENT</td><td><span class="hl-o">→ CONNECTING</span>. Dashed preview pipe.</td><td>Preview in medium color. Valid targets glow. Others 30%.</td><td>→ "connecting…"</td></tr>
+<tr><td>Release on valid port</td><td><span class="badge bp">release</span></td><td>CONNECTING</td><td>Pipe created. <span class="hl-g">→ SELECTED_CONNECTION</span></td><td>Solid pipe in medium color, flow animation.</td><td>→ From→Medium→To</td></tr>
+<tr><td>Release on invalid port</td><td><span class="badge bp">release</span></td><td>CONNECTING</td><td><span class="hl-g">→ SELECTED_COMPONENT</span>. No pipe.</td><td>Cursor red flash 200ms.</td><td>→ error (Hebrew)</td></tr>
+<tr><td>Release on empty area</td><td><span class="badge bp">release</span></td><td>CONNECTING</td><td><span class="hl-g">→ SELECTED_COMPONENT</span>. No change.</td><td>Preview disappears.</td><td>Unchanged</td></tr>
+<tr class="grp"><td colspan="6"><span class="grp-lbl">Pipes</span></td></tr>
+<tr><td>Click pipe</td><td><span class="badge bc">click</span></td><td>Any</td><td><span class="hl-g">→ SELECTED_CONNECTION</span></td><td>Pipe thickens. Midpoint dot appears.</td><td>→ From→Medium→To + delete</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- VALIDATION RULES                        -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="validation">
+<div class="section-title">Validation Rules — 7 Cases, All Non-blocking</div>
+<div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:6px;padding:10px 14px;font-size:9px;color:var(--red);margin-bottom:14px">
+  עיקרון: הגרף תמיד תקין. שגיאות מוצגות בפאנל בלבד. לא נוצרים edges פגומים. המשתמש לא יכול לשמור מצב לא עקבי. הבד לא נחסם לעולם.
+</div>
+<table>
+<thead><tr><th>כלל</th><th>מתי</th><th>Visual Signal</th><th>הודעה בפאנל</th><th>חוסם בד?</th><th>Edge נוצר?</th></tr></thead>
+<tbody>
+<tr><td>Outlet → Outlet</td><td>release port drag</td><td>Cursor red flash 200ms</td><td>אי אפשר לחבר שתי יציאות</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr><td>Inlet → Inlet</td><td>release port drag</td><td>Cursor red flash 200ms</td><td>אי אפשר לחבר שתי כניסות</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr><td>Medium mismatch (hot ↔ cold)</td><td>release port drag</td><td>Preview pipe turns red</td><td>מדיומים שונים — חם ↔ קר</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr><td>Self-connection</td><td>release on same node</td><td>Port dot shakes 3px / 150ms</td><td>רכיב לא יכול להתחבר לעצמו</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr><td>Duplicate connection</td><td>release port drag</td><td>Existing pipe pulses briefly</td><td>חיבור זה כבר קיים</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr><td>Port already occupied</td><td>release port drag</td><td>Target port shakes</td><td>נקודה זו כבר מחוברת</td><td class="no">לא</td><td class="no">לא</td></tr>
+<tr style="background:rgba(74,222,128,.03)"><td>Unconnected outlet</td><td>passive — on selection</td><td>Red ✗ next to port in panel only</td><td>יציאה לא מחוברת (ייעוץ)</td><td class="no">לא</td><td class="yes">כן — ייעוץ בלבד</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- KEYBOARD SHORTCUTS                      -->
+<!-- ═══════════════════════════════════════ -->
+<div class="section" id="keyboard">
+<div class="section-title">Keyboard Shortcuts — Complete Reference</div>
+<div class="kb-grid">
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--green)">History</div>
+    <div class="kb-r"><span class="key">Ctrl+Z</span><div class="kb-a">בטל פעולה אחרונה<span class="kb-n">Toast 3s + Ctrl+Y hint</span></div></div>
+    <div class="kb-r"><span class="key">Ctrl+Y</span><div class="kb-a">בצע מחדש<span class="kb-n">Redo stack clears on new mutation</span></div></div>
+    <div class="kb-r"><span class="key">Ctrl+Shift+Z</span><div class="kb-a">בצע מחדש (חלופה)</div></div>
+  </div>
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--blue)">Selection</div>
+    <div class="kb-r"><span class="key">Ctrl+A</span><div class="kb-a">בחר הכל</div></div>
+    <div class="kb-r"><span class="key">Escape</span><div class="kb-a">בטל בחירה / PLACING / CONNECTING</div></div>
+    <div class="kb-r"><span class="key">Shift+Click</span><div class="kb-a">הוסף לבחירה</div></div>
+  </div>
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--purple)">Clipboard</div>
+    <div class="kb-r"><span class="key">Ctrl+C</span><div class="kb-a">העתק נבחרים<span class="kb-n">Toast: "הועתק"</span></div></div>
+    <div class="kb-r"><span class="key">Ctrl+V</span><div class="kb-a">הדבק<span class="kb-n">Offset +40,+40px. Auto-selected.</span></div></div>
+    <div class="kb-r"><span class="key">Ctrl+D</span><div class="kb-a">שכפל מיידי</div></div>
+  </div>
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--red)">Delete</div>
+    <div class="kb-r"><span class="key">Delete</span><div class="kb-a">מחק רכיב / צינור / קבוצה<span class="kb-n">Undoable. Includes connected pipes.</span></div></div>
+    <div class="kb-r"><span class="key">Backspace</span><div class="kb-a">מחק (חלופה)</div></div>
+  </div>
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--cyan)">Navigation</div>
+    <div class="kb-r"><span class="key">Ctrl+=</span><div class="kb-a">קרב (zoom in)</div></div>
+    <div class="kb-r"><span class="key">Ctrl+−</span><div class="kb-a">רחק (zoom out)</div></div>
+    <div class="kb-r"><span class="key">Ctrl+0</span><div class="kb-a">fitView — הצג הכל<span class="kb-n">padding 0.25, 500ms ease</span></div></div>
+  </div>
+  <div class="kb-g">
+    <div class="kb-t" style="color:var(--yellow)">Positioning</div>
+    <div class="kb-r"><span class="key">→ ↑ ↓ ←</span><div class="kb-a">הזז 20px (רשת)<span class="kb-n">Undoable</span></div></div>
+    <div class="kb-r"><span class="key">Shift+Arrow</span><div class="kb-a">הזז 4px (עדין)</div></div>
+    <div class="kb-r"><span class="key">F2</span><div class="kb-a">שנה שם רכיב נבחר<span class="kb-n">Expands Details if collapsed</span></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- REVIEW PACKAGE — scoped styles                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<style>
+/* Review package shared */
+.rev-en{direction:ltr;text-align:left}
+.lead{background:var(--bg2);border:1px solid var(--border);border-inline-start:3px solid var(--orange);border-radius:8px;padding:16px 18px;margin-bottom:24px;font-size:12px;line-height:1.8;color:var(--text2)}
+.lead b{color:var(--text)}
+.tldr{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+
+/* User journeys */
+.journey{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:18px}
+.j-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.j-tag{font-size:9px;font-weight:900;padding:3px 9px;border-radius:4px;letter-spacing:.06em;flex-shrink:0}
+.j-name{font-size:14px;font-weight:900;color:var(--text)}
+.j-who{font-size:10px;color:var(--text3);margin-bottom:14px}
+.j-steps{display:flex;gap:8px;flex-wrap:wrap}
+.j-step{flex:1;min-width:150px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative}
+.j-num{font-size:9px;font-weight:900;color:var(--blue);margin-bottom:5px;letter-spacing:.08em}
+.j-act{font-size:11px;font-weight:700;color:var(--text);line-height:1.45;margin-bottom:5px}
+.j-sys{font-size:9.5px;color:var(--text2);line-height:1.6}
+.j-fric{margin-top:7px;padding-top:7px;border-top:1px dashed var(--border2);font-size:9.5px;color:var(--red);line-height:1.55}
+.j-fric::before{content:"⚠ ";font-weight:900}
+.j-ok .j-fric{color:var(--green)}
+.j-ok .j-fric::before{content:"✓ "}
+
+/* Critique lists */
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.crit-item{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;display:flex;gap:11px;align-items:flex-start}
+.crit-n{font-size:18px;font-weight:900;color:var(--border2);line-height:1;flex-shrink:0;min-width:26px;font-variant-numeric:tabular-nums}
+.crit-c{flex:1;min-width:0}
+.crit-h{font-size:11.5px;font-weight:800;color:var(--text);line-height:1.4;margin-bottom:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.crit-b{font-size:10px;color:var(--text2);line-height:1.65}
+.crit-b code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9px;background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:0 4px;color:var(--cyan)}
+.sev{font-size:7.5px;font-weight:900;padding:2px 6px;border-radius:3px;letter-spacing:.06em;flex-shrink:0;text-transform:uppercase}
+.s-block{background:rgba(239,68,68,.16);color:var(--red);border:1px solid rgba(239,68,68,.35)}
+.s-major{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.32)}
+.s-minor{background:rgba(251,191,36,.13);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.s-opp{background:rgba(74,222,128,.13);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.crit-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:9px;color:var(--text3)}
+
+/* From zero */
+.fz-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.fz-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:15px 17px}
+.fz-k{font-size:9px;font-weight:900;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.fz-t{font-size:13px;font-weight:900;color:var(--text);margin-bottom:8px}
+.fz-b{font-size:10.5px;color:var(--text2);line-height:1.75}
+.fz-b b{color:var(--text)}
+.fz-wide{grid-column:1 / -1}
+
+/* Benchmark */
+.bench{display:flex;flex-direction:column;gap:11px}
+.bench-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:0;overflow:hidden;display:grid;grid-template-columns:170px 1fr}
+.bench-l{padding:15px 16px;border-inline-end:1px solid var(--border);background:var(--bg3)}
+.bench-name{font-size:14px;font-weight:900;color:var(--text);margin-bottom:5px}
+.bench-what{font-size:9.5px;color:var(--text3);line-height:1.6}
+.bench-r{padding:13px 16px;display:flex;flex-direction:column;gap:9px}
+.bench-row2{display:flex;gap:9px;align-items:flex-start}
+.bench-lbl{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;flex-shrink:0;min-width:74px;text-align:center}
+.bl-steal{background:rgba(74,222,128,.14);color:var(--green)}
+.bl-avoid{background:rgba(239,68,68,.14);color:var(--red)}
+.bench-txt{font-size:10px;color:var(--text2);line-height:1.6}
+
+/* Roadmap */
+.road-tier{margin-bottom:20px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.road-head{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.road-p{font-size:13px;font-weight:900;padding:4px 11px;border-radius:5px;flex-shrink:0}
+.road-cap{font-size:12px;font-weight:800;color:var(--text)}
+.road-why{font-size:10px;color:var(--text3);margin-inline-start:auto;text-align:right;max-width:50%}
+.road-item{display:flex;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);align-items:flex-start}
+.road-item:last-child{border-bottom:none}
+.road-rank{font-size:11px;font-weight:900;color:var(--border2);min-width:24px;flex-shrink:0;font-variant-numeric:tabular-nums;padding-top:1px}
+.road-body{flex:1}
+.road-t{font-size:11.5px;font-weight:800;color:var(--text);margin-bottom:3px}
+.road-d{font-size:10px;color:var(--text2);line-height:1.6}
+.road-impact{font-size:8.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:var(--green);flex-shrink:0;text-align:right;min-width:88px;padding-top:2px}
+@media(max-width:760px){.crit-grid,.fz-grid{grid-template-columns:1fr}.bench-card{grid-template-columns:1fr}.bench-l{border-inline-end:none;border-bottom:1px solid var(--border)}}
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- USER JOURNEYS                                                           -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="journeys">
+<div class="section-title" style="color:var(--orange)">User Journeys — Four Real Paths Through the Product</div>
+<div class="lead rev-en">
+<div class="tldr">How to read this</div>
+Each journey is the <b>actual</b> current path, step by step — system response under each action — with the friction (⚠) or success (✓) that a real user hits at that moment. These are not aspirational flows; they describe the product as built today.
+</div>
+
+<div class="journey j-ok">
+  <div class="j-head"><span class="j-tag" style="background:rgba(56,189,248,.16);color:var(--cyan)">J1 · MONITOR</span><span class="j-name">An operator checks whether the building is OK</span></div>
+  <div class="j-who rev-en">Persona: facility operator · Goal: "Is everything running? Anything I need to act on?" · Frequency: many times/day</div>
+  <div class="j-steps">
+    <div class="j-step"><div class="j-num">01 · OPEN</div><div class="j-act">Opens the app in Monitor mode</div><div class="j-sys">Header + demo strip + status bar + KPI bar stack above the canvas; equipment grid on the side; live nodes animate.</div><div class="j-fric rev-en">Four horizontal strips before the canvas; the demo strip nags on every reload (state not persisted).</div></div>
+    <div class="j-step"><div class="j-num">02 · SCAN</div><div class="j-act">Looks for the building's overall status</div><div class="j-sys">"הכל תקין" / alarm count in the header; per-node temps/states on the canvas.</div><div class="j-fric rev-en">Status answer is scattered across 5 places — no single "is my building OK?" summary.</div></div>
+    <div class="j-step"><div class="j-num">03 · SPOT</div><div class="j-act">Notices a node pulsing red</div><div class="j-sys">Critical node pulses + glows; alarm badge shows a count; alarm banner appears in sidebar.</div><div class="j-fric rev-en">Alarm color (red) and "hot pipe" color language overlap on the same canvas — momentary ambiguity.</div></div>
+    <div class="j-step"><div class="j-num">04 · DRILL</div><div class="j-act">Clicks the node</div><div class="j-sys">Right inspector opens with values, alarms, sensor state.</div><div class="j-fric rev-en">Inspector shows telemetry, not "what happened / what to do." Operator must interpret raw numbers.</div></div>
+  </div>
+</div>
+
+<div class="journey">
+  <div class="j-head"><span class="j-tag" style="background:rgba(251,146,60,.16);color:var(--orange)">J2 · BUILD</span><span class="j-name">An installer builds a plant room from zero</span></div>
+  <div class="j-who rev-en">Persona: commissioning installer · Goal: model the physical plant room · Frequency: once per project (high stakes)</div>
+  <div class="j-steps">
+    <div class="j-step"><div class="j-num">01 · SWITCH</div><div class="j-act">Finds and clicks "בנייה"</div><div class="j-sys">10px segmented toggle in the header flips mode; palette replaces the equipment grid; canvas shows a warm empty invitation.</div><div class="j-fric rev-en">The mode switch — a fundamental context change — is a tiny header control with near-zero affordance.</div></div>
+    <div class="j-step"><div class="j-num">02 · PLACE</div><div class="j-act">Drags a component to the canvas</div><div class="j-sys">Neon ghost pill follows cursor; canvas glows; on drop a full SVG node appears, auto-named "Heat Pump 1".</div><div class="j-fric rev-en">Ghost (pill) ≠ result (node). Auto-name uses the English engineering label inside a Hebrew-first UI.</div></div>
+    <div class="j-step"><div class="j-num">03 · CONNECT</div><div class="j-act">Wires two components</div><div class="j-sys">Drags handle→handle; medium inferred from source port; edge drawn, or a red toast if invalid.</div><div class="j-fric rev-en">No pre-drop compatibility hint — you only learn it was invalid after releasing.</div></div>
+    <div class="j-step"><div class="j-num">04 · NAME</div><div class="j-act">Renames a component meaningfully</div><div class="j-sys">Selects node → opens inspector → expands "פרטים נוספים" → types → confirms.</div><div class="j-fric rev-en">Rename is buried under an expander that re-collapses on every new selection. Renaming N nodes = N cycles.</div></div>
+    <div class="j-step"><div class="j-num">05 · SAVE</div><div class="j-act">Tries to save the finished plant</div><div class="j-sys">— nothing —</div><div class="j-fric rev-en">There is no save / export / load. A refresh destroys the entire design. This breaks the core promise of a builder.</div></div>
+  </div>
+</div>
+
+<div class="journey">
+  <div class="j-head"><span class="j-tag" style="background:rgba(192,132,252,.16);color:var(--purple)">J3 · EDIT</span><span class="j-name">An engineer corrects an existing design</span></div>
+  <div class="j-who rev-en">Persona: commissioning engineer · Goal: fix a mistake in a built model · Frequency: ongoing during commissioning</div>
+  <div class="j-steps">
+    <div class="j-step"><div class="j-num">01 · FIND</div><div class="j-act">Locates the wrong component</div><div class="j-sys">Visually scans the canvas; pans/zooms with the controls.</div><div class="j-fric rev-en">No search / jump-to-component. In a large plant this is pure visual hunting.</div></div>
+    <div class="j-step"><div class="j-num">02 · DELETE</div><div class="j-act">Presses Delete on a connected node</div><div class="j-sys">Deletion is blocked because it still has pipes; the keyboard path swallows the error silently.</div><div class="j-fric rev-en">Dead end: nothing happens, no message. No "delete this and its pipes?" choice.</div></div>
+    <div class="j-step"><div class="j-num">03 · UNDO</div><div class="j-act">Makes a mistake, reaches for Ctrl+Z</div><div class="j-sys">— nothing — (only Ctrl+D / duplicate is wired)</div><div class="j-fric rev-en">Undo is promised in the principles & keyboard reference but is NOT implemented. Mis-edits are permanent.</div></div>
+    <div class="j-step"><div class="j-num">04 · REDO LAYOUT</div><div class="j-act">Drags nodes to tidy the layout</div><div class="j-sys">Manual positions persist; ELK auto-layout also runs.</div><div class="j-fric rev-en">Auto-layout and manual placement compete; the recent "canvas collapses to 0 width" bug shows the pipeline is fragile.</div></div>
+  </div>
+</div>
+
+<div class="journey j-ok">
+  <div class="j-head"><span class="j-tag" style="background:rgba(74,222,128,.16);color:var(--green)">J4 · PRESENT</span><span class="j-name">Showing the twin to a client</span></div>
+  <div class="j-who rev-en">Persona: sales / project lead · Goal: a clean full-screen view for a stakeholder · Frequency: occasional, high visibility</div>
+  <div class="j-steps">
+    <div class="j-step"><div class="j-num">01 · ENTER</div><div class="j-act">Clicks ▶ or presses F</div><div class="j-sys">Header, strips, and both sidebars collapse; only the animated canvas remains; a "presentation" badge shows.</div><div class="j-fric rev-en">The F shortcut is undiscoverable; no on-screen hint that it exists.</div></div>
+    <div class="j-step"><div class="j-num">02 · SHOW</div><div class="j-act">Walks the client through the live flow</div><div class="j-sys">Animated pipes, live values, alarm pulses read well full-screen.</div><div class="j-fric rev-en">This is the product's strongest moment — but it's display-only.</div></div>
+    <div class="j-step"><div class="j-num">03 · SHARE</div><div class="j-act">Client asks for a copy</div><div class="j-sys">— nothing —</div><div class="j-fric rev-en">No shareable link, PDF, or report. Presentation mode is the only "output" and it can't leave the screen.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- CRITIQUE — INTRO                                                         -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="critique-intro">
+<div class="doc-title" style="font-size:22px;color:var(--red)">Current Product Critique</div>
+<div class="lead rev-en" style="border-inline-start-color:var(--red)">
+<div class="tldr" style="color:var(--red)">Ground rule: brutal honesty</div>
+This section judges the product <b>as it is built today</b>, not as the blueprint above describes it. A recurring theme: <b>the blueprint documents a richer, more finished product than the code implements</b> — undo, arrow-key nudge, F2-rename, zone navigation, and 50-step history all appear in the spec but are absent in the build. Each item below cites the specific behavior or file. Severity: <span class="sev s-block">Blocker</span> trust-breaking · <span class="sev s-major">Major</span> hurts daily use · <span class="sev s-minor">Minor</span> polish.
+</div>
+</div>
+
+<!-- ─── UX WEAKNESSES ─── -->
+<div class="section" id="crit-ux">
+<div class="section-title" style="color:var(--red)">Top 20 — UX Weaknesses</div>
+<div class="crit-grid rev-en">
+  <div class="crit-item"><div class="crit-n">01</div><div class="crit-c"><div class="crit-h">No persistence at all <span class="sev s-block">Blocker</span></div><div class="crit-b">Everything lives in an in-memory <code>GraphStore</code>. A reload erases the whole design. A "builder" you cannot save is a demo, not a tool.</div></div></div>
+  <div class="crit-item"><div class="crit-n">02</div><div class="crit-c"><div class="crit-h">Undo is promised but not wired <span class="sev s-block">Blocker</span></div><div class="crit-b">Principle 06 and the keyboard reference both claim "Ctrl+Z always / 50-action stack." The only Ctrl handler in <code>MissionControlView</code> is <code>Ctrl+D</code>. Mis-edits are permanent.</div></div></div>
+  <div class="crit-item"><div class="crit-n">03</div><div class="crit-c"><div class="crit-h">Documented shortcuts don't exist <span class="sev s-major">Major</span></div><div class="crit-b">Arrow-nudge, Shift+nudge, F2-rename, Ctrl+0 fitView appear in the keyboard reference. The real handler only does Esc / Delete / Ctrl+D. The spec oversells the build.</div></div></div>
+  <div class="crit-item"><div class="crit-n">04</div><div class="crit-c"><div class="crit-h">Mode switch has no presence <span class="sev s-major">Major</span></div><div class="crit-b">Monitor↔Build is a 10px segmented toggle in the header — a fundamental context change with the affordance of a footnote.</div></div></div>
+  <div class="crit-item"><div class="crit-n">05</div><div class="crit-c"><div class="crit-h">Two disjoint selection systems <span class="sev s-major">Major</span></div><div class="crit-b">Monitor uses local <code>selectedComponentId</code>; Build uses the FSM. Selecting a node in one mode is forgotten on switch — selection never carries across.</div></div></div>
+  <div class="crit-item"><div class="crit-n">06</div><div class="crit-c"><div class="crit-h">Two competing ways to place <span class="sev s-minor">Minor</span></div><div class="crit-b">Click-palette-then-click-canvas <i>and</i> drag-to-canvas both exist, with no guidance on which to use — two mental models for one outcome.</div></div></div>
+  <div class="crit-item"><div class="crit-n">07</div><div class="crit-c"><div class="crit-h">Delete fails silently <span class="sev s-major">Major</span></div><div class="crit-b">Deleting a connected component is blocked by an empty <code>catch</code> on the keyboard path. The user presses Delete and nothing happens — no message, no reason.</div></div></div>
+  <div class="crit-item"><div class="crit-n">08</div><div class="crit-c"><div class="crit-h">Connection form is a 4-dropdown maze <span class="sev s-major">Major</span></div><div class="crit-b">Wiring via the panel means four cascading native <code>&lt;select&gt;</code>s buried under "פרטים נוספים" — the slowest possible path, redundant with drag-to-connect.</div></div></div>
+  <div class="crit-item"><div class="crit-n">09</div><div class="crit-c"><div class="crit-h">Auto-names are English <span class="sev s-minor">Minor</span></div><div class="crit-b">New nodes are named from <code>def.label</code> ("Heat Pump 2") inside a Hebrew-first UI that otherwise hides English entirely.</div></div></div>
+  <div class="crit-item"><div class="crit-n">10</div><div class="crit-c"><div class="crit-h">No real onboarding <span class="sev s-major">Major</span></div><div class="crit-b">Beyond one static empty-canvas hint, there's no first-run arc: no "start here," no sample plant, no guided first connection.</div></div></div>
+  <div class="crit-item"><div class="crit-n">11</div><div class="crit-c"><div class="crit-h">Presentation mode is undiscoverable <span class="sev s-minor">Minor</span></div><div class="crit-b">Entered via the F key or a ▶ button with no hint F exists; Esc exits only when no drawer guard intercepts it.</div></div></div>
+  <div class="crit-item"><div class="crit-n">12</div><div class="crit-c"><div class="crit-h">Four strips before the canvas <span class="sev s-major">Major</span></div><div class="crit-b">Header + demo strip + system status + KPI bar stack vertically, pushing the actual content — the canvas — down the screen.</div></div></div>
+  <div class="crit-item"><div class="crit-n">13</div><div class="crit-c"><div class="crit-h">Inspector width jumps per mode <span class="sev s-minor">Minor</span></div><div class="crit-b">360px in Monitor, 280px in Build. The canvas reflows every time you toggle modes — a small but constant jolt.</div></div></div>
+  <div class="crit-item"><div class="crit-n">14</div><div class="crit-c"><div class="crit-h">Palette search is weak & hidden <span class="sev s-minor">Minor</span></div><div class="crit-b">Behind a 🔍 toggle; matches only the Hebrew name and raw <code>typeId</code> — no synonyms, no fuzzy, no English fallback.</div></div></div>
+  <div class="crit-item"><div class="crit-n">15</div><div class="crit-c"><div class="crit-h">Category labels are truncated <span class="sev s-minor">Minor</span></div><div class="crit-b"><code>heLabel.split(' ')[0]</code> shows only the first word: "נקודות צריכה"→"נקודות", "מקורות חום"→"מקורות". Meaning is lost.</div></div></div>
+  <div class="crit-item"><div class="crit-n">16</div><div class="crit-c"><div class="crit-h">Drag-only is exclusionary <span class="sev s-major">Major</span></div><div class="crit-b">The palette's primary verb is drag. Keyboard users and touch users who can't fine-drag have no obvious add-to-canvas path.</div></div></div>
+  <div class="crit-item"><div class="crit-n">17</div><div class="crit-c"><div class="crit-h">No sense of "done" <span class="sev s-major">Major</span></div><div class="crit-b">Nothing tells you a design is complete, fully connected, or physically valid. There is no finish state, checklist, or review gate.</div></div></div>
+  <div class="crit-item"><div class="crit-n">18</div><div class="crit-c"><div class="crit-h">Three different empty states <span class="sev s-minor">Minor</span></div><div class="crit-b">Canvas (⬡ hexagon), build inspector (✦), monitor inspector (⬡) each invent their own "nothing here" metaphor and icon.</div></div></div>
+  <div class="crit-item"><div class="crit-n">19</div><div class="crit-c"><div class="crit-h">The demo strip nags forever <span class="sev s-minor">Minor</span></div><div class="crit-b">Dismissible, but <code>showDemoInfo</code> resets to true on every load, so the same banner returns each session.</div></div></div>
+  <div class="crit-item"><div class="crit-n">20</div><div class="crit-c"><div class="crit-h">No project / zone navigation <span class="sev s-major">Major</span></div><div class="crit-b">The blueprint mocks "קומה 1 / קומה 2 / גג," but the build is a single flat canvas. A real building has zones; the product has none.</div></div></div>
+</div>
+</div>
+
+<!-- ─── VISUAL WEAKNESSES ─── -->
+<div class="section" id="crit-visual">
+<div class="section-title" style="color:var(--red)">Top 20 — Visual Weaknesses</div>
+<div class="crit-grid rev-en">
+  <div class="crit-item"><div class="crit-n">01</div><div class="crit-c"><div class="crit-h">Two clashing identities <span class="sev s-block">Blocker</span></div><div class="crit-b">Monitor uses the sky-blue token system on <code>#0d1117</code>; the palette is near-black <code>#050810</code> with neon category colors. They look like two different apps.</div></div></div>
+  <div class="crit-item"><div class="crit-n">02</div><div class="crit-c"><div class="crit-h">No single brand accent <span class="sev s-major">Major</span></div><div class="crit-b">Tokens set <code>--accent</code> to sky-blue <code>#0ea5e9</code>, yet the builder's primary active/placing color is orange <code>#fb923c</code>. The product has no one color it owns.</div></div></div>
+  <div class="crit-item"><div class="crit-n">03</div><div class="crit-c"><div class="crit-h">Gamer-RGB glow everywhere <span class="sev s-major">Major</span></div><div class="crit-b">Pulsing halos, drop-shadows, and neon outlines on nearly every surface read as a gaming overlay, not a calm premium product.</div></div></div>
+  <div class="crit-item"><div class="crit-n">04</div><div class="crit-c"><div class="crit-h">Emoji as category icons <span class="sev s-major">Major</span></div><div class="crit-b">♨ 🛢 ⚙ 🚿 📡 📊 💨 🔀 render differently on every OS/browser and instantly undercut a premium feel.</div></div></div>
+  <div class="crit-item"><div class="crit-n">05</div><div class="crit-c"><div class="crit-h">Mixed icon vocabularies <span class="sev s-minor">Minor</span></div><div class="crit-b">Emoji coexist with geometric glyphs (⊛ ⬡ ✦ ✛ ◆) with no system or grid behind them.</div></div></div>
+  <div class="crit-item"><div class="crit-n">06</div><div class="crit-c"><div class="crit-h">English ALL-CAPS on canvas <span class="sev s-major">Major</span></div><div class="crit-b">Fallback nodes (filter, manifold, expansion vessel, generic) render <code>typeId.toUpperCase()</code> → "DISTRIBUTION MANIFOLD" inside a Hebrew product.</div></div></div>
+  <div class="crit-item"><div class="crit-n">07</div><div class="crit-c"><div class="crit-h">Hebrew forced UPPERCASE at 9px <span class="sev s-minor">Minor</span></div><div class="crit-b">Node name labels use <code>text-transform:uppercase</code> at 9px — meaningless for Hebrew and barely legible.</div></div></div>
+  <div class="crit-item"><div class="crit-n">08</div><div class="crit-c"><div class="crit-h">The brick ≠ what you get <span class="sev s-major">Major</span></div><div class="crit-b">Palette illustrations are gorgeous and per-type, but several map to a plain gray box on the canvas. Pick-up and result don't match.</div></div></div>
+  <div class="crit-item"><div class="crit-n">09</div><div class="crit-c"><div class="crit-h">Hex hardcoded in TSX <span class="sev s-major">Major</span></div><div class="crit-b"><code>styles.css</code> states "No hex in TSX files," yet the entire builder uses raw hex (<code>#fb923c</code>, <code>#4a6080</code>…), bypassing tokens. Theming is impossible and colors drift.</div></div></div>
+  <div class="crit-item"><div class="crit-n">10</div><div class="crit-c"><div class="crit-h">Duplicate, conflicting keyframes <span class="sev s-minor">Minor</span></div><div class="crit-b"><code>@keyframes emptyPulse</code> is defined twice (0.3/0.7 vs 0.2/0.35). Behavior depends on cascade order — a latent bug.</div></div></div>
+  <div class="crit-item"><div class="crit-n">11</div><div class="crit-c"><div class="crit-h">Typo in the primary CTA <span class="sev s-major">Major</span></div><div class="crit-b">The empty-canvas hint reads "ורשור ישירות אל הבד" — should be "וגרור". The first words a new user reads contain a spelling error.</div></div></div>
+  <div class="crit-item"><div class="crit-n">12</div><div class="crit-c"><div class="crit-h">Noisy at rest <span class="sev s-minor">Minor</span></div><div class="crit-b">32px grid + glows + animated dashes + pulsing nodes mean the canvas is never visually quiet, even when nothing is happening.</div></div></div>
+  <div class="crit-item"><div class="crit-n">13</div><div class="crit-c"><div class="crit-h">SCADA-level type density <span class="sev s-major">Major</span></div><div class="crit-b">8–11px labels, 9px node names. Dense, technical, control-room density — the opposite of an approachable building product.</div></div></div>
+  <div class="crit-item"><div class="crit-n">14</div><div class="crit-c"><div class="crit-h">Color carries two meanings <span class="sev s-block">Blocker</span></div><div class="crit-b">Orange/blue mean "hot/cold medium" <i>and</i> red/amber/green mean "status." Same hue family, two languages, on one canvas — genuinely confusing.</div></div></div>
+  <div class="crit-item"><div class="crit-n">15</div><div class="crit-c"><div class="crit-h">No elevation system <span class="sev s-minor">Minor</span></div><div class="crit-b">Flat borders + ad-hoc glows instead of a consistent material/depth scale. Cards, nodes, and panels each invent their own surface.</div></div></div>
+  <div class="crit-item"><div class="crit-n">16</div><div class="crit-c"><div class="crit-h">Radius chaos <span class="sev s-minor">Minor</span></div><div class="crit-b">3/4/6/7/8/9/10/12/14px corner radii scattered through inline styles — no scale is honored.</div></div></div>
+  <div class="crit-item"><div class="crit-n">17</div><div class="crit-c"><div class="crit-h">Drag ghost misrepresents result <span class="sev s-minor">Minor</span></div><div class="crit-b">The drag preview is a neon pill; the drop produces a full schematic SVG. The preview tells you nothing about the outcome.</div></div></div>
+  <div class="crit-item"><div class="crit-n">18</div><div class="crit-c"><div class="crit-h">Nine competing neon hues <span class="sev s-major">Major</span></div><div class="crit-b">Each category gets its own high-saturation accent. With everything bright, nothing has priority — there's no visual hierarchy.</div></div></div>
+  <div class="crit-item"><div class="crit-n">19</div><div class="crit-c"><div class="crit-h">Reads as a P&amp;ID, not a BOS <span class="sev s-major">Major</span></div><div class="crit-b">The "premium engineering graphics" are schematic line-art on black — technically handsome but unmistakably control-room, not consumer-grade.</div></div></div>
+  <div class="crit-item"><div class="crit-n">20</div><div class="crit-c"><div class="crit-h">No type scale <span class="sev s-minor">Minor</span></div><div class="crit-b">Font weights jump 600/700/800/900 and sizes 8–22px with no defined scale. Hierarchy is improvised per component.</div></div></div>
+</div>
+</div>
+
+<!-- ─── WORKFLOW WEAKNESSES ─── -->
+<div class="section" id="crit-workflow">
+<div class="section-title" style="color:var(--red)">Top 20 — Workflow Weaknesses</div>
+<div class="crit-grid rev-en">
+  <div class="crit-item"><div class="crit-n">01</div><div class="crit-c"><div class="crit-h">No save / load / export / import <span class="sev s-block">Blocker</span></div><div class="crit-b">The core build workflow has no persistence or sharing endpoint of any kind. Work cannot leave the tab.</div></div></div>
+  <div class="crit-item"><div class="crit-n">02</div><div class="crit-c"><div class="crit-h">No undo/redo <span class="sev s-block">Blocker</span></div><div class="crit-b">A mis-delete or mis-move is permanent. For a building configuration tool this is unacceptable risk.</div></div></div>
+  <div class="crit-item"><div class="crit-n">03</div><div class="crit-c"><div class="crit-h">Auto-layout fights manual layout <span class="sev s-major">Major</span></div><div class="crit-b">ELK relayout and persisted drag positions compete. The just-fixed "canvas collapses to 0 width" bug is a symptom of the fragility.</div></div></div>
+  <div class="crit-item"><div class="crit-n">04</div><div class="crit-c"><div class="crit-h">Wiring demands prior knowledge <span class="sev s-major">Major</span></div><div class="crit-b">You must understand inlet/outlet roles and medium before the UI assists; validation only fires after a complete 4-dropdown selection.</div></div></div>
+  <div class="crit-item"><div class="crit-n">05</div><div class="crit-c"><div class="crit-h">No pre-drop connect feedback <span class="sev s-major">Major</span></div><div class="crit-b">Drag-to-connect infers medium from the source but shows no compatibility hint on hover; you learn validity only after releasing.</div></div></div>
+  <div class="crit-item"><div class="crit-n">06</div><div class="crit-c"><div class="crit-h">Delete-blocked instead of guided <span class="sev s-major">Major</span></div><div class="crit-b">A connected component can't be deleted — but the UI offers no "delete this and its pipes" path. Just a dead end.</div></div></div>
+  <div class="crit-item"><div class="crit-n">07</div><div class="crit-c"><div class="crit-h">No templates or sub-assemblies <span class="sev s-major">Major</span></div><div class="crit-b">No copy/paste across projects, no grouping, no saved assemblies. Every plant room is built brick-by-brick from scratch.</div></div></div>
+  <div class="crit-item"><div class="crit-n">08</div><div class="crit-c"><div class="crit-h">No alignment / smart snapping <span class="sev s-minor">Minor</span></div><div class="crit-b">Only a 20px grid. No align, distribute, or snap-to-neighbor — tidy layouts are manual fiddling.</div></div></div>
+  <div class="crit-item"><div class="crit-n">09</div><div class="crit-c"><div class="crit-h">Multi-select, single action <span class="sev s-minor">Minor</span></div><div class="crit-b">Shift + box-select work, but the only batch operation is Ctrl+D. No batch delete/move/align from the panel.</div></div></div>
+  <div class="crit-item"><div class="crit-n">10</div><div class="crit-c"><div class="crit-h">Two code paths, one outcome <span class="sev s-minor">Minor</span></div><div class="crit-b">The placing FSM and the React-Flow drag path both create components, doubling the bug surface for a single feature.</div></div></div>
+  <div class="crit-item"><div class="crit-n">11</div><div class="crit-c"><div class="crit-h">No validate / review step <span class="sev s-major">Major</span></div><div class="crit-b">The system never says "this tank has no heat source" or "this loop is open." Design-level health doesn't exist — only runtime alarms.</div></div></div>
+  <div class="crit-item"><div class="crit-n">12</div><div class="crit-c"><div class="crit-h">Monitor and Build are walled off <span class="sev s-major">Major</span></div><div class="crit-b">You can't glance at live values while editing, or nudge a setting while monitoring. The hard mode split blocks the natural loop.</div></div></div>
+  <div class="crit-item"><div class="crit-n">13</div><div class="crit-c"><div class="crit-h">Rename is a buried cycle <span class="sev s-major">Major</span></div><div class="crit-b">Rename lives under an expander that re-collapses on each selection. Naming a plant's worth of components is dozens of expand-type-confirm cycles.</div></div></div>
+  <div class="crit-item"><div class="crit-n">14</div><div class="crit-c"><div class="crit-h">No find / jump on canvas <span class="sev s-minor">Minor</span></div><div class="crit-b">No way to search a node by name and center it. Large plants become a visual scavenger hunt.</div></div></div>
+  <div class="crit-item"><div class="crit-n">15</div><div class="crit-c"><div class="crit-h">History exists but is hidden <span class="sev s-minor">Minor</span></div><div class="crit-b"><code>EventStore</code> / <code>VersionStore</code> live in the domain, but nothing in the UI exposes history, versions, or restore.</div></div></div>
+  <div class="crit-item"><div class="crit-n">16</div><div class="crit-c"><div class="crit-h">Context menu adds nothing new <span class="sev s-minor">Minor</span></div><div class="crit-b">Right-click repeats rename/duplicate/delete already in the panel, instead of canvas-specific power (align, lock, group).</div></div></div>
+  <div class="crit-item"><div class="crit-n">17</div><div class="crit-c"><div class="crit-h">No keyboard-driven build <span class="sev s-minor">Minor</span></div><div class="crit-b">You cannot add, connect, and name a component without the mouse. Power users have no fast lane.</div></div></div>
+  <div class="crit-item"><div class="crit-n">18</div><div class="crit-c"><div class="crit-h">Connect form re-asks context <span class="sev s-minor">Minor</span></div><div class="crit-b">The form's "from" defaults to the selected node but still presents every component as a choice — re-deriving what selection already told it.</div></div></div>
+  <div class="crit-item"><div class="crit-n">19</div><div class="crit-c"><div class="crit-h">No bulk / template import <span class="sev s-major">Major</span></div><div class="crit-b">No "paste a parts list" or "start from a standard plant." Onboarding a real building is hours of one-by-one dragging.</div></div></div>
+  <div class="crit-item"><div class="crit-n">20</div><div class="crit-c"><div class="crit-h">Presentation is the only output <span class="sev s-major">Major</span></div><div class="crit-b">No shareable link, PDF, or commissioning report. The designed/monitored system can't be communicated outside the running app.</div></div></div>
+</div>
+</div>
+
+<!-- ─── PREMIUM-BOS OPPORTUNITIES ─── -->
+<div class="section" id="crit-premium">
+<div class="section-title" style="color:var(--green)">Top 20 — Opportunities to Feel Like a Premium BOS, Not an Engineering Tool</div>
+<div class="lead rev-en" style="border-inline-start-color:var(--green)">
+The current product feels like SCADA in dark mode. A premium <b>Building Operating System</b> feels like Apple Home for a mechanical room: calm, confident, plain-spoken, and answers "is my building OK?" before it shows you a single number. These are the 20 highest-leverage moves toward that feeling.
+</div>
+<div class="crit-grid rev-en">
+  <div class="crit-item"><div class="crit-n">01</div><div class="crit-c"><div class="crit-h">One calm accent, neutral surfaces <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Retire the 9-color neon palette and the glows. One confident accent + warm neutral greys reads premium instantly.</div></div></div>
+  <div class="crit-item"><div class="crit-n">02</div><div class="crit-c"><div class="crit-h">One illustration language <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Replace SCADA line-art with a warm, consistent equipment set (soft 2.5D) that is <i>identical</i> in the palette and on the canvas.</div></div></div>
+  <div class="crit-item"><div class="crit-n">03</div><div class="crit-c"><div class="crit-h">Speak outcomes, not telemetry <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Lead with "המים חמים — הכול תקין," not "58°C / 2.1 bar." Keep the numbers one tap away.</div></div></div>
+  <div class="crit-item"><div class="crit-n">04</div><div class="crit-c"><div class="crit-h">A real "home" view <span class="sev s-opp">Opportunity</span></div><div class="crit-b">One glance answers "is my building okay?" — an Apple-Home-style status summary above the schematic.</div></div></div>
+  <div class="crit-item"><div class="crit-n">05</div><div class="crit-c"><div class="crit-h">Scenes &amp; automations <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Named human concepts — morning boost, legionella cycle, vacation mode — as first-class objects.</div></div></div>
+  <div class="crit-item"><div class="crit-n">06</div><div class="crit-c"><div class="crit-h">Persistent, versioned by default <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Autosave, named revisions, "restore yesterday." A building's model should never be lost — it should feel permanent.</div></div></div>
+  <div class="crit-item"><div class="crit-n">07</div><div class="crit-c"><div class="crit-h">Guided setup, not blank canvas <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Pick a building type / template, get a sensible starter plant, then adjust. Never start from nothing.</div></div></div>
+  <div class="crit-item"><div class="crit-n">08</div><div class="crit-c"><div class="crit-h">Rooms &amp; zones, not flat schematic <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Organize by floor / zone with a spatial metaphor; the building, not the pipe diagram, is the mental model.</div></div></div>
+  <div class="crit-item"><div class="crit-n">09</div><div class="crit-c"><div class="crit-h">Intent-level relationships <span class="sev s-opp">Opportunity</span></div><div class="crit-b">"This tank serves floors 1–3." Generate the P&amp;ID underneath; don't make users draw it port-by-port.</div></div></div>
+  <div class="crit-item"><div class="crit-n">10</div><div class="crit-c"><div class="crit-h">One primary action per screen <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Apple-style focus: a single obvious next step, not a toolbar of equal-weight controls.</div></div></div>
+  <div class="crit-item"><div class="crit-n">11</div><div class="crit-c"><div class="crit-h">Friendly component identity cards <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Each component: image, plain name, "what it does," health in words — not a raw port table.</div></div></div>
+  <div class="crit-item"><div class="crit-n">12</div><div class="crit-c"><div class="crit-h">Whitespace &amp; big tap targets <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Soft depth and generous spacing over control-room density. Approachable beats information-dense for a BOS.</div></div></div>
+  <div class="crit-item"><div class="crit-n">13</div><div class="crit-c"><div class="crit-h">Narrative timelines <span class="sev s-opp">Opportunity</span></div><div class="crit-b">"היום ב-06:00 המשאבה הופעלה אוטומטית" instead of a raw event log. Tell the building's story.</div></div></div>
+  <div class="crit-item"><div class="crit-n">14</div><div class="crit-c"><div class="crit-h">Actionable, reassuring alarms <span class="sev s-opp">Opportunity</span></div><div class="crit-b">What happened · what it means · what to do · one-tap acknowledge. Calm the operator, don't just flash red.</div></div></div>
+  <div class="crit-item"><div class="crit-n">15</div><div class="crit-c"><div class="crit-h">A story-arc onboarding <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Welcome → build/import → connect → see it live → share. A first session that feels like a guided tour.</div></div></div>
+  <div class="crit-item"><div class="crit-n">16</div><div class="crit-c"><div class="crit-h">Polished read-only share <span class="sev s-opp">Opportunity</span></div><div class="crit-b">A link or PDF a building manager can show stakeholders without ever entering the editor.</div></div></div>
+  <div class="crit-item"><div class="crit-n">17</div><div class="crit-c"><div class="crit-h">One model, view/edit lens <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Unify Monitor + Build like Figma's view/edit — an edit affordance on one model, not two separate apps.</div></div></div>
+  <div class="crit-item"><div class="crit-n">18</div><div class="crit-c"><div class="crit-h">Proper localization &amp; units <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Localize number/unit formatting; keep technical detail one tap away, never the headline.</div></div></div>
+  <div class="crit-item"><div class="crit-n">19</div><div class="crit-c"><div class="crit-h">A real component marketplace <span class="sev s-opp">Opportunity</span></div><div class="crit-b">Branded, searchable, template-driven product library (ties directly to the BOS roadmap's visual equipment library).</div></div></div>
+  <div class="crit-item"><div class="crit-n">20</div><div class="crit-c"><div class="crit-h">Mobile/tablet as first-class <span class="sev s-opp">Opportunity</span></div><div class="crit-b">A building manager is on the floor with a phone, not at a desk. Design the operator surface for touch from the start.</div></div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- IF WE STARTED FROM ZERO                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="from-zero">
+<div class="doc-title" style="font-size:22px;color:var(--green)">If We Started From Zero Today</div>
+<div class="lead rev-en" style="border-inline-start-color:var(--green)">
+Ignore the current implementation entirely. If we designed the Builder from scratch — knowing it must feel like a premium Building Operating System and serve installers, engineers, and operators — here is the shape it would take. The organizing belief: <b>the user models a building's intent; the software generates the schematic.</b>
+</div>
+<div class="fz-grid">
+  <div class="fz-card fz-wide"><div class="fz-k">North Star</div><div class="fz-t">Model intent, generate the schematic</div><div class="fz-b">Today the user is forced to think like a P&amp;ID drafter: place ports, draw pipes, infer media. Instead the user should declare <b>intent</b> — "a heat pump heats this storage tank," "this tank serves the showers on floors 1–3" — and the system derives the connections, media, and layout. The schematic becomes an <b>output</b> you can inspect, not a chore you draw. Manual override stays available for experts, but it is never the price of entry.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 01</div><div class="fz-t">One model, two lenses</div><div class="fz-b">No "Monitor mode" vs "Build mode." There is <b>one building model</b> seen through a <b>Plan</b> lens (configure) or a <b>Live</b> lens (observe), with a single edit affordance — like Figma's view/edit. Selection, zoom, and focus carry seamlessly between them.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 02</div><div class="fz-t">Persistent &amp; versioned from line one</div><div class="fz-b">Autosave is non-negotiable. Every change is a step in a <b>named, branchable history</b> — restore yesterday, fork a "what-if" scenario, compare two designs. Infinite undo/redo is the floor, not a feature.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 03</div><div class="fz-t">Start from a template, never blank</div><div class="fz-b">First run asks "what kind of building?" and drops in a sensible <b>starter plant</b> you refine. Blank canvas is an expert escape hatch, not the default. Importing a parts list or a standard plant is one action.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 04</div><div class="fz-t">A single design system</div><div class="fz-b">Tokens only — zero hex in components. One brand accent, a restrained neutral palette, a defined type scale, a consistent elevation system, and <b>one</b> equipment illustration set used identically in the library, on the canvas, and in the inspector. Motion is reserved for meaning (a pump actually turning), not decoration.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 05</div><div class="fz-t">Connection as a guided act</div><div class="fz-b">Hovering a source highlights every <b>compatible</b> target before you commit; incompatible ones dim with a reason. A "complete the circuit" assistant suggests the obvious next link. Deleting a connected component offers "remove with its pipes" — never a silent dead end.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 06</div><div class="fz-t">Design-level health</div><div class="fz-b">Beyond runtime alarms, the model continuously validates the <b>design</b>: "this tank has no heat source," "this loop never returns," "no sensor on the hot supply." A quiet readiness score tells you when the build is genuinely complete.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 07</div><div class="fz-t">Three input modes, all complete</div><div class="fz-b">Drag, click, and keyboard each fully build a plant. A power user can add-connect-name without the mouse; a touch user on a tablet never needs a precise drag; nothing is exclusive to one input.</div></div>
+
+  <div class="fz-card"><div class="fz-k">Foundation 08</div><div class="fz-t">Output is a product</div><div class="fz-b">A design produces a <b>shareable link, a PDF, and a commissioning checklist</b>. The work leaves the app and speaks to stakeholders who will never open the editor.</div></div>
+
+  <div class="fz-card fz-wide"><div class="fz-k">The 60-second first run</div><div class="fz-t">What "from zero" feels like</div><div class="fz-b"><b>0:00</b> Welcome — "What are we heating today?" → pick "apartment building, central hot water." <b>0:10</b> A starter plant appears, pre-named in Hebrew, already connected and already "live" with demo telemetry. <b>0:25</b> A gentle nudge: "Add a solar collector?" — drag once, the system wires it and shows the new flow. <b>0:40</b> The home view says "הכול תקין" with a soft green. <b>0:55</b> "Share with your team" produces a link. The user has built, connected, validated, and shared a building — and never once thought about a port.</div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- PRODUCT BENCHMARK                                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="benchmark">
+<div class="doc-title" style="font-size:22px;color:var(--blue)">Product Benchmark</div>
+<div class="lead rev-en" style="border-inline-start-color:var(--blue)">
+Where the desired experience should borrow from the best-in-class — and where each reference is a trap. We currently resemble the one product on this list we should look <i>least</i> like (SCADA). The goal is the warmth of Apple Home with the power of Figma and the rigor of CAD.
+</div>
+<div class="bench rev-en">
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">Figma</div><div class="bench-what">Collaborative design canvas with a real object model, components &amp; variants, and a plugin ecosystem.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt">A single infinite canvas; <b>components → instances</b> (our equipment library should work exactly like this); infinite undo; inline comments; view-vs-edit as one model, not two apps.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Pro-tool density and a thousand panels would overwhelm a facility operator. Borrow the model, not the cockpit.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">FigJam</div><div class="bench-what">Figma's playful, low-stakes whiteboard — easy connectors, stickers, zero fear of "breaking" anything.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt">Friendly <b>connector UX</b> (drag from edge, snaps, just works); a warm, unintimidating first impression; the feeling that experimenting is safe.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Too loose and imprecise for safety-critical mechanical config. Keep the friendliness, add rigor.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">Miro</div><div class="bench-what">Large-scale collaborative boards with templates, frames, and a strong present mode.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt"><b>Template-first onboarding</b>; frames as zones/floors; a polished presentation mode (the one thing we already do well).</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Boards become sprawling and slow; infinite freedom turns into clutter. A building plant needs structure, not a mural.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">Apple Home</div><div class="bench-what">Consumer smart-home control: status at a glance, scenes, rooms, plain language, one accent.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt">The <b>"is everything OK?" summary</b>; scenes &amp; automations as first-class; rooms as the organizing metaphor; calm single-accent visual language. This is our north star for <i>feel</i>.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Oversimplification hides the pro detail commissioning engineers need. Layer depth under the calm surface — don't remove it.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">Home Assistant</div><div class="bench-what">Power-user home automation: entity model, dashboards, deep automations, huge community.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt">The <b>entity + automation model</b>; configurable dashboards; history graphs and trends as a core surface.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Notoriously complex setup — the cautionary tale. Power must not cost first-run comprehension. This is the trap we must consciously dodge.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">SCADA systems</div><div class="bench-what">Industrial supervisory control: real-time plant truth, disciplined alarms, P&amp;ID fidelity, redundancy.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt"><b>Alarm discipline</b> (states, debounce, acknowledge), live trends, deterministic state, and never lying about what's real.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">The 1990s aesthetic and operator-hostile density. <b>This is exactly what we currently look like</b> — borrow the rigor, reject the look.</span></div>
+  </div></div>
+
+  <div class="bench-card"><div class="bench-l"><div class="bench-name">Professional CAD</div><div class="bench-what">Precision engineering tools: constraints, layers, measured drawing, component libraries, snapping.</div></div><div class="bench-r">
+    <div class="bench-row2"><span class="bench-lbl bl-steal">Steal</span><span class="bench-txt"><b>Alignment, snapping &amp; constraints</b>; reusable component libraries; measured precision when it's wanted.</span></div>
+    <div class="bench-row2"><span class="bench-lbl bl-avoid">Avoid</span><span class="bench-txt">Steep learning curve and mandatory precision. Keep accuracy <i>optional</i> — assistive, never a gate to getting started.</span></div>
+  </div></div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- IMPLEMENTATION ROADMAP                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="roadmap">
+<div class="doc-title" style="font-size:22px;color:var(--orange)">Prioritized Implementation Roadmap</div>
+<div class="lead rev-en" style="border-inline-start-color:var(--orange)">
+Ranked strictly by <b>user impact</b>, not engineering convenience. The ordering principle: first make the product <b>trustworthy</b> (don't lose work, don't lie about capabilities), then <b>coherent</b> (one design, one source of truth), then <b>premium</b> (the BOS feel), then <b>scaled</b> (delight &amp; reach). Each tier is a release gate: do not advance until the tier above is real.
+</div>
+
+<div class="road-tier">
+  <div class="road-head"><span class="road-p" style="background:rgba(239,68,68,.18);color:var(--red)">P0</span><span class="road-cap">Trust — without these, nothing else matters</span><span class="road-why">A tool that loses work or claims features it lacks cannot be shown to a customer.</span></div>
+  <div class="road-item"><div class="road-rank">1</div><div class="road-body"><div class="road-t">Persistence + autosave + named versions</div><div class="road-d">Save/load the building model; autosave every change; restore points. The single highest-impact gap — it converts a demo into a product.</div></div><div class="road-impact">Critical</div></div>
+  <div class="road-item"><div class="road-rank">2</div><div class="road-body"><div class="road-t">Wire real undo/redo</div><div class="road-d">Implement Ctrl+Z/Ctrl+Y against the existing event model. Removes the fear of every destructive action.</div></div><div class="road-impact">Critical</div></div>
+  <div class="road-item"><div class="road-rank">3</div><div class="road-body"><div class="road-t">Close the doc-vs-reality gap</div><div class="road-d">Stop advertising shortcuts and capabilities (nudge, F2, zone nav, "50-step history") that aren't built. Either ship them or remove the claims — credibility first.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">4</div><div class="road-body"><div class="road-t">Fix delete-blocked dead ends</div><div class="road-d">Offer "delete with its pipes"; never swallow the error silently. Small effort, removes a daily wall.</div></div><div class="road-impact">High</div></div>
+</div>
+
+<div class="road-tier">
+  <div class="road-head"><span class="road-p" style="background:rgba(251,146,60,.18);color:var(--orange)">P1</span><span class="road-cap">Coherence — one product, not three</span><span class="road-why">Unify the two visual identities and the duplicated data so the product feels designed, not assembled.</span></div>
+  <div class="road-item"><div class="road-rank">5</div><div class="road-body"><div class="road-t">One design system, tokens only</div><div class="road-d">Kill hex-in-TSX, pick one brand accent, dedupe the conflicting <code>emptyPulse</code> keyframe, fix the "ורשור" typo, define a type &amp; radius scale. Make Monitor and Build look like one app.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">6</div><div class="road-body"><div class="road-t">Single source of truth for components</div><div class="road-d">One registry for Hebrew name, accent, and illustration — consumed by palette, canvas, and inspector. Eliminates the duplicated <code>HE_NAME</code>/<code>TYPE_ACCENT</code> maps and drift.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">7</div><div class="road-body"><div class="road-t">Make the canvas match the palette</div><div class="road-d">The same illustration on the brick and on the board; no English ALL-CAPS fallback boxes. The thing you pick up is the thing you place.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">8</div><div class="road-body"><div class="road-t">Connection UX with live hints</div><div class="road-d">Pre-drop compatibility highlighting; reasons on incompatible targets; retire the 4-dropdown form as the primary path.</div></div><div class="road-impact">Medium</div></div>
+  <div class="road-item"><div class="road-rank">9</div><div class="road-body"><div class="road-t">Separate medium-color from status-color</div><div class="road-d">Resolve the dual meaning of orange/blue/red on one canvas — distinct visual channels for "what flows" vs "is it OK."</div></div><div class="road-impact">Medium</div></div>
+</div>
+
+<div class="road-tier">
+  <div class="road-head"><span class="road-p" style="background:rgba(74,222,128,.18);color:var(--green)">P2</span><span class="road-cap">Premium — the BOS feeling</span><span class="road-why">Now that it's trustworthy and coherent, make it feel like a product people are proud to open.</span></div>
+  <div class="road-item"><div class="road-rank">10</div><div class="road-body"><div class="road-t">Home / summary view in plain language</div><div class="road-d">"Is my building OK?" answered in one glance, in words, above the schematic. The single biggest leap toward premium feel.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">11</div><div class="road-body"><div class="road-t">Templates + guided setup + copy/paste + groups</div><div class="road-d">Never start blank; reuse assemblies; import a standard plant. Turns hours of dragging into minutes.</div></div><div class="road-impact">High</div></div>
+  <div class="road-item"><div class="road-rank">12</div><div class="road-body"><div class="road-t">Unify Monitor + Build into one model</div><div class="road-d">Plan/Live lenses on one building with a single edit affordance. Removes the wall between observing and adjusting.</div></div><div class="road-impact">Medium</div></div>
+  <div class="road-item"><div class="road-rank">13</div><div class="road-body"><div class="road-t">Shareable read-only output</div><div class="road-d">Link + PDF + commissioning checklist. The work finally leaves the app and speaks to stakeholders.</div></div><div class="road-impact">Medium</div></div>
+  <div class="road-item"><div class="road-rank">14</div><div class="road-body"><div class="road-t">Actionable alarms &amp; narrative timeline</div><div class="road-d">What happened / what it means / what to do; events told as a story, not a log.</div></div><div class="road-impact">Medium</div></div>
+</div>
+
+<div class="road-tier">
+  <div class="road-head"><span class="road-p" style="background:rgba(96,165,250,.18);color:var(--blue)">P3</span><span class="road-cap">Scale &amp; delight</span><span class="road-why">Reach new surfaces and the long-term BOS vision once the core is excellent.</span></div>
+  <div class="road-item"><div class="road-rank">15</div><div class="road-body"><div class="road-t">Zones / rooms / floor metaphor</div><div class="road-d">Organize by building structure, not a flat canvas. Foundation for scenes and spatial navigation.</div></div><div class="road-impact">Medium</div></div>
+  <div class="road-item"><div class="road-rank">16</div><div class="road-body"><div class="road-t">Scenes &amp; automations</div><div class="road-d">Named human behaviors (morning boost, legionella cycle, vacation). Where the product becomes a true operating system.</div></div><div class="road-impact">Medium</div></div>
+  <div class="road-item"><div class="road-rank">17</div><div class="road-body"><div class="road-t">Component marketplace / visual library</div><div class="road-d">Branded, template-driven equipment library — the BOS roadmap's drag-and-drop builder with 2.5D illustrations.</div></div><div class="road-impact">Long-term</div></div>
+  <div class="road-item"><div class="road-rank">18</div><div class="road-body"><div class="road-t">Mobile / tablet operator surface</div><div class="road-d">A first-class touch experience for the manager on the floor — not a shrunk desktop.</div></div><div class="road-impact">Long-term</div></div>
+</div>
+</div>
+
+<div style="margin-top:48px;padding:20px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;text-align:center">
+  <div style="font-size:11px;font-weight:900;color:var(--green);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase">Review Package Status</div>
+  <div style="font-size:10px;color:var(--text2);line-height:1.8">
+    This is a complete product design review — blueprint, honest critique, redesign vision, benchmark, and roadmap.<br>
+    Implementation will resume only after this review is explicitly approved.<br>
+    <span style="color:var(--text3)">Zentro Digital Twin · Product Design Review Package v2.0 · 80 critique findings · 18 ranked initiatives</span>
+  </div>
+</div>
+</div>
+
+</main>
+
+<script>
+// Active nav highlight on scroll
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('#nav a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      links.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`#nav a[href="#${e.target.id}"]`);
+      if(link) link.classList.add('active');
+    }
+  });
+}, {threshold: 0.3});
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
