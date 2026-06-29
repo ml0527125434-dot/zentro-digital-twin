@@ -9,8 +9,8 @@
  *   - If no storage exists, callers should fall back to the in-memory adapter.
  *
  * Layout:
- *   <ns>:index            → JSON array of project ids
- *   <ns>:project:<id>     → JSON of a ProjectSnapshot
+ *   <ns>:index            -> JSON array of project ids
+ *   <ns>:project:<id>     -> JSON of a ProjectSnapshot
  *
  * Corrupt or unreadable entries are treated as absent rather than throwing, so a
  * single bad key can never brick the app on load.
@@ -37,10 +37,59 @@ export interface LocalStorageRepositoryOptions {
 
 const DEFAULT_NAMESPACE = 'zentro';
 
+// ---------------------------------------------------------------------------
+// Shared key + read helpers (used by both the async port and the sync peek)
+// ---------------------------------------------------------------------------
+
+function indexKeyOf(ns: string): string {
+  return `${ns}:index`;
+}
+function projectKeyOf(ns: string, id: string): string {
+  return `${ns}:project:${id}`;
+}
+
+function readIndex(storage: StorageLike, ns: string): string[] {
+  const raw = storage.getItem(indexKeyOf(ns));
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function readSnapshot(storage: StorageLike, ns: string, id: string): ProjectSnapshot | null {
+  const raw = storage.getItem(projectKeyOf(ns, id));
+  if (!raw) return null;
+  try {
+    return parseProjectSnapshot(JSON.parse(raw));
+  } catch {
+    return null; // corrupt entry -> treat as absent
+  }
+}
+
+function latestOf(storage: StorageLike, ns: string): ProjectSnapshot | null {
+  let latest: ProjectSnapshot | null = null;
+  for (const id of readIndex(storage, ns)) {
+    const snap = readSnapshot(storage, ns, id);
+    if (snap && (!latest || snap.savedAt > latest.savedAt)) latest = snap;
+  }
+  return latest;
+}
+
+function resolveStorage(storage?: StorageLike): StorageLike | null {
+  return storage ?? globalThis.localStorage ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Availability probe
+// ---------------------------------------------------------------------------
+
 /** True when a usable Web Storage backend is present in this environment. */
 export function isLocalStorageAvailable(storage?: StorageLike): boolean {
   try {
-    const s = storage ?? globalThis.localStorage;
+    const s = resolveStorage(storage);
     if (!s) return false;
     const probe = '__zentro_probe__';
     s.setItem(probe, '1');
@@ -51,11 +100,33 @@ export function isLocalStorageAvailable(storage?: StorageLike): boolean {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Synchronous peek — for eager hydration in the composition/bootstrap layer
+// (NOT part of the ProjectRepository port; the Builder/business logic never
+//  uses it — only the app's startup wiring does).
+// ---------------------------------------------------------------------------
+
+export function peekLatestSnapshotSync(
+  options: LocalStorageRepositoryOptions = {},
+): ProjectSnapshot | null {
+  const storage = resolveStorage(options.storage);
+  if (!storage) return null;
+  try {
+    return latestOf(storage, options.namespace ?? DEFAULT_NAMESPACE);
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The async ProjectRepository adapter
+// ---------------------------------------------------------------------------
+
 export function createLocalStorageProjectRepository(
   options: LocalStorageRepositoryOptions = {},
 ): ProjectRepository {
   const ns = options.namespace ?? DEFAULT_NAMESPACE;
-  const storage = options.storage ?? globalThis.localStorage;
+  const storage = resolveStorage(options.storage);
   if (!storage) {
     throw new Error(
       'createLocalStorageProjectRepository: no Web Storage available. ' +
@@ -63,65 +134,36 @@ export function createLocalStorageProjectRepository(
     );
   }
 
-  const indexKey = `${ns}:index`;
-  const projectKey = (id: string) => `${ns}:project:${id}`;
-
-  function readIndex(): string[] {
-    const raw = storage.getItem(indexKey);
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
-    } catch {
-      return [];
-    }
-  }
-
   function writeIndex(ids: string[]): void {
-    storage.setItem(indexKey, JSON.stringify([...new Set(ids)]));
-  }
-
-  function readSnapshot(id: string): ProjectSnapshot | null {
-    const raw = storage.getItem(projectKey(id));
-    if (!raw) return null;
-    try {
-      return parseProjectSnapshot(JSON.parse(raw));
-    } catch {
-      return null; // corrupt entry → treat as absent
-    }
+    storage!.setItem(indexKeyOf(ns), JSON.stringify([...new Set(ids)]));
   }
 
   return {
     async save(snapshot) {
-      storage.setItem(projectKey(snapshot.project.id), snapshotToJson(snapshot));
-      const ids = readIndex();
+      storage!.setItem(projectKeyOf(ns, snapshot.project.id), snapshotToJson(snapshot));
+      const ids = readIndex(storage!, ns);
       if (!ids.includes(snapshot.project.id)) {
         writeIndex([...ids, snapshot.project.id]);
       }
     },
 
     async load(projectId) {
-      return readSnapshot(projectId);
+      return readSnapshot(storage!, ns, projectId);
     },
 
     async loadLatest() {
-      let latest: ProjectSnapshot | null = null;
-      for (const id of readIndex()) {
-        const snap = readSnapshot(id);
-        if (snap && (!latest || snap.savedAt > latest.savedAt)) latest = snap;
-      }
-      return latest;
+      return latestOf(storage!, ns);
     },
 
     async remove(projectId) {
-      storage.removeItem(projectKey(projectId));
-      writeIndex(readIndex().filter((id) => id !== projectId));
+      storage!.removeItem(projectKeyOf(ns, projectId));
+      writeIndex(readIndex(storage!, ns).filter((id) => id !== projectId));
     },
 
     async list() {
       const summaries: ProjectSummary[] = [];
-      for (const id of readIndex()) {
-        const snap = readSnapshot(id);
+      for (const id of readIndex(storage!, ns)) {
+        const snap = readSnapshot(storage!, ns, id);
         if (snap) {
           summaries.push({
             projectId: snap.project.id,

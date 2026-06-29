@@ -19,6 +19,8 @@ import { BuilderProvider } from '../builder/BuilderContext.js';
 import { LocaleProvider, useLocale } from '../i18n/index.js';
 import { useProjection } from './useProjection.js';
 import { MissionControlView } from './mission-control/MissionControlView.js';
+import type { ProjectRepository } from '../persistence/index.js';
+import { useAutosave, captureSnapshot } from '../persistence/index.js';
 
 export interface ZentroAppProps {
   projectId:    string;
@@ -29,6 +31,8 @@ export interface ZentroAppProps {
   alarmStore:      AlarmStore;
   createdBy?:      string;
   autoRefreshMs?:  number;
+  /** Optional persistence port. When provided, every mutation autosaves. */
+  repo?:           ProjectRepository;
 }
 
 type AppContentProps = Omit<ZentroAppProps, 'createdBy'> & { nowMs: number; onMutation: () => void };
@@ -360,11 +364,21 @@ export function ZentroApp({
   alarmStore,
   createdBy = 'app',
   autoRefreshMs,
+  repo,
 }: ZentroAppProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
+  // Autosave the CONFIG graph through the persistence port (no-op without a repo).
+  const requestSave = useAutosave(
+    repo,
+    useCallback(
+      () => captureSnapshot(stores, profileStore, alarmStore, projectId),
+      [stores, profileStore, alarmStore, projectId],
+    ),
+  );
+
   const refresh     = useCallback(() => setNowMs(Date.now()), []);
-  const onMutation  = useCallback(() => setNowMs(Date.now()), []);
+  const onMutation  = useCallback(() => { setNowMs(Date.now()); requestSave(); }, [requestSave]);
 
   useEffect(() => {
     if (!autoRefreshMs) return;

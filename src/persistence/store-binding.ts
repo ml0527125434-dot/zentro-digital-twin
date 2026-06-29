@@ -1,5 +1,5 @@
 /**
- * Zentro Digital Twin — Persistence ↔ Store binding (Stage 35, P0-1)
+ * Zentro Digital Twin — Persistence <-> Store binding (Stage 35, P0-1)
  *
  * The ONLY module in the persistence layer that imports engine/store internals.
  * It adapts the pure SnapshotSource/SnapshotSink seams to the live runtime
@@ -16,6 +16,10 @@ import {
   type OperationalProfileStore,
 } from '../projection/operational-profile-store.js';
 import {
+  createInMemoryAlarmStore,
+  type AlarmStore,
+} from '../alarm/alarm-store.js';
+import {
   serializeProjectSnapshot,
   applyProjectSnapshot,
   type ProjectSnapshot,
@@ -27,12 +31,14 @@ import {
 export function snapshotSourceFromStores(
   stores: EngineStores,
   profileStore: OperationalProfileStore,
+  alarmStore: AlarmStore,
 ): SnapshotSource {
   return {
     getProject: (projectId) => stores.graph.getProject(projectId),
     getComponents: (projectId) => stores.graph.getComponents(projectId),
     getConnections: (projectId) => stores.graph.getConnections(projectId),
     listProfiles: () => profileStore.listAll(),
+    listAlarmRules: () => alarmStore.listAllRules(),
   };
 }
 
@@ -40,12 +46,16 @@ export function snapshotSourceFromStores(
 export function snapshotSinkFromStores(
   stores: EngineStores,
   profileStore: OperationalProfileStore,
+  alarmStore: AlarmStore,
 ): SnapshotSink {
   return {
     setProject: (project) => stores.graph.setProject(project),
     setComponent: (component) => stores.graph.setComponent(component),
     setConnection: (connection) => stores.graph.setConnection(connection),
     setProfiles: (profiles) => profileStore.setMany(profiles),
+    setAlarmRules: (rules) => {
+      for (const rule of rules) alarmStore.setAlarmRule(rule);
+    },
   };
 }
 
@@ -53,14 +63,19 @@ export function snapshotSinkFromStores(
 export function captureSnapshot(
   stores: EngineStores,
   profileStore: OperationalProfileStore,
+  alarmStore: AlarmStore,
   projectId: string,
 ): ProjectSnapshot {
-  return serializeProjectSnapshot(snapshotSourceFromStores(stores, profileStore), projectId);
+  return serializeProjectSnapshot(
+    snapshotSourceFromStores(stores, profileStore, alarmStore),
+    projectId,
+  );
 }
 
 export interface RestoredStores {
   stores: EngineStores;
   profileStore: OperationalProfileStore;
+  alarmStore: AlarmStore;
   projectId: string;
 }
 
@@ -69,8 +84,9 @@ export interface RestoredStores {
  * Returns brand-new stores rather than mutating existing ones, so a load is a
  * clean replacement with no leftover components/connections from a prior model.
  *
- * Note: TELEMETRY (liveStore) and ALARM stores are intentionally NOT restored —
- * those are runtime/observed state, not part of the saved building model.
+ * Note: TELEMETRY (liveStore) is intentionally NOT restored — that is
+ * runtime/observed state, not part of the saved building model. AlarmRules ARE
+ * restored (they are configuration); live Alarm instances are not.
  */
 export function restoreStoresFromSnapshot(snapshot: ProjectSnapshot): RestoredStores {
   const stores: EngineStores = {
@@ -79,8 +95,9 @@ export function restoreStoresFromSnapshot(snapshot: ProjectSnapshot): RestoredSt
     events: createInMemoryEventStore(),
   };
   const profileStore = createInMemoryOperationalProfileStore();
+  const alarmStore = createInMemoryAlarmStore();
 
-  applyProjectSnapshot(snapshot, snapshotSinkFromStores(stores, profileStore));
+  applyProjectSnapshot(snapshot, snapshotSinkFromStores(stores, profileStore, alarmStore));
 
-  return { stores, profileStore, projectId: snapshot.project.id };
+  return { stores, profileStore, alarmStore, projectId: snapshot.project.id };
 }

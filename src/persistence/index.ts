@@ -28,9 +28,12 @@ export { createInMemoryProjectRepository } from './in-memory-repository.js';
 export {
   createLocalStorageProjectRepository,
   isLocalStorageAvailable,
+  peekLatestSnapshotSync,
   type StorageLike,
   type LocalStorageRepositoryOptions,
 } from './local-storage-repository.js';
+
+export { useAutosave } from './use-autosave.js';
 
 export {
   snapshotSourceFromStores,

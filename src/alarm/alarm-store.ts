@@ -21,6 +21,8 @@ export interface AlarmStore {
   getAlarmRule(ruleId: string): AlarmRule | undefined;
   /** Returns all rules registered for the given componentId. */
   getAlarmRulesForComponent(componentId: string): AlarmRule[];
+  /** Returns every registered AlarmRule (config — used by persistence). */
+  listAllRules(): AlarmRule[];
 }
 
 export function createInMemoryAlarmStore(): AlarmStore {
@@ -42,6 +44,9 @@ export function createInMemoryAlarmStore(): AlarmStore {
     },
     getAlarmRulesForComponent(componentId) {
       return [...rules.values()].filter(r => r.componentId === componentId);
+    },
+    listAllRules() {
+      return [...rules.values()];
     },
   };
 }

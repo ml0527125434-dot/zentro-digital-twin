@@ -3,7 +3,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { Project, Component, Connection, OperationalProfile } from '../domain/types.js';
+import type {
+  Project, Component, Connection, OperationalProfile, AlarmRule,
+} from '../domain/types.js';
 import {
   serializeProjectSnapshot,
   parseProjectSnapshot,
@@ -11,6 +13,7 @@ import {
   snapshotFromJson,
   SnapshotError,
   CURRENT_SCHEMA_VERSION,
+  DOCUMENT_KIND,
   type ProjectSnapshot,
   type SnapshotSource,
 } from './project-snapshot.js';
@@ -18,6 +21,7 @@ import { createInMemoryProjectRepository } from './in-memory-repository.js';
 import {
   createLocalStorageProjectRepository,
   isLocalStorageAvailable,
+  peekLatestSnapshotSync,
   type StorageLike,
 } from './local-storage-repository.js';
 import { captureSnapshot, restoreStoresFromSnapshot } from './store-binding.js';
@@ -25,6 +29,7 @@ import { createInMemoryGraphStore } from '../engine/graph-engine.js';
 import { createInMemoryVersionStore } from '../domain/project-version.js';
 import { createInMemoryEventStore } from '../domain/event-store.js';
 import { createInMemoryOperationalProfileStore } from '../projection/operational-profile-store.js';
+import { createInMemoryAlarmStore } from '../alarm/alarm-store.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -38,25 +43,17 @@ function makeProject(): Project {
 
 function makeComponent(id: string, type = 'storage_tank'): Component {
   return {
-    id,
-    type,
-    name: `רכיב ${id}`,
-    projectId: PROJECT_ID,
-    position: { x: 100, y: 120 },
-    bindings: [],
+    id, type, name: `רכיב ${id}`, projectId: PROJECT_ID,
+    position: { x: 100, y: 120 }, bindings: [],
   };
 }
 
 function makeConnection(id: string, from: string, to: string): Connection {
   return {
-    id,
-    projectId: PROJECT_ID,
-    fromComponentId: from,
-    fromPortId: 'out_hot',
-    toComponentId: to,
-    toPortId: 'in_hot',
-    medium: 'hot_water',
-    topologicalDirection: 'forward',
+    id, projectId: PROJECT_ID,
+    fromComponentId: from, fromPortId: 'out_hot',
+    toComponentId: to, toPortId: 'in_hot',
+    medium: 'hot_water', topologicalDirection: 'forward',
   };
 }
 
@@ -64,16 +61,40 @@ function makeProfile(): OperationalProfile {
   return { id: 'profile_1', appliesToType: 'storage_tank', scope: 'type_default', metrics: [] };
 }
 
+function makeAlarmRule(): AlarmRule {
+  return {
+    id: 'rule_1', componentId: 'cmp_a', triggerStatus: [],
+    debounceSeconds: 5, severity: 'warning', message: 'alarm.test',
+  };
+}
+
 function makeSource(): SnapshotSource {
   const project = makeProject();
   const components = [makeComponent('cmp_a'), makeComponent('cmp_b', 'heat_pump')];
   const connections = [makeConnection('cn_1', 'cmp_b', 'cmp_a')];
   const profiles = [makeProfile()];
+  const rules = [makeAlarmRule()];
   return {
     getProject: (pid) => (pid === PROJECT_ID ? project : undefined),
     getComponents: () => components,
     getConnections: () => connections,
     listProfiles: () => profiles,
+    listAlarmRules: () => rules,
+  };
+}
+
+/** A valid raw document object (for parse tests), with overrides applied. */
+function rawDoc(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    kind: DOCUMENT_KIND,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    savedAt: '2026-06-29T00:00:00.000Z',
+    project: makeProject(),
+    operationalProfiles: [],
+    components: [],
+    connections: [],
+    alarmRules: [],
+    ...overrides,
   };
 }
 
@@ -82,14 +103,16 @@ function makeSource(): SnapshotSource {
 // ---------------------------------------------------------------------------
 
 describe('project-snapshot — serialize', () => {
-  it('captures project, components, connections and profiles', () => {
+  it('captures project, components, connections, profiles, alarm rules + kind', () => {
     const snap = serializeProjectSnapshot(makeSource(), PROJECT_ID, () => '2026-06-29T00:00:00.000Z');
+    expect(snap.kind).toBe(DOCUMENT_KIND);
     expect(snap.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect(snap.savedAt).toBe('2026-06-29T00:00:00.000Z');
     expect(snap.project.id).toBe(PROJECT_ID);
     expect(snap.components).toHaveLength(2);
     expect(snap.connections).toHaveLength(1);
     expect(snap.operationalProfiles).toHaveLength(1);
+    expect(snap.alarmRules).toHaveLength(1);
   });
 
   it('throws when the project does not exist', () => {
@@ -115,39 +138,63 @@ describe('project-snapshot — JSON + validation', () => {
     expect(restored).toEqual(snap);
   });
 
+  it('writes the kind discriminator into the JSON', () => {
+    const snap = serializeProjectSnapshot(makeSource(), PROJECT_ID);
+    expect(JSON.parse(snapshotToJson(snap)).kind).toBe('zentro.digital-twin.document');
+  });
+
   it('rejects non-JSON text', () => {
     expect(() => snapshotFromJson('{not json')).toThrow(SnapshotError);
   });
 
+  it('rejects a document with a MISSING kind', () => {
+    const noKind = rawDoc();
+    delete noKind.kind;
+    expect(() => parseProjectSnapshot(noKind)).toThrow(/Zentro document/);
+  });
+
+  it('rejects a document with the WRONG kind', () => {
+    expect(() => parseProjectSnapshot(rawDoc({ kind: 'something.else' }))).toThrow(/Zentro document/);
+  });
+
   it('rejects a missing schemaVersion', () => {
-    expect(() => parseProjectSnapshot({ project: makeProject(), components: [], connections: [] }))
-      .toThrow(/schemaVersion/);
+    const bad = rawDoc();
+    delete bad.schemaVersion;
+    expect(() => parseProjectSnapshot(bad)).toThrow(/schemaVersion/);
   });
 
   it('rejects a future schemaVersion', () => {
-    const future = { schemaVersion: CURRENT_SCHEMA_VERSION + 1, project: makeProject(), components: [], connections: [] };
-    expect(() => parseProjectSnapshot(future)).toThrow(/newer/);
+    expect(() => parseProjectSnapshot(rawDoc({ schemaVersion: CURRENT_SCHEMA_VERSION + 1 })))
+      .toThrow(/newer/);
   });
 
   it('rejects a missing project', () => {
-    expect(() => parseProjectSnapshot({ schemaVersion: 1, components: [], connections: [] }))
-      .toThrow(/project/);
+    const bad = rawDoc();
+    delete bad.project;
+    expect(() => parseProjectSnapshot(bad)).toThrow(/project/);
   });
 
   it('rejects components whose projectId mismatches', () => {
-    const bad = {
-      schemaVersion: 1,
-      project: makeProject(),
+    expect(() => parseProjectSnapshot(rawDoc({
       components: [{ id: 'x', type: 't', projectId: 'other' }],
-      connections: [],
-    };
-    expect(() => parseProjectSnapshot(bad)).toThrow(/projectId/);
+    }))).toThrow(/projectId/);
   });
 
-  it('accepts a snapshot with no operationalProfiles field (defaults to [])', () => {
-    const ok = { schemaVersion: 1, savedAt: 'x', project: makeProject(), components: [], connections: [] };
-    const parsed = parseProjectSnapshot(ok);
+  it('defaults alarmRules and profiles to [] when absent', () => {
+    const doc = rawDoc();
+    delete doc.alarmRules;
+    delete doc.operationalProfiles;
+    const parsed = parseProjectSnapshot(doc);
+    expect(parsed.alarmRules).toEqual([]);
     expect(parsed.operationalProfiles).toEqual([]);
+  });
+
+  it('migrates a v1 document (no alarmRules) by adding an empty array', () => {
+    const v1 = rawDoc({ schemaVersion: 1 });
+    delete v1.alarmRules;
+    const parsed = parseProjectSnapshot(v1);
+    expect(parsed.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(parsed.alarmRules).toEqual([]);
   });
 });
 
@@ -158,10 +205,8 @@ describe('project-snapshot — JSON + validation', () => {
 describe('in-memory repository', () => {
   it('saves and loads a snapshot', async () => {
     const repo = createInMemoryProjectRepository();
-    const snap = serializeProjectSnapshot(makeSource(), PROJECT_ID);
-    await repo.save(snap);
-    const loaded = await repo.load(PROJECT_ID);
-    expect(loaded?.project.id).toBe(PROJECT_ID);
+    await repo.save(serializeProjectSnapshot(makeSource(), PROJECT_ID));
+    expect((await repo.load(PROJECT_ID))?.project.id).toBe(PROJECT_ID);
   });
 
   it('returns null for an unknown project', async () => {
@@ -235,6 +280,15 @@ describe('localStorage repository', () => {
     expect(await repo.list()).toHaveLength(0);
   });
 
+  it('peekLatestSnapshotSync reads the latest synchronously', async () => {
+    const storage = fakeStorage();
+    const repo = createLocalStorageProjectRepository({ storage, namespace: 'test' });
+    await repo.save(serializeProjectSnapshot(makeSource(), PROJECT_ID));
+    const peeked = peekLatestSnapshotSync({ storage, namespace: 'test' });
+    expect(peeked?.project.id).toBe(PROJECT_ID);
+    expect(peeked?.kind).toBe(DOCUMENT_KIND);
+  });
+
   it('persists across repository instances over the same storage', async () => {
     const storage = fakeStorage();
     const repoA = createLocalStorageProjectRepository({ storage, namespace: 'test' });
@@ -274,38 +328,41 @@ describe('store binding — capture + restore', () => {
         events: createInMemoryEventStore(),
       },
       profileStore: createInMemoryOperationalProfileStore(),
+      alarmStore: createInMemoryAlarmStore(),
     };
   }
 
-  it('captures a snapshot from live stores and restores an identical model', () => {
-    const { stores, profileStore } = freshStores();
+  it('captures from live stores and restores an identical model incl. alarm rules', () => {
+    const { stores, profileStore, alarmStore } = freshStores();
     stores.graph.setProject(makeProject());
     stores.graph.setComponent(makeComponent('cmp_a'));
     stores.graph.setComponent(makeComponent('cmp_b', 'heat_pump'));
     stores.graph.setConnection(makeConnection('cn_1', 'cmp_b', 'cmp_a'));
     profileStore.set(makeProfile());
+    alarmStore.setAlarmRule(makeAlarmRule());
 
-    const snap = captureSnapshot(stores, profileStore, PROJECT_ID);
+    const snap = captureSnapshot(stores, profileStore, alarmStore, PROJECT_ID);
+    expect(snap.alarmRules).toHaveLength(1);
+
     const restored = restoreStoresFromSnapshot(snap);
-
     expect(restored.projectId).toBe(PROJECT_ID);
     expect(restored.stores.graph.getProject(PROJECT_ID)?.name).toBe('בניין מגורים');
     expect(restored.stores.graph.getComponents(PROJECT_ID)).toHaveLength(2);
     expect(restored.stores.graph.getConnections(PROJECT_ID)).toHaveLength(1);
     expect(restored.profileStore.listAll()).toHaveLength(1);
+    expect(restored.alarmStore.listAllRules()).toHaveLength(1);
   });
 
   it('restored stores are independent of the originals', () => {
-    const { stores, profileStore } = freshStores();
+    const { stores, profileStore, alarmStore } = freshStores();
     stores.graph.setProject(makeProject());
     stores.graph.setComponent(makeComponent('cmp_a'));
 
-    const snap = captureSnapshot(stores, profileStore, PROJECT_ID);
+    const snap = captureSnapshot(stores, profileStore, alarmStore, PROJECT_ID);
     const restored = restoreStoresFromSnapshot(snap);
 
-    // Mutate the restored copy; the original must be untouched.
     restored.stores.graph.setComponent(makeComponent('cmp_new'));
     expect(restored.stores.graph.getComponents(PROJECT_ID)).toHaveLength(2);
     expect(stores.graph.getComponents(PROJECT_ID)).toHaveLength(1);
   });
-})
+});

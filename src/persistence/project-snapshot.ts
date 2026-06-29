@@ -3,15 +3,17 @@
  *
  * Pure, dependency-light (domain types only) serialization of the CONFIG graph:
  * the building model the Builder owns — project + components + connections +
- * operational profiles.
+ * operational profiles + alarm rules.
  *
  * This module knows NOTHING about WHERE data is stored (localStorage / file /
  * backend). Storage adapters consume `ProjectSnapshot`; the Builder consumes the
  * `ProjectRepository` port. Neither knows about the other.
  *
- * Versioning: every snapshot carries a `schemaVersion`. `parseProjectSnapshot`
- * validates structure and runs forward migrations so older saved files keep
- * loading after the schema evolves.
+ * Every document carries:
+ *   - `kind`: a fixed discriminator identifying it as a Zentro document. Import
+ *     rejects any payload whose kind is missing or different.
+ *   - `schemaVersion`: integer; `parseProjectSnapshot` validates + runs forward
+ *     migrations so older saved files keep loading after the schema evolves.
  */
 
 import type {
@@ -19,18 +21,25 @@ import type {
   Component,
   Connection,
   OperationalProfile,
+  AlarmRule,
 } from '../domain/types.js';
 
+/** Fixed discriminator stamped on every Zentro document. */
+export const DOCUMENT_KIND = 'zentro.digital-twin.document';
+export type DocumentKind = typeof DOCUMENT_KIND;
+
 /** Bump when the snapshot shape changes; add a migration step in `migrate()`. */
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 export interface ProjectSnapshot {
+  readonly kind: DocumentKind;
   readonly schemaVersion: number;
   readonly savedAt: string; // ISO8601
   readonly project: Project;
   readonly operationalProfiles: OperationalProfile[];
   readonly components: Component[];
   readonly connections: Connection[];
+  readonly alarmRules: AlarmRule[];
 }
 
 /** Thrown when raw input cannot be parsed into a valid ProjectSnapshot. */
@@ -43,7 +52,7 @@ export class SnapshotError extends Error {
 
 // ---------------------------------------------------------------------------
 // Read/write seams — keep this module independent of engine/store internals.
-// Adapters that bind these to EngineStores live in `store-binding.ts`.
+// Adapters that bind these to runtime stores live in `store-binding.ts`.
 // ---------------------------------------------------------------------------
 
 export interface SnapshotSource {
@@ -51,6 +60,7 @@ export interface SnapshotSource {
   getComponents(projectId: string): Component[];
   getConnections(projectId: string): Connection[];
   listProfiles(): OperationalProfile[];
+  listAlarmRules(): AlarmRule[];
 }
 
 export interface SnapshotSink {
@@ -58,6 +68,7 @@ export interface SnapshotSink {
   setComponent(component: Component): void;
   setConnection(connection: Connection): void;
   setProfiles(profiles: OperationalProfile[]): void;
+  setAlarmRules(rules: AlarmRule[]): void;
 }
 
 // ---------------------------------------------------------------------------
@@ -73,14 +84,15 @@ export function serializeProjectSnapshot(
   if (!project) {
     throw new SnapshotError(`Cannot serialize: project '${projectId}' not found.`);
   }
-  // Deep-clone via structuredClone so the snapshot never aliases live store objects.
   return {
+    kind: DOCUMENT_KIND,
     schemaVersion: CURRENT_SCHEMA_VERSION,
     savedAt: now(),
     project: clone(project),
     operationalProfiles: source.listProfiles().map(clone),
     components: source.getComponents(projectId).map(clone),
     connections: source.getConnections(projectId).map(clone),
+    alarmRules: source.listAlarmRules().map(clone),
   };
 }
 
@@ -94,6 +106,7 @@ export function applyProjectSnapshot(
 ): void {
   sink.setProject(clone(snapshot.project));
   sink.setProfiles(snapshot.operationalProfiles.map(clone));
+  sink.setAlarmRules(snapshot.alarmRules.map(clone));
   for (const component of snapshot.components) sink.setComponent(clone(component));
   for (const connection of snapshot.connections) sink.setConnection(clone(connection));
 }
@@ -125,6 +138,14 @@ export function parseProjectSnapshot(raw: unknown): ProjectSnapshot {
     throw new SnapshotError('Snapshot must be a JSON object.');
   }
 
+  // Document-kind gate: reject anything that is not explicitly a Zentro document.
+  if (raw.kind !== DOCUMENT_KIND) {
+    throw new SnapshotError(
+      `Not a Zentro document: expected kind "${DOCUMENT_KIND}" but found ` +
+        `${raw.kind === undefined ? '(none)' : JSON.stringify(raw.kind)}.`,
+    );
+  }
+
   const version = raw.schemaVersion;
   if (typeof version !== 'number' || !Number.isFinite(version)) {
     throw new SnapshotError('Snapshot is missing a numeric "schemaVersion".');
@@ -142,17 +163,17 @@ export function parseProjectSnapshot(raw: unknown): ProjectSnapshot {
 
 /**
  * Forward migrations. Each step upgrades a snapshot from version N to N+1.
- * Today there is only v1, so this is the identity. The structure is here so
- * the next schema change is a one-line addition, never a rewrite.
+ * v1 had no `alarmRules`; v2 adds it. Older docs gain an empty array.
  */
 function migrate(raw: Record<string, unknown>): Record<string, unknown> {
-  let working = { ...raw };
+  const working = { ...raw };
   let version = working.schemaVersion as number;
 
-  // Example of the pattern for future use:
-  // if (version === 1) { working = upgradeV1toV2(working); version = 2; }
+  if (version < 2) {
+    if (!Array.isArray(working.alarmRules)) working.alarmRules = [];
+    version = 2;
+  }
 
-  // Always stamp the current version once migrations complete.
   working.schemaVersion = version < CURRENT_SCHEMA_VERSION ? CURRENT_SCHEMA_VERSION : version;
   return working;
 }
@@ -180,6 +201,10 @@ function validateShape(raw: Record<string, unknown>): ProjectSnapshot {
   const operationalProfiles = raw.operationalProfiles ?? [];
   if (!Array.isArray(operationalProfiles)) {
     throw new SnapshotError('Snapshot "operationalProfiles" must be an array.');
+  }
+  const alarmRules = raw.alarmRules ?? [];
+  if (!Array.isArray(alarmRules)) {
+    throw new SnapshotError('Snapshot "alarmRules" must be an array.');
   }
 
   for (const c of components) {
@@ -211,12 +236,14 @@ function validateShape(raw: Record<string, unknown>): ProjectSnapshot {
   const savedAt = typeof raw.savedAt === 'string' ? raw.savedAt : new Date(0).toISOString();
 
   return {
+    kind: DOCUMENT_KIND,
     schemaVersion: raw.schemaVersion as number,
     savedAt,
     project: project as unknown as Project,
     operationalProfiles: operationalProfiles as OperationalProfile[],
     components: components as Component[],
     connections: connections as Connection[],
+    alarmRules: alarmRules as AlarmRule[],
   };
 }
 
@@ -229,7 +256,6 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 function clone<T>(value: T): T {
-  // structuredClone is available in all target runtimes (browser + Node 17+ test env).
   return typeof structuredClone === 'function'
     ? structuredClone(value)
     : (JSON.parse(JSON.stringify(value)) as T);
