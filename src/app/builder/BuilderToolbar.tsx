@@ -26,6 +26,8 @@ const ICON: Record<string, React.ReactNode> = {
   arrange:    <><rect x="2.5" y="2.5" width="4" height="4" rx="1" /><rect x="9.5" y="2.5" width="4" height="4" rx="1" /><rect x="6" y="9.5" width="4" height="4" rx="1" /></>,
   grid:       <><path d="M2.5 6h11M2.5 10h11M6 2.5v11M10 2.5v11" /></>,
   search:     <><circle cx="7" cy="7" r="4" /><path d="M10 10l3.5 3.5" /></>,
+  present:    <><path d="M5 3l8 5-8 5z" /></>,
+  globe:      <><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2.2 2 2.2 10 0 12M8 2c-2.2 2-2.2 10 0 12" /></>,
 };
 
 function Icon({ name }: { name: string }) {
@@ -126,6 +128,9 @@ export interface BuilderToolbarProps {
   onSearch:      () => void;
   // File group slot (reuses the existing PersistenceToolbar)
   fileSlot?:     React.ReactNode;
+  // Utility (trailing) — relocated from the header during §9.7 consolidation
+  onPresent:     () => void;
+  onToggleLang:  () => void;
 }
 
 export function BuilderToolbar(props: BuilderToolbarProps) {
@@ -134,6 +139,7 @@ export function BuilderToolbar(props: BuilderToolbarProps) {
     mode, onSetMode,
     onUndo, canUndo, onRedo, canRedo, onDuplicate, onDelete, hasSelection,
     onFit, onAutoArrange, gridVisible, onToggleGrid, onSearch, fileSlot,
+    onPresent, onToggleLang,
   } = props;
 
   return (
@@ -186,6 +192,11 @@ export function BuilderToolbar(props: BuilderToolbarProps) {
 
       {/* Search */}
       <ToolBtn icon="search" labelKey="toolbar.search" onClick={onSearch} testid="tb-search" />
+
+      {/* Utility — trailing edge (presentation + language, relocated from the header) */}
+      <span style={{ flex: 1 }} />
+      <ToolBtn icon="present" labelKey="pres.enter"     onClick={onPresent}    testid="tb-present" />
+      <ToolBtn icon="globe"   labelKey="app.lang_switch" onClick={onToggleLang} testid="tb-lang" />
     </div>
   );
 }

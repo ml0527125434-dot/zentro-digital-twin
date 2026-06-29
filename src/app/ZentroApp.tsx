@@ -111,7 +111,7 @@ function AppContent({
 
       {/* Header bar — collapses in presentation mode */}
       <div style={{
-        maxHeight:  presentationMode ? 0 : 64,
+        maxHeight:  (presentationMode || buildMode) ? 0 : 64,
         overflow:   'hidden',
         flexShrink: 0,
         transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
@@ -250,8 +250,8 @@ function AppContent({
             display:        'flex',
             alignItems:     'center',
             gap:            10,
-            padding:        presentationMode ? '0 14px' : '6px 14px',
-            maxHeight:      presentationMode ? 0 : 40,
+            padding:        (presentationMode || buildMode) ? '0 14px' : '6px 14px',
+            maxHeight:      (presentationMode || buildMode) ? 0 : 40,
             overflow:       'hidden',
             background:     'color-mix(in srgb, var(--accent) 8%, var(--bg-crust))',
             borderBottom:   '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
@@ -313,6 +313,8 @@ function AppContent({
         onSetBuildMode={setBuildMode}
         repo={repo}
         captureProject={captureProject}
+        onEnterPresentation={() => setPresentationMode(true)}
+        onToggleLocale={() => setLocale(locale === 'he' ? 'en' : 'he')}
       />
 
       {/* Floating presentation mode overlay — exit button + badge */}

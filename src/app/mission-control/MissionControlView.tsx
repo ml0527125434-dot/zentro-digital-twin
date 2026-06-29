@@ -64,6 +64,8 @@ export interface MissionControlViewProps {
   onSetBuildMode?:     (build: boolean) => void;
   repo?:               ProjectRepository;
   captureProject?:     () => ProjectSnapshot;
+  onEnterPresentation?: () => void;
+  onToggleLocale?:     () => void;
 }
 
 // Small shared button style for panel-toggle controls
@@ -95,6 +97,8 @@ export function MissionControlView({
   onSetBuildMode,
   repo,
   captureProject,
+  onEnterPresentation,
+  onToggleLocale,
 }: MissionControlViewProps) {
   const { t } = useLocale();
   const builder = useBuilder();
@@ -105,6 +109,7 @@ export function MissionControlView({
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [gridVisible,    setGridVisible]    = useState(true);
   const viewportRef = useRef<{ fitView: () => void } | null>(null);
+  const wasNarrowRef = useRef(false);
 
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
@@ -505,6 +510,20 @@ export function MissionControlView({
   const handleFit    = useCallback(() => { viewportRef.current?.fitView(); }, []);
   const handleSearch = useCallback(() => { document.dispatchEvent(new CustomEvent('zentro:builder:focusSearch')); }, []);
 
+  // §9.6 — auto-collapse both side panels when the viewport gets narrow (only on the
+  // transition into narrow, so we never fight the user). The centre canvas itself
+  // never collapses — its column keeps a hard minimum width (the 0-width bug guard).
+  useEffect(() => {
+    const onResize = () => {
+      const narrow = window.innerWidth < 900;
+      if (narrow && !wasNarrowRef.current) { setLeftCollapsed(true); setRightCollapsed(true); }
+      wasNarrowRef.current = narrow;
+    };
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   // Presentation mode collapses both sidebars; manual toggles respected otherwise
   const showLeft  = !presentationMode && !leftCollapsed;
   const showRight = !presentationMode && !rightCollapsed;
@@ -538,13 +557,15 @@ export function MissionControlView({
             gridVisible={gridVisible} onToggleGrid={() => setGridVisible(v => !v)}
             onSearch={handleSearch}
             fileSlot={repo && captureProject ? <PersistenceToolbar repo={repo} capture={captureProject} /> : undefined}
+            onPresent={onEnterPresentation ?? (() => {})}
+            onToggleLang={onToggleLocale ?? (() => {})}
           />
         </div>
       )}
 
-      {/* ── System Status Strip — full width, collapses in presentation mode ── */}
+      {/* ── System Status Strip — hidden in build (toolbar+status bar cover it) & presentation ── */}
       <div style={{
-        maxHeight:  presentationMode ? 0 : 40,
+        maxHeight:  (presentationMode || buildMode) ? 0 : 40,
         overflow:   'hidden',
         flexShrink: 0,
         transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
