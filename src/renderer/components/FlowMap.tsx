@@ -91,6 +91,7 @@ export interface FlowMapProps {
   onDropComponent?:      ((typeId: string, x: number, y: number) => void) | undefined;
   placingMode?:          boolean | undefined;
   builderMode?:          boolean | undefined;
+  isValidConnection?:    ((conn: RFConnection | Edge) => boolean) | undefined;
 }
 
 // Inner component: has access to useReactFlow() which requires being inside <ReactFlow>
@@ -139,7 +140,7 @@ function DropZoneCapture({ onDropComponent }: { onDropComponent?: ((typeId: stri
   return null;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode, isValidConnection }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -221,6 +222,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
   return (
     <div
       data-flowmap-drop
+      data-flowmap-build={builderMode || undefined}
       style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}
     >
       {/* @ts-expect-error — exactOptionalPropertyTypes conflicts with @xyflow/react prop signatures */}
@@ -249,6 +251,9 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         selectionMode={SelectionMode.Partial}
         snapToGrid={builderMode}
         snapGrid={[20, 20]}
+        isValidConnection={isValidConnection as never}
+        connectionRadius={28}
+        connectionLineStyle={{ stroke: 'var(--accent)', strokeWidth: 2.5 }}
       >
         <Background
           variant={BackgroundVariant.Lines}

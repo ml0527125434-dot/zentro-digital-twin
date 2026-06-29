@@ -874,3 +874,42 @@ body {
   animation: canvasDragPulse 0.8s ease-in-out infinite;
   border-radius: 12px;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Stage 35 — Builder connection affordances (functional, build mode only)
+   Makes ports easy to find and grab, and highlights valid/invalid drop targets
+   during a connection drag. Scoped to [data-flowmap-build] so Monitor is unchanged.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-flowmap-build] .react-flow__handle {
+  width: 11px;
+  height: 11px;
+  background: var(--accent);
+  border: 2px solid var(--bg-crust);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+[data-flowmap-build] .react-flow__handle:hover {
+  transform: scale(1.45);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+  cursor: crosshair;
+}
+
+/* Valid drop target during a connection drag */
+[data-flowmap-build] .react-flow__handle.valid,
+[data-flowmap-build] .react-flow__handle.connectingto.valid {
+  background: var(--status-healthy) !important;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--status-healthy) 35%, transparent);
+}
+
+/* Invalid drop target during a connection drag */
+[data-flowmap-build] .react-flow__handle.connectingto:not(.valid) {
+  background: var(--status-critical) !important;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--status-critical) 30%, transparent);
+}
+
+/* The component currently sourcing a connection */
+[data-flowmap-build] .react-flow__handle.connectingfrom {
+  background: var(--accent) !important;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 35%, transparent);
+}

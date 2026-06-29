@@ -41,6 +41,7 @@ import { BuilderContextMenu } from '../builder/BuilderContextMenu.js';
 import { useBuilder } from '../../builder/useBuilder.js';
 import { createGraphHistory, captureGraph, restoreGraph } from '../../builder/graph-history.js';
 import { copySelection, planPaste, type ClipboardData } from '../../builder/clipboard.js';
+import { validateConnectionDraft } from '../../builder/port-validator.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -221,6 +222,30 @@ export function MissionControlView({
       connectErrorTimer.current = setTimeout(() => setConnectError(null), 3500);
     }
   }, [buildMode, stores, registry, projectId, builder, onMutation]);
+
+  // Live connection validity — drives React Flow's valid/invalid target highlight
+  const isValidConnection = useCallback(
+    (c: { source: string | null; sourceHandle: string | null; target: string | null; targetHandle: string | null }) => {
+      if (!c.source || !c.target) return false;
+      const comps = stores.graph.getComponents(projectId);
+      const from = comps.find(x => x.id === c.source);
+      const to   = comps.find(x => x.id === c.target);
+      if (!from || !to) return false;
+      const fromDef  = registry.get(from.type);
+      const fromPort = fromDef?.ports.find(pt => pt.id === (c.sourceHandle ?? ''));
+      if (!fromPort) return false;
+      return validateConnectionDraft(
+        {
+          fromComponentId: from.id, fromComponentType: from.type, fromPortId: c.sourceHandle ?? '',
+          toComponentId: to.id, toComponentType: to.type, toPortId: c.targetHandle ?? '',
+          medium: fromPort.medium,
+        },
+        registry,
+        stores.graph.getConnections(projectId),
+      ).valid;
+    },
+    [stores, registry, projectId],
+  );
 
   // Drag-from-palette drop: place a new component at the drop position
   const handleDropComponent = useCallback((typeId: string, x: number, y: number) => {
@@ -727,6 +752,7 @@ export function MissionControlView({
               onNodeMoved={buildMode ? handleNodeMoved : undefined}
               onDropComponent={buildMode ? handleDropComponent : undefined}
               placingMode={isPlacingMode}
+              isValidConnection={buildMode ? isValidConnection : undefined}
               builderMode={buildMode}
             />
           </div>
