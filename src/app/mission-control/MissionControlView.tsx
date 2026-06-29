@@ -785,7 +785,7 @@ export function MissionControlView({
           {isPlacingMode && builder.state.mode === 'placing' && (() => {
             const typeId = builder.state.pendingTypeId;
             const def    = typeId ? registry.get(typeId) : null;
-            const label  = def?.label ?? typeId ?? '';
+            const label  = typeId ? heComponentName(typeId, def?.label ?? typeId) : '';
             return (
               <div style={{
                 position:      'absolute',

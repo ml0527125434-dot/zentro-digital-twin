@@ -325,14 +325,29 @@ export function BuilderPropertyPanel({ projectId, stores, registry, onMutation }
             <ComponentIllustration typeId={component?.type ?? ''} accent={accent} />
           </div>
 
-          {/* Name */}
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#e2e8f4', lineHeight: 1.2 }}>
-              {component?.name}
-            </div>
+          {/* Name — inline editable (rename without digging into a panel) */}
+          <div style={{ textAlign: 'center', width: '100%' }}>
+            <input
+              data-testid="builder-rename-input"
+              value={renameValue}
+              onChange={e => setRenameValue(e.currentTarget.value)}
+              onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); if (e.key === 'Escape') { setRenameValue(component?.name ?? ''); e.currentTarget.blur(); } }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.background = 'transparent'; handleRename(); }}
+              aria-label="שם הרכיב"
+              title="לחץ לשינוי שם"
+              style={{
+                width: '100%', textAlign: 'center', boxSizing: 'border-box',
+                background: 'transparent', border: '1px solid transparent', borderRadius: 7,
+                fontSize: 18, fontWeight: 900, color: '#e2e8f4', lineHeight: 1.3,
+                outline: 'none', padding: '3px 6px', direction: 'rtl',
+                transition: 'background 0.12s, border-color 0.12s',
+              }}
+            />
             <div style={{ fontSize: 11, color: accent, marginTop: 3, fontWeight: 700 }}>
               {heName}
             </div>
+            {renameError && <div style={{ fontSize: 10, color: '#ef4444', marginTop: 3 }}>{renameError}</div>}
           </div>
 
           {/* Quick actions */}
@@ -379,6 +394,9 @@ export function BuilderPropertyPanel({ projectId, stores, registry, onMutation }
                   gas:'#fbbf24', electric:'#a78bfa', air:'#94a3b8',
                 };
                 const mc = medColors[port.medium] ?? '#60a5fa';
+                const roleHe = port.role === 'inlet' ? 'כניסה' : port.role === 'outlet' ? 'יציאה' : 'דו-כיווני';
+                const sameRole = def.ports.filter(q => q.role === port.role);
+                const roleIdx = sameRole.length > 1 ? ` ${sameRole.indexOf(port) + 1}` : '';
                 const connected = allConnections.some(cn =>
                   (cn.fromComponentId === selectedId && cn.fromPortId === port.id) ||
                   (cn.toComponentId   === selectedId && cn.toPortId   === port.id)
@@ -398,7 +416,7 @@ export function BuilderPropertyPanel({ projectId, stores, registry, onMutation }
                       flexShrink: 0,
                     }} />
                     <div style={{ flex: 1, fontSize: 11, color: connected ? '#c8d4e8' : '#4a6080', fontWeight: 600 }}>
-                      {port.label}
+                      {roleHe}{roleIdx}
                     </div>
                     <div style={{
                       fontSize: 9, fontWeight: 800, color: mc,
@@ -433,39 +451,12 @@ export function BuilderPropertyPanel({ projectId, stores, registry, onMutation }
             direction:      'rtl',
           }}
         >
-          <span>פרטים נוספים</span>
+          <span>הוסף חיבור ידני</span>
           <span style={{ transition: 'transform 0.2s', transform: showDetails ? 'rotate(180deg)' : 'none' }}>▾</span>
         </button>
 
         {showDetails && (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {/* Rename */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input
-                data-testid="builder-rename-input"
-                value={renameValue}
-                onChange={e => setRenameValue(e.currentTarget.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleRename(); }}
-                placeholder="שם הרכיב"
-                style={{
-                  flex: 1, background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 7, color: '#e2e8f4',
-                  fontSize: 12, padding: '7px 10px', outline: 'none', direction: 'rtl',
-                }}
-              />
-              <button
-                data-testid="builder-rename-btn"
-                onClick={handleRename}
-                style={{
-                  padding: '7px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f4',
-                  cursor: 'pointer', fontSize: 12, fontWeight: 700, flexShrink: 0,
-                }}
-              >שנה</button>
-            </div>
-            {renameError && <div style={{ fontSize: 10, color: '#ef4444' }}>{renameError}</div>}
-
             {/* Add connection form */}
             <div style={{
               padding: '10px', borderRadius: 8,
