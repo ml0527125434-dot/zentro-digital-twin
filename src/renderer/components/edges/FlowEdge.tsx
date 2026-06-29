@@ -1,31 +1,44 @@
 /**
- * FlowEdge — premium pipe visualization.
- * Stage 33: dramatic visual transformation — thick colored pipes,
- * 3 animated direction arrows, strong glow, 3D pipe highlight.
+ * FlowEdge — engineering pipe (Stage 1A: orthogonal routing + static arrow).
+ *
+ * Master Spec (pid-spec §1):
+ *  - §1.1 Orthogonal only — getSmoothStepPath with borderRadius = ELBOW_RADIUS.
+ *  - §1.2 Elbows render as a single near-sharp 3px corner.
+ *  - §1.7 A *static* arrowhead sits at the pipe midpoint (filled triangle, medium
+ *         color), always visible at rest — the P&ID "not a toy" signal.
+ *  - §1.8 Animation is Monitor-only / live-data-only. Build Mode pipes are static.
+ *
+ * Colors are design tokens only (var(--pipe-*) / var(--status-*)) — no hex here.
  */
 
-import React from 'react';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import {
   EdgeLabelRenderer,
-  getBezierPath,
+  getSmoothStepPath,
   type EdgeProps,
 } from '@xyflow/react';
 import type { ConnectionEdge } from '../../flow-transformers.js';
 import { sensorStatePresentation, nodeStatusPresentation } from '../../theme.js';
 import { FlowState } from '../../../domain/types.js';
+import { BuildModeContext } from '../../build-mode-context.js';
 
-function mediumColor(medium?: string): string {
+/** Near-sharp 90° corner — technical, not bubbly (pid-spec §0 ELBOW_RADIUS). */
+const ELBOW_RADIUS = 3;
+
+/** Medium → design-token color (pid-spec §0; values live in styles.css). */
+function mediumColorVar(medium?: string): string {
   switch (medium) {
-    case 'cold_water': return '#38bdf8';
-    case 'recirc':     return '#2dd4bf';
-    case 'gas':        return '#fbbf24';
-    case 'electric':   return '#a78bfa';
-    case 'air':        return '#94a3b8';
-    case 'hot_water':  return '#f97316';
-    default:           return '#1e3a5f';
+    case 'cold_water': return 'var(--pipe-cold)';
+    case 'recirc':     return 'var(--pipe-recirc)';
+    case 'gas':        return 'var(--pipe-gas)';
+    case 'electric':   return 'var(--pipe-electric)';
+    case 'air':        return 'var(--pipe-air)';
+    case 'hot_water':  return 'var(--pipe-hot)';
+    default:           return 'var(--edge-default)';
   }
 }
 
+/** Pipe thickness stays as today in Stage 1A; the toned-down 4–6px set is Stage 1C. */
 function mediumStrokeWidth(medium?: string, isFlowing?: boolean): number {
   const base = medium === 'hot_water' ? 10
     : medium === 'cold_water' || medium === 'recirc' ? 9
@@ -42,9 +55,13 @@ export function FlowEdge({
   targetPosition,
   data,
 }: EdgeProps<ConnectionEdge>) {
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const buildMode = useContext(BuildModeContext);
+
+  // §1.1 — orthogonal route with near-sharp elbows (replaces the old bezier curve).
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
+    borderRadius: ELBOW_RADIUS,
   });
 
   const flow           = data?.viewModel.flow        ?? FlowState.Unknown;
@@ -59,50 +76,68 @@ export function FlowEdge({
 
   const isFlowing = flow === FlowState.Flowing || flow === FlowState.Reverse;
 
-  // Stroke color priority: alarm > status-tinted flow > medium identity
+  // §1.8 — live animation is Monitor-only. Build Mode forces a calm, static pipe.
+  const live = !buildMode && (isFlowing || hasActiveAlarm);
+
+  // Stroke color priority: alarm > status-tinted live flow > medium identity.
   let strokeColor: string;
   if (hasActiveAlarm) {
-    strokeColor = '#ef4444';
-  } else if (isFlowing && statusPres && value !== null) {
+    strokeColor = 'var(--status-critical)';
+  } else if (live && statusPres && value !== null) {
     strokeColor = `var(${statusPres.cssVar})`;
   } else {
-    strokeColor = mediumColor(medium);
+    strokeColor = mediumColorVar(medium);
   }
 
-  const strokeWidth = hasActiveAlarm
-    ? 10
-    : mediumStrokeWidth(medium, isFlowing);
+  const strokeWidth = hasActiveAlarm ? 10 : mediumStrokeWidth(medium, live);
 
-  // Animation class for dash pattern
-  let animClass: string;
-  if (hasActiveAlarm) {
-    animClass = 'zentro-edge-alarm';
-  } else if (flow === FlowState.Flowing) {
-    animClass = 'zentro-edge-flowing';
-  } else if (flow === FlowState.Reverse) {
-    animClass = 'zentro-edge-reverse';
-  } else {
-    animClass = 'zentro-edge-noflow';
+  // Dash animation class — static in Build Mode, live in Monitor.
+  let animClass = 'zentro-edge-noflow';
+  if (!buildMode) {
+    if (hasActiveAlarm)                       animClass = 'zentro-edge-alarm';
+    else if (flow === FlowState.Flowing)      animClass = 'zentro-edge-flowing';
+    else if (flow === FlowState.Reverse)      animClass = 'zentro-edge-reverse';
   }
 
-  const showArrow  = isFlowing || hasActiveAlarm;
-  const arrowReverse = flow === FlowState.Reverse;
-  const arrowDur   = flow === FlowState.Flowing ? '1.6s' : '2.4s';
+  // §1.7 — static midpoint arrowhead pointing source→target (topological forward).
+  // Derived from the actual rendered path so it sits on the orthogonal midsegment.
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const [arrow, setArrow] = useState<{ x: number; y: number; angle: number } | null>(null);
 
-  // Temperature label (only when flowing with a value)
-  const showLabel = isFlowing && value !== null && statusPres !== null;
+  useLayoutEffect(() => {
+    const path = pathRef.current;
+    // jsdom has no SVG geometry — guard so tests render without it.
+    if (!path || typeof path.getTotalLength !== 'function') { setArrow(null); return; }
+    let len = 0;
+    try { len = path.getTotalLength(); } catch { setArrow(null); return; }
+    if (!len || !Number.isFinite(len)) { setArrow(null); return; }
+    try {
+      const mid   = path.getPointAtLength(len / 2);
+      const ahead = path.getPointAtLength(Math.min(len, len / 2 + 1));
+      const angle = (Math.atan2(ahead.y - mid.y, ahead.x - mid.x) * 180) / Math.PI;
+      setArrow({ x: mid.x, y: mid.y, angle });
+    } catch {
+      setArrow(null);
+    }
+  }, [edgePath]);
+
+  // Static arrowhead scales gently with pipe width.
+  const arrowSize = Math.max(5, strokeWidth * 0.9);
+
+  // Temperature label only in Monitor when actually flowing with a value.
+  const showLabel = live && isFlowing && value !== null && statusPres !== null;
 
   return (
     <>
-      {/* Strong glow layer */}
-      {(isFlowing || hasActiveAlarm) && (
+      {/* Live glow layer — Monitor only */}
+      {live && (
         <path
           d={edgePath}
           style={{
             stroke:        strokeColor,
             strokeWidth:   strokeWidth + 14,
             fill:          'none',
-            opacity:       0.22,
+            opacity:       0.18,
             pointerEvents: 'none',
           }}
         />
@@ -111,47 +146,44 @@ export function FlowEdge({
       {/* Main pipe body */}
       <path
         id={id}
+        ref={pathRef}
         d={edgePath}
         className={`react-flow__edge-path ${animClass}`}
         style={{
-          stroke:      strokeColor,
+          stroke:        strokeColor,
           strokeWidth,
-          fill:        'none',
-          strokeLinecap: 'round',
+          fill:          'none',
+          strokeLinejoin: 'round',
         }}
       />
 
-      {/* Inner highlight stripe — 3D pipe depth effect */}
-      {isFlowing && (
-        <path
-          d={edgePath}
-          style={{
-            stroke:        'rgba(255,255,255,0.18)',
-            strokeWidth:   strokeWidth * 0.35,
-            fill:          'none',
-            pointerEvents: 'none',
-            strokeLinecap: 'round',
-          }}
+      {/* Static midpoint arrowhead — always visible (P&ID direction signal) */}
+      {arrow && (
+        <polygon
+          points={`${arrowSize},0 ${-arrowSize * 0.85},${-arrowSize * 0.75} ${-arrowSize * 0.85},${arrowSize * 0.75}`}
+          transform={`translate(${arrow.x},${arrow.y}) rotate(${arrow.angle})`}
+          fill={strokeColor}
+          pointerEvents="none"
+          aria-hidden="true"
         />
       )}
 
-      {/* Animated flow arrows — 3 evenly spaced */}
-      {showArrow && (
+      {/* Live moving markers — Monitor only, on top of the static arrow */}
+      {live && isFlowing && (
         <g pointerEvents="none" aria-hidden="true">
-          {[0, 0.33, 0.66].map((offset, i) => (
+          {[0, 0.5].map((offset, i) => (
             <polygon
               key={i}
-              points="-7,0 6,-4.5 6,4.5"
+              points="-6,0 5,-4 5,4"
               fill={strokeColor}
-              opacity={0.95}
-              style={{ filter: `drop-shadow(0 0 5px ${strokeColor})` }}
+              opacity={0.9}
             >
               <animateMotion
-                dur={arrowDur}
+                dur={flow === FlowState.Flowing ? '1.8s' : '2.6s'}
                 repeatCount="indefinite"
                 rotate="auto"
-                begin={`${-offset * parseFloat(arrowDur)}s`}
-                keyPoints={arrowReverse ? '1;0' : '0;1'}
+                begin={`${-offset * 1.8}s`}
+                keyPoints={flow === FlowState.Reverse ? '1;0' : '0;1'}
                 keyTimes="0;1"
                 calcMode="linear"
               >
@@ -171,7 +203,7 @@ export function FlowEdge({
         className="react-flow__edge-interaction"
       />
 
-      {/* Temperature label at midpoint */}
+      {/* Temperature label at midpoint — Monitor only */}
       {showLabel && (
         <EdgeLabelRenderer>
           <div
@@ -179,9 +211,9 @@ export function FlowEdge({
               position:      'absolute',
               transform:     `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'none',
-              background:    `color-mix(in srgb, ${strokeColor} 20%, #0a0e17)`,
+              background:    `color-mix(in srgb, ${strokeColor} 20%, var(--bg-crust))`,
               border:        `1px solid ${strokeColor}`,
-              borderRadius:  12,
+              borderRadius:  6,
               padding:       '2px 8px',
               fontSize:       10,
               fontWeight:     700,

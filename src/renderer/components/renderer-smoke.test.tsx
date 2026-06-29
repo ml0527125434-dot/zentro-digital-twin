@@ -22,6 +22,7 @@ vi.mock('@xyflow/react', () => ({
   BaseEdge:          () => null,
   EdgeLabelRenderer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   getBezierPath:     () => ['M0 0', 0, 0] as [string, number, number],
+  getSmoothStepPath: () => ['M0 0', 0, 0] as [string, number, number],
   Position: {
     Left:   'left',
     Right:  'right',

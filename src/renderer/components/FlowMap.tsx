@@ -22,6 +22,7 @@ import {
   type Connection as RFConnection,
 } from '@xyflow/react';
 import type { ComponentNode, ConnectionEdge } from '../flow-transformers.js';
+import { BuildModeContext }   from '../build-mode-context.js';
 import { TankNode }           from './nodes/TankNode.js';
 import { PumpNode }           from './nodes/PumpNode.js';
 import { ValveNode }          from './nodes/ValveNode.js';
@@ -247,6 +248,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
       data-flowmap-build={builderMode || undefined}
       style={{ width: '100%', height: '100%', cursor: placingMode ? 'crosshair' : 'default' }}
     >
+      <BuildModeContext.Provider value={!!builderMode}>
       {/* @ts-expect-error — exactOptionalPropertyTypes conflicts with @xyflow/react prop signatures */}
       <ReactFlow
         nodes={stableNodes}
@@ -288,6 +290,7 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         <Controls showInteractive={false} />
         <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} />
       </ReactFlow>
+      </BuildModeContext.Provider>
     </div>
   );
 }
