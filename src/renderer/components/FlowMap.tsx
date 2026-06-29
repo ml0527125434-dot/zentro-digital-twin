@@ -78,6 +78,10 @@ const EDGE_TYPES: EdgeTypes = {
   flowEdge: FlowEdge as never,
 };
 
+// pid-spec §0/§3 — one source for the grid: visible grid == snap (CAD feeling).
+const GRID = 20;        // minor grid line + snap step
+const GRID_MAJOR = 100; // heavier "major" line every 5th (5 × GRID)
+
 export interface FlowMapProps {
   nodes: ComponentNode[];
   edges: ConnectionEdge[];
@@ -128,7 +132,9 @@ function DropZoneCapture({ onDropComponent, onReady }: { onDropComponent?: ((typ
       if (!typeId) return;
       e.preventDefault();
       const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
-      onDropComponent(typeId, pos.x, pos.y);
+      // §3.3 — equipment origin snaps to grid on drop (matches drag-stop snap).
+      const snap = (v: number) => Math.round(v / GRID) * GRID;
+      onDropComponent(typeId, snap(pos.x), snap(pos.y));
     };
 
     container.addEventListener('dragover', handleDragOver);
@@ -276,16 +282,25 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         panOnDrag={builderMode ? [1, 2] : undefined}
         selectionMode={SelectionMode.Partial}
         snapToGrid={builderMode}
-        snapGrid={[20, 20]}
+        snapGrid={[GRID, GRID]}
         isValidConnection={isValidConnection as never}
         connectionRadius={28}
         connectionLineStyle={{ stroke: 'var(--accent)', strokeWidth: 2.5 }}
       >
+        {/* §3.1 — minor grid (20px) + heavier major grid (100px); visible grid == snap */}
         <Background
+          id="grid-minor"
           variant={BackgroundVariant.Lines}
-          gap={32}
-          size={0.5}
+          gap={GRID}
+          lineWidth={0.5}
           color="var(--border)"
+        />
+        <Background
+          id="grid-major"
+          variant={BackgroundVariant.Lines}
+          gap={GRID_MAJOR}
+          lineWidth={1}
+          color="var(--border-bright)"
         />
         <Controls showInteractive={false} />
         <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} />
