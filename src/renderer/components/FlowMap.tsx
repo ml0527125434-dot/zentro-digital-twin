@@ -99,13 +99,16 @@ export interface FlowMapProps {
   builderMode?:          boolean | undefined;
   isValidConnection?:    ((conn: RFConnection | Edge) => boolean) | undefined;
   selectedIds?:          string[] | undefined;
+  gridVisible?:          boolean | undefined;
+  onViewportReady?:      ((api: { fitView: () => void }) => void) | undefined;
 }
 
 // Inner component: has access to useReactFlow() which requires being inside <ReactFlow>
-function DropZoneCapture({ onDropComponent, onReady }: { onDropComponent?: ((typeId: string, x: number, y: number) => void) | undefined; onReady?: (fn: (p: { x: number; y: number }) => { x: number; y: number }) => void }) {
-  const { screenToFlowPosition } = useReactFlow();
+function DropZoneCapture({ onDropComponent, onReady, onViewportReady }: { onDropComponent?: ((typeId: string, x: number, y: number) => void) | undefined; onReady?: (fn: (p: { x: number; y: number }) => { x: number; y: number }) => void; onViewportReady?: ((api: { fitView: () => void }) => void) | undefined }) {
+  const { screenToFlowPosition, fitView } = useReactFlow();
 
   React.useEffect(() => { onReady?.(screenToFlowPosition); }, [onReady, screenToFlowPosition]);
+  React.useEffect(() => { onViewportReady?.({ fitView: () => { void fitView({ padding: 0.2, duration: 300 }); } }); }, [onViewportReady, fitView]);
 
   React.useEffect(() => {
     if (!onDropComponent) return;
@@ -151,7 +154,7 @@ function DropZoneCapture({ onDropComponent, onReady }: { onDropComponent?: ((typ
   return null;
 }
 
-export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode, isValidConnection, selectedIds, onNodesDelete }: FlowMapProps) {
+export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, onSelectionChange, onNodeContextMenu, onConnect, onEdgeDelete, onNodeMoved, onDropComponent, placingMode, builderMode, isValidConnection, selectedIds, onNodesDelete, gridVisible, onViewportReady }: FlowMapProps) {
   // Track measured dimensions per node ID so RF preserves handleBounds across
   // re-renders where buildFlowGraph creates new node object references every tick.
   // Without this, adoptUserNodes resets measured/handleBounds on every 1s refresh,
@@ -288,22 +291,26 @@ export function FlowMap({ nodes, edges, onNodeClick, onEdgeClick, onPaneClick, o
         connectionLineStyle={{ stroke: 'var(--accent)', strokeWidth: 2.5 }}
       >
         {/* §3.1 — minor grid (20px) + heavier major grid (100px); visible grid == snap */}
-        <Background
-          id="grid-minor"
-          variant={BackgroundVariant.Lines}
-          gap={GRID}
-          lineWidth={0.5}
-          color="var(--border)"
-        />
-        <Background
-          id="grid-major"
-          variant={BackgroundVariant.Lines}
-          gap={GRID_MAJOR}
-          lineWidth={1}
-          color="var(--border-bright)"
-        />
+        {gridVisible !== false && (
+          <>
+            <Background
+              id="grid-minor"
+              variant={BackgroundVariant.Lines}
+              gap={GRID}
+              lineWidth={0.5}
+              color="var(--border)"
+            />
+            <Background
+              id="grid-major"
+              variant={BackgroundVariant.Lines}
+              gap={GRID_MAJOR}
+              lineWidth={1}
+              color="var(--border-bright)"
+            />
+          </>
+        )}
         <Controls showInteractive={false} />
-        <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} />
+        <DropZoneCapture onDropComponent={onDropComponent} onReady={(fn) => { screenToFlowRef.current = fn; }} onViewportReady={onViewportReady} />
       </ReactFlow>
       </BuildModeContext.Provider>
     </div>

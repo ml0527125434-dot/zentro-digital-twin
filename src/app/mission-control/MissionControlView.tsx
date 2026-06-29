@@ -44,6 +44,10 @@ import { createGraphHistory, captureGraph, restoreGraph } from '../../builder/gr
 import { copySelection, planPaste, type ClipboardData } from '../../builder/clipboard.js';
 import { validateConnectionDraft } from '../../builder/port-validator.js';
 import { heComponentName } from '../../lib/component-he-names.js';
+import { BuilderToolbar } from '../builder/BuilderToolbar.js';
+import { PersistenceToolbar } from '../builder/PersistenceToolbar.js';
+import type { ProjectRepository } from '../../persistence/project-repository.js';
+import type { ProjectSnapshot } from '../../persistence/project-snapshot.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -57,6 +61,9 @@ export interface MissionControlViewProps {
   presentationMode?:   boolean;
   onDrawerOpenChange?: (open: boolean) => void;
   onMutation?:         () => void;
+  onSetBuildMode?:     (build: boolean) => void;
+  repo?:               ProjectRepository;
+  captureProject?:     () => ProjectSnapshot;
 }
 
 // Small shared button style for panel-toggle controls
@@ -85,6 +92,9 @@ export function MissionControlView({
   presentationMode = false,
   onDrawerOpenChange,
   onMutation,
+  onSetBuildMode,
+  repo,
+  captureProject,
 }: MissionControlViewProps) {
   const { t } = useLocale();
   const builder = useBuilder();
@@ -93,6 +103,8 @@ export function MissionControlView({
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [leftCollapsed,  setLeftCollapsed]  = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  const [gridVisible,    setGridVisible]    = useState(true);
+  const viewportRef = useRef<{ fitView: () => void } | null>(null);
 
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
@@ -478,6 +490,21 @@ export function MissionControlView({
     return [...ids];
   }, [multiSelectedIds, builder.state.mode, builder.state.selectedComponentId]);
 
+  // ── Toolbar (Phase 2B) action handlers — reuse existing builder operations ──
+  const doDuplicateSel = useCallback(() => {
+    for (const id of selectedIds) { try { builder.duplicateComponent(id); } catch { /* skip */ } }
+    if (selectedIds.length) onMutation?.();
+  }, [selectedIds, builder, onMutation]);
+
+  const doDeleteSel = useCallback(() => {
+    for (const id of selectedIds) { try { builder.deleteComponentCascade(id); } catch { /* skip */ } }
+    builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+    if (selectedIds.length) onMutation?.();
+  }, [selectedIds, builder, onMutation]);
+
+  const handleFit    = useCallback(() => { viewportRef.current?.fitView(); }, []);
+  const handleSearch = useCallback(() => { document.dispatchEvent(new CustomEvent('zentro:builder:focusSearch')); }, []);
+
   // Presentation mode collapses both sidebars; manual toggles respected otherwise
   const showLeft  = !presentationMode && !leftCollapsed;
   const showRight = !presentationMode && !rightCollapsed;
@@ -493,6 +520,28 @@ export function MissionControlView({
         overflow:      'hidden',
       }}
     >
+      {/* ── Top engineering toolbar (Phase 2B, §9.1) — build mode ── */}
+      {buildMode && (
+        <div style={{
+          maxHeight:  presentationMode ? 0 : 44,
+          overflow:   'hidden',
+          flexShrink: 0,
+          transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+        }}>
+          <BuilderToolbar
+            mode="build"
+            onSetMode={(m) => onSetBuildMode?.(m === 'build')}
+            onUndo={doUndo}  canUndo={historyRef.current.canUndo()}
+            onRedo={doRedo}  canRedo={historyRef.current.canRedo()}
+            onDuplicate={doDuplicateSel} onDelete={doDeleteSel} hasSelection={selectedIds.length > 0}
+            onFit={handleFit} onAutoArrange={undefined}
+            gridVisible={gridVisible} onToggleGrid={() => setGridVisible(v => !v)}
+            onSearch={handleSearch}
+            fileSlot={repo && captureProject ? <PersistenceToolbar repo={repo} capture={captureProject} /> : undefined}
+          />
+        </div>
+      )}
+
       {/* ── System Status Strip — full width, collapses in presentation mode ── */}
       <div style={{
         maxHeight:  presentationMode ? 0 : 40,
@@ -793,6 +842,8 @@ export function MissionControlView({
               isValidConnection={buildMode ? isValidConnection : undefined}
               selectedIds={buildMode ? selectedIds : undefined}
               builderMode={buildMode}
+              gridVisible={gridVisible}
+              onViewportReady={(api) => { viewportRef.current = api; }}
             />
           </div>
 

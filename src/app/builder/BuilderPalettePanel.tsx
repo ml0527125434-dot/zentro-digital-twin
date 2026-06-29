@@ -9,7 +9,7 @@
  * - Drag is the PRIMARY interaction
  */
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { ComponentRegistry } from '../../lib/component-registry.js';
 import { getPaletteItems } from '../../builder/palette.js';
 import { useBuilder } from '../../builder/useBuilder.js';
@@ -530,6 +530,13 @@ export function BuilderPalettePanel({ registry }: BuilderPalettePanelProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery]           = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+
+  // Toolbar Search (Phase 2B) → open + focus the palette search.
+  useEffect(() => {
+    const handler = () => { setSearchOpen(true); setTimeout(() => searchRef.current?.focus(), 60); };
+    document.addEventListener('zentro:builder:focusSearch', handler as EventListener);
+    return () => document.removeEventListener('zentro:builder:focusSearch', handler as EventListener);
+  }, []);
 
   const allItems = getPaletteItems(registry);
 

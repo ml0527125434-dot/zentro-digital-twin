@@ -236,4 +236,18 @@ export const EN: Translations = {
   'status.selected':        ({ count }) => `${count} selected`,
   'status.components':      ({ count }) => count === 1 ? '1 component' : `${count} components`,
   'status.connections':     ({ count }) => count === 1 ? '1 pipe' : `${count} pipes`,
+
+  // Stage 2B: Top toolbar
+  'toolbar.group_file':   'File',
+  'toolbar.group_edit':   'Edit',
+  'toolbar.group_layout': 'Layout',
+  'toolbar.group_view':   'View',
+  'toolbar.undo':         'Undo',
+  'toolbar.redo':         'Redo',
+  'toolbar.duplicate':    'Duplicate',
+  'toolbar.delete':       'Delete',
+  'toolbar.fit':          'Fit',
+  'toolbar.auto_arrange': 'Auto-arrange',
+  'toolbar.grid':         'Grid',
+  'toolbar.search':       'Search',
 };

@@ -208,7 +208,20 @@ export type TranslationKey =
   | 'status.design_warnings'
   | 'status.selected'
   | 'status.components'
-  | 'status.connections';
+  | 'status.connections'
+  // Stage 2B: Top toolbar (groups + actions)
+  | 'toolbar.group_file'
+  | 'toolbar.group_edit'
+  | 'toolbar.group_layout'
+  | 'toolbar.group_view'
+  | 'toolbar.undo'
+  | 'toolbar.redo'
+  | 'toolbar.duplicate'
+  | 'toolbar.delete'
+  | 'toolbar.fit'
+  | 'toolbar.auto_arrange'
+  | 'toolbar.grid'
+  | 'toolbar.search';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);

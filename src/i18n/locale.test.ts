@@ -85,6 +85,9 @@ const ALL_KEYS: TranslationKey[] = [
   'builder.shortcuts_hint', 'builder.shortcuts_dismiss',
   'status.ready', 'status.no_components', 'status.design_warnings',
   'status.selected', 'status.components', 'status.connections',
+  'toolbar.group_file', 'toolbar.group_edit', 'toolbar.group_layout', 'toolbar.group_view',
+  'toolbar.undo', 'toolbar.redo', 'toolbar.duplicate', 'toolbar.delete',
+  'toolbar.fit', 'toolbar.auto_arrange', 'toolbar.grid', 'toolbar.search',
 ];
 
 describe('Hebrew locale', () => {

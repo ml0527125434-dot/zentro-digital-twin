@@ -21,7 +21,6 @@ import { useProjection } from './useProjection.js';
 import { MissionControlView } from './mission-control/MissionControlView.js';
 import type { ProjectRepository } from '../persistence/index.js';
 import { useAutosave, captureSnapshot } from '../persistence/index.js';
-import { PersistenceToolbar } from './builder/PersistenceToolbar.js';
 
 export interface ZentroAppProps {
   projectId:    string;
@@ -203,9 +202,6 @@ function AppContent({
               </button>
             </div>
 
-            {buildMode && (
-              <PersistenceToolbar repo={repo} capture={captureProject} />
-            )}
             <button
               data-testid="pres-enter-btn"
               onClick={() => setPresentationMode(true)}
@@ -314,6 +310,9 @@ function AppContent({
         presentationMode={presentationMode}
         onDrawerOpenChange={handleDrawerOpenChange}
         onMutation={onMutation}
+        onSetBuildMode={setBuildMode}
+        repo={repo}
+        captureProject={captureProject}
       />
 
       {/* Floating presentation mode overlay — exit button + badge */}

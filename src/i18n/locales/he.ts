@@ -236,4 +236,18 @@ export const HE: Translations = {
   'status.selected':        ({ count }) => `${count} נבחרו`,
   'status.components':      ({ count }) => count === 1 ? 'רכיב אחד' : `${count} רכיבים`,
   'status.connections':     ({ count }) => count === 1 ? 'צינור אחד' : `${count} צינורות`,
+
+  // Stage 2B: Top toolbar
+  'toolbar.group_file':   'קובץ',
+  'toolbar.group_edit':   'עריכה',
+  'toolbar.group_layout': 'פריסה',
+  'toolbar.group_view':   'תצוגה',
+  'toolbar.undo':         'ביטול',
+  'toolbar.redo':         'חזרה',
+  'toolbar.duplicate':    'שכפול',
+  'toolbar.delete':       'מחיקה',
+  'toolbar.fit':          'התאם',
+  'toolbar.auto_arrange': 'סדר אוטומטית',
+  'toolbar.grid':         'רשת',
+  'toolbar.search':       'חיפוש',
 };
