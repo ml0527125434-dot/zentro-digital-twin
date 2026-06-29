@@ -223,4 +223,6 @@ export const EN: Translations = {
   'builder.persist_exported':     'Export complete',
   'builder.persist_imported':     'Import complete',
   'builder.persist_import_error': 'Import error',
+  'builder.history_undone':       'Undone',
+  'builder.history_redone':       'Redone',
 };

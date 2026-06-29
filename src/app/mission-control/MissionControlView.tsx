@@ -39,6 +39,7 @@ import { BuilderPalettePanel } from '../builder/BuilderPalettePanel.js';
 import { BuilderPropertyPanel } from '../builder/BuilderPropertyPanel.js';
 import { BuilderContextMenu } from '../builder/BuilderContextMenu.js';
 import { useBuilder } from '../../builder/useBuilder.js';
+import { createGraphHistory, captureGraph, restoreGraph } from '../../builder/graph-history.js';
 
 export interface MissionControlViewProps {
   projectId:     string;
@@ -91,6 +92,12 @@ export function MissionControlView({
 
   // Builder multi-select tracking (from React Flow selection events)
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
+
+  // Undo/redo history for the CONFIG graph (build mode)
+  const historyRef = useRef(createGraphHistory(50));
+  const lastVersionRef = useRef<number>(-1);
+  const [undoToast, setUndoToast] = useState<string | null>(null);
+  const undoToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Connection validation toast
   const [connectError, setConnectError] = useState<string | null>(null);
@@ -244,7 +251,10 @@ export function MissionControlView({
   }, [buildMode, builder, onMutation]);
 
   // Cleanup connect error timer on unmount
-  useEffect(() => () => { if (connectErrorTimer.current) clearTimeout(connectErrorTimer.current); }, []);
+  useEffect(() => () => {
+    if (connectErrorTimer.current) clearTimeout(connectErrorTimer.current);
+    if (undoToastTimer.current) clearTimeout(undoToastTimer.current);
+  }, []);
 
   // Signal to ZentroApp whether inspector has content (ESC-key priority)
   useEffect(() => {
@@ -261,6 +271,46 @@ export function MissionControlView({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [selectedComponentId, buildMode]);
+
+  // Record undo history whenever a CONFIG mutation bumps the project version.
+  // Undo/redo restore the GraphStore directly (no version bump), so they never
+  // re-trigger this recorder.
+  useEffect(() => {
+    const v = stores.versions.current(projectId);
+    if (lastVersionRef.current === -1) {
+      historyRef.current.reset(captureGraph(stores, projectId));
+      lastVersionRef.current = v;
+      return;
+    }
+    if (v !== lastVersionRef.current) {
+      lastVersionRef.current = v;
+      historyRef.current.record(captureGraph(stores, projectId));
+    }
+  });
+
+  const showUndoToast = useCallback((msg: string) => {
+    setUndoToast(msg);
+    if (undoToastTimer.current) clearTimeout(undoToastTimer.current);
+    undoToastTimer.current = setTimeout(() => setUndoToast(null), 3000);
+  }, []);
+
+  const doUndo = useCallback(() => {
+    const snap = historyRef.current.undo();
+    if (!snap) return;
+    restoreGraph(stores, projectId, snap);
+    builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+    onMutation?.();
+    showUndoToast(t('builder.history_undone'));
+  }, [stores, projectId, builder, onMutation, showUndoToast, t]);
+
+  const doRedo = useCallback(() => {
+    const snap = historyRef.current.redo();
+    if (!snap) return;
+    restoreGraph(stores, projectId, snap);
+    builder.dispatchFsm({ type: 'CLEAR_SELECTION' });
+    onMutation?.();
+    showUndoToast(t('builder.history_redone'));
+  }, [stores, projectId, builder, onMutation, showUndoToast, t]);
 
   // Build mode keyboard shortcuts: Delete → delete selected; Escape → cancel placing
   useEffect(() => {
@@ -291,6 +341,18 @@ export function MissionControlView({
         }
       }
 
+      // Ctrl+Z → undo ; Ctrl+Shift+Z or Ctrl+Y → redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        if (e.shiftKey) doRedo(); else doUndo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault();
+        doRedo();
+        return;
+      }
+
       // Ctrl+D → duplicate selected component
       if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
         e.preventDefault();
@@ -305,7 +367,7 @@ export function MissionControlView({
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [buildMode, builder, multiSelectedIds, onMutation]);
+  }, [buildMode, builder, multiSelectedIds, onMutation, doUndo, doRedo]);
 
   const components  = stores.graph.getComponents(projectId);
   const connections = stores.graph.getConnections(projectId);
@@ -577,6 +639,19 @@ export function MissionControlView({
               textOverflow: 'ellipsis',
             }}>
               ⚠ {connectError}
+            </div>
+          )}
+
+          {undoToast && (
+            <div data-testid="undo-toast" style={{
+              position: 'absolute', bottom: 16, insetInlineStart: '50%', transform: 'translateX(-50%)',
+              zIndex: 30, background: 'var(--bg-crust)', border: '1px solid var(--border)',
+              borderRadius: 6, padding: '6px 14px', fontSize: 11, fontWeight: 600,
+              color: 'var(--text-base)', display: 'flex', gap: 10, alignItems: 'center',
+              pointerEvents: 'none', boxShadow: 'var(--shadow, 0 2px 8px rgba(0,0,0,0.3))',
+            }}>
+              <span>{undoToast}</span>
+              <span style={{ color: 'var(--text-dim)', fontSize: 10 }}>Ctrl+Z / Ctrl+Y</span>
             </div>
           )}
 

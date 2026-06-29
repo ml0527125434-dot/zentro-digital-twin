@@ -223,4 +223,6 @@ export const HE: Translations = {
   'builder.persist_exported':     'ייצוא הושלם',
   'builder.persist_imported':     'ייבוא הושלם',
   'builder.persist_import_error': 'שגיאת ייבוא',
+  'builder.history_undone':       'בוטל',
+  'builder.history_redone':       'שוחזר',
 };

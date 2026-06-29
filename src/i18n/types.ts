@@ -195,7 +195,10 @@ export type TranslationKey =
   | 'builder.persist_saved'
   | 'builder.persist_exported'
   | 'builder.persist_imported'
-  | 'builder.persist_import_error';
+  | 'builder.persist_import_error'
+  // Stage 35: Undo/redo toast
+  | 'builder.history_undone'
+  | 'builder.history_redone';
 
 /** String value or a function that interpolates { count: number }. */
 export type TranslationValue = string | ((args: { count: number }) => string);
