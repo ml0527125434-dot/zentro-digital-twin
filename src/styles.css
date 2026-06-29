@@ -67,6 +67,7 @@
   --pipe-gas:     #fbbf24;   /* gas supply — amber                       */
   --pipe-electric:#a78bfa;   /* electrical — violet                      */
   --pipe-air:     #94a3b8;   /* air/vent — slate                         */
+  --pipe-mixed:   #64748b;   /* mixed / unknown medium (pid-spec §0)     */
 
   /* ── Node canvas ─────────────────────────────────────────────────────── */
   --node-bg:     #131825;    /* node card fill                           */

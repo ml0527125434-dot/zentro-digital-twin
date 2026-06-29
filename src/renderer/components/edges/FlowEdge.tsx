@@ -34,17 +34,18 @@ function mediumColorVar(medium?: string): string {
     case 'electric':   return 'var(--pipe-electric)';
     case 'air':        return 'var(--pipe-air)';
     case 'hot_water':  return 'var(--pipe-hot)';
-    default:           return 'var(--edge-default)';
+    default:           return 'var(--pipe-mixed)';
   }
 }
 
-/** Pipe thickness stays as today in Stage 1A; the toned-down 4–6px set is Stage 1C. */
+/** Medium → pipe thickness — toned-down 4–6px engineering line-work (pid-spec §0). */
 function mediumStrokeWidth(medium?: string, isFlowing?: boolean): number {
-  const base = medium === 'hot_water' ? 10
-    : medium === 'cold_water' || medium === 'recirc' ? 9
-    : medium === 'gas' ? 8
-    : 7;
-  return isFlowing ? base : base - 2;
+  switch (medium) {
+    case 'hot_water':                 return isFlowing ? 6   : 5;
+    case 'cold_water': case 'recirc': return isFlowing ? 5.5 : 4.5;
+    case 'gas': case 'electric':      return isFlowing ? 5   : 4;
+    default:                          return isFlowing ? 4.5 : 3.5; // air / other
+  }
 }
 
 export function FlowEdge({
@@ -89,7 +90,8 @@ export function FlowEdge({
     strokeColor = mediumColorVar(medium);
   }
 
-  const strokeWidth = hasActiveAlarm ? 10 : mediumStrokeWidth(medium, live);
+  // Alarm/live use the medium's "live" width; rest uses the thinner width. No 10px outlier.
+  const strokeWidth = mediumStrokeWidth(medium, live || hasActiveAlarm);
 
   // Dash animation class — static in Build Mode, live in Monitor.
   let animClass = 'zentro-edge-noflow';
