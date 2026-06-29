@@ -214,4 +214,13 @@ export const HE: Translations = {
   'alarm.rule.tank_warn':     'טמפרטורת מיכל באזור אזהרה',
   'alarm.rule.shower_scald':  'טמפרטורת מקלחת מעל הגבול הבטוח — סכנת כוויה',
   'alarm.rule.shower_cold':   'טמפרטורת מקלחת מתחת לסף הנוחות',
+
+  // Stage 35: Persistence toolbar
+  'builder.persist_save':         'שמור',
+  'builder.persist_export':       'ייצוא',
+  'builder.persist_import':       'ייבוא',
+  'builder.persist_saved':        'נשמר',
+  'builder.persist_exported':     'ייצוא הושלם',
+  'builder.persist_imported':     'ייבוא הושלם',
+  'builder.persist_import_error': 'שגיאת ייבוא',
 };

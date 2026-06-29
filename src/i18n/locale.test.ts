@@ -78,6 +78,9 @@ const ALL_KEYS: TranslationKey[] = [
   'alarm.rule.tank_risk', 'alarm.rule.tank_warn', 'alarm.rule.shower_scald', 'alarm.rule.shower_cold',
   // Stage 34: LEGO builder palette
   'builder.lego_title', 'builder.lego_hint', 'builder.lego_drag_tip', 'builder.lego_active_hint',
+  // Stage 35: Persistence toolbar
+  'builder.persist_save', 'builder.persist_export', 'builder.persist_import',
+  'builder.persist_saved', 'builder.persist_exported', 'builder.persist_imported', 'builder.persist_import_error',
 ];
 
 describe('Hebrew locale', () => {

@@ -11,6 +11,8 @@ export {
   type SnapshotSource,
   type SnapshotSink,
   CURRENT_SCHEMA_VERSION,
+  DOCUMENT_KIND,
+  type DocumentKind,
   SnapshotError,
   serializeProjectSnapshot,
   applyProjectSnapshot,

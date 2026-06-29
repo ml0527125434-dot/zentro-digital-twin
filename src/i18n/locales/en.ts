@@ -214,4 +214,13 @@ export const EN: Translations = {
   'alarm.rule.tank_warn':     'Tank temperature in warning zone',
   'alarm.rule.shower_scald':  'Shower temperature above safe limit — scald risk',
   'alarm.rule.shower_cold':   'Shower temperature below comfort threshold',
+
+  // Stage 35: Persistence toolbar
+  'builder.persist_save':         'Save',
+  'builder.persist_export':       'Export',
+  'builder.persist_import':       'Import',
+  'builder.persist_saved':        'Saved',
+  'builder.persist_exported':     'Export complete',
+  'builder.persist_imported':     'Import complete',
+  'builder.persist_import_error': 'Import error',
 };

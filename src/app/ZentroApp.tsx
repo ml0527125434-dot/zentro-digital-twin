@@ -21,6 +21,7 @@ import { useProjection } from './useProjection.js';
 import { MissionControlView } from './mission-control/MissionControlView.js';
 import type { ProjectRepository } from '../persistence/index.js';
 import { useAutosave, captureSnapshot } from '../persistence/index.js';
+import { PersistenceToolbar } from './builder/PersistenceToolbar.js';
 
 export interface ZentroAppProps {
   projectId:    string;
@@ -46,12 +47,19 @@ function AppContent({
   alarmStore,
   nowMs,
   onMutation,
+  repo,
 }: AppContentProps) {
   const { t, config, setLocale, locale } = useLocale();
   const [showDemoInfo, setShowDemoInfo] = useState(true);
   const [presentationMode, setPresentationMode] = useState(false);
   const [buildMode, setBuildMode] = useState(false);
   const drawerOpenRef = useRef(false);
+
+  // Bound CONFIG-graph capture for the persistence toolbar (Save / Export).
+  const captureProject = useCallback(
+    () => captureSnapshot(stores, profileStore, alarmStore, projectId),
+    [stores, profileStore, alarmStore, projectId],
+  );
 
   const handleDrawerOpenChange = useCallback((open: boolean) => {
     drawerOpenRef.current = open;
@@ -195,6 +203,9 @@ function AppContent({
               </button>
             </div>
 
+            {buildMode && (
+              <PersistenceToolbar repo={repo} capture={captureProject} />
+            )}
             <button
               data-testid="pres-enter-btn"
               onClick={() => setPresentationMode(true)}
@@ -403,6 +414,7 @@ export function ZentroApp({
           alarmStore={alarmStore}
           nowMs={nowMs}
           onMutation={onMutation}
+          repo={repo}
         />
         <button data-testid="refresh-btn" onClick={refresh} style={{ display: 'none' }}>
           Refresh
