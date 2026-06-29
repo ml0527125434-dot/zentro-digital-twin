@@ -486,8 +486,8 @@ export function MissionControlView({
             </button>
           )}
 
-          {/* ELK loading indicator */}
-          {!isReady && (
+          {/* ELK loading indicator (monitor only — build uses stored positions) */}
+          {!buildMode && !isReady && (
             <div style={{
               position:       'absolute',
               insetInlineEnd: 10,
@@ -583,7 +583,7 @@ export function MissionControlView({
           {/* FlowMap — fills the entire center column */}
           <div style={{ position: 'absolute', inset: 0 }}>
             <FlowMap
-              nodes={layoutNodes}
+              nodes={buildMode ? nodes : layoutNodes}
               edges={edges}
               onNodeClick={handleSelectComponent}
               onEdgeClick={buildMode ? handleEdgeClick : undefined}
