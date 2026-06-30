@@ -484,6 +484,20 @@ export function MissionControlView({
   const { nodes, edges } = buildFlowGraph(components, connections, componentVMs, connectionVMs);
   const { layoutNodes, isReady } = useElkLayout(nodes, edges);
 
+  // ── Stage F (§9 Stage F / pid-spec §6) — on-demand ELK auto-arrange ──────────
+  // Build mode shows raw graph positions, so persisting the ELK result makes it
+  // stick. ELK is dynamically imported (kept in its own lazy chunk, as elsewhere).
+  const handleAutoArrange = useCallback(async () => {
+    if (components.length === 0) return;
+    const { computeElkLayout } = await import('../../renderer/elk-layout.js');
+    const positions = await computeElkLayout(nodes, edges.map(e => ({ source: e.source, target: e.target })));
+    let moved = false;
+    for (const [id, pos] of positions) {
+      try { builder.moveComponent(id, pos); moved = true; } catch { /* skip */ }
+    }
+    if (moved) onMutation?.();
+  }, [components.length, nodes, edges, builder, onMutation]);
+
   const isPlacingMode = buildMode && builder.state.mode === 'placing';
 
   // Unified selection set: RF multi-selection + the FSM single selection.
@@ -551,7 +565,7 @@ export function MissionControlView({
             onUndo={doUndo}  canUndo={historyRef.current.canUndo()}
             onRedo={doRedo}  canRedo={historyRef.current.canRedo()}
             onDuplicate={doDuplicateSel} onDelete={doDeleteSel} hasSelection={selectedIds.length > 0}
-            onFit={handleFit} onAutoArrange={undefined}
+            onFit={handleFit} onAutoArrange={handleAutoArrange}
             gridVisible={gridVisible} onToggleGrid={() => setGridVisible(v => !v)}
             onSearch={handleSearch}
             fileSlot={repo && captureProject ? <PersistenceToolbar repo={repo} capture={captureProject} /> : undefined}
