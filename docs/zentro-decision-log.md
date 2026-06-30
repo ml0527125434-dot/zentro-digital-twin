@@ -8,6 +8,27 @@ this log captures the smaller calls made stage-to-stage.
 | ID | Date | Decision | Status |
 |----|------|----------|--------|
 | DL-001 | 2026-06-29 | Port glyphs stay **neutral** (`--bg-mantle` fill + `--border-bright` keyline); do **not** implement medium-filled ports. | Adopted |
+| DL-002 | 2026-06-30 | Three non-blocking UI items (Hebrew port tooltip · sidebar icon-rail · Hebrew aria-labels) are **deferred** — integrate only if a stage's work directly touches them. | Deferred |
+
+---
+
+## DL-002 — Defer three non-blocking UI items
+
+**Decision (Reviewer, entering Phase 4):** The following non-blocking follow-ups, surfaced
+during Stages D–F, are **not** to be implemented on their own. Fold each in **only** if a
+stage's work already touches that surface; otherwise it stays parked here.
+
+1. **Hebrew port tooltip (§2.3)** — a `role · medium` tooltip on port hover (e.g.
+   "כניסה · מים חמים"). Requires threading each port's role+medium into the ~10 node
+   components; do it alongside the canvas-parity / per-port-metadata work, not before.
+2. **Sidebar icon-rail (§9.6)** — collapse side panels to an icon rail under the width
+   threshold (today they collapse fully + restore). A responsive refinement.
+3. **Hebrew `aria-label`s** — a pass to ensure interactive controls expose Hebrew
+   accessible names where they currently fall back to English/test ids.
+
+**Rationale:** none blocks current functionality; each is small but cross-cutting, and
+batching them avoids piecemeal churn. Revisit when a relevant stage makes them free, or as
+a dedicated accessibility/polish pass in Phase 5.
 
 ---
 
